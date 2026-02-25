@@ -1253,5 +1253,5 @@ fun TagChips(tags: List<String>) {
 
 ### ARC Labs Studio Standards
 
-- Refer to `Architecture/presentation-layer.md` for ViewModel and state management patterns
-- Refer to `Quality/testing-standards.md` for testing Compose UI with performance in mind
+- Refer to [Presentation Layer](../Layers/presentation.md) for ViewModel and state management patterns
+- Refer to [Testing Standards](./testing.md) for testing Compose UI with performance in mind

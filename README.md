@@ -69,7 +69,9 @@ ARCKnowledge-Android/
 ├── Tools/
 │   ├── gradle.md                  Gradle Kotlin DSL, version catalogs, tasks
 │   ├── android-studio.md          IDE configuration & debugging
-│   └── arcdevtools-android.md     Centralized tooling & CI/CD
+│   ├── arcdevtools-android.md     Centralized tooling & CI/CD
+│   ├── mcp-setup.md               MCP server configuration
+│   └── context7-usage.md          Context7 documentation query patterns
 │
 ├── Projects/
 │   ├── apps.md                    Android app standards & patterns

@@ -22,6 +22,61 @@ You are the **primary AI agent for ARC Labs Studio**, an indie development studi
 
 ---
 
+## MCP Servers Available
+
+Before implementing library-specific code, **query Context7 for current documentation**. Training data may be outdated.
+
+| Server | Purpose | When to Use |
+|--------|---------|-------------|
+| **Context7** | Library docs (Compose, Hilt, Room, Retrofit, Coroutines) | Before calling any library API |
+| **Linear** | Issue tracking, sprint management | Creating/updating issues, checking sprint |
+| **GitHub** | Branch/PR management | Creating branches, opening PRs |
+
+> **Setup**: See [Tools/mcp-setup.md](Tools/mcp-setup.md) for installation.
+> **Usage**: See [Tools/context7-usage.md](Tools/context7-usage.md) for query patterns.
+
+---
+
+## Ordered Reading List (Onboarding)
+
+Read in this order when joining a new ARC Labs Android project:
+
+| # | Document | What You'll Learn |
+|---|----------|--------------------|
+| 1 | **This file (CLAUDE.md)** | Philosophy, rules, quick references |
+| 2 | [Architecture/clean-architecture.md](Architecture/clean-architecture.md) | Layer boundaries, dependency rules |
+| 3 | [Architecture/mvvm.md](Architecture/mvvm.md) | ViewModel + StateFlow + UiState pattern |
+| 4 | [Architecture/dependency-injection.md](Architecture/dependency-injection.md) | Hilt setup, modules, scopes |
+| 5 | [Layers/presentation.md](Layers/presentation.md) | Composables, ViewModels, navigation |
+| 6 | [Layers/domain.md](Layers/domain.md) | Entities, Use Cases, Repository interfaces |
+| 7 | [Layers/data.md](Layers/data.md) | Retrofit, Room, DataStore, DTOs |
+| 8 | [Quality/testing.md](Quality/testing.md) | JUnit 5, MockK, Turbine, coverage |
+| 9 | [Tools/gradle.md](Tools/gradle.md) | Build system, version catalogs, tasks |
+
+**Load on demand** (when the task requires it):
+- [Architecture/navigation-compose.md](Architecture/navigation-compose.md) — Type-safe Navigation Compose
+- [Architecture/solid-principles.md](Architecture/solid-principles.md) — SOLID with Kotlin examples
+- [Architecture/singletons.md](Architecture/singletons.md) — When and how to use singletons
+- [Quality/code-style.md](Quality/code-style.md) — ktlint + detekt configuration
+- [Quality/compose-performance.md](Quality/compose-performance.md) — Recomposition, stability, optimization
+- [Quality/code-review.md](Quality/code-review.md) — Review checklist
+- [Quality/documentation.md](Quality/documentation.md) — KDoc + Dokka
+- [Quality/module-structure.md](Quality/module-structure.md) — Gradle multi-module organization
+- [Quality/ui-guidelines.md](Quality/ui-guidelines.md) — Material Design 3, accessibility
+- [Quality/readme-standards.md](Quality/readme-standards.md) — README templates
+- [Projects/apps.md](Projects/apps.md) — App development standards
+- [Projects/libraries.md](Projects/libraries.md) — Library development guide
+- [Tools/android-studio.md](Tools/android-studio.md) — IDE configuration
+- [Tools/arcdevtools-android.md](Tools/arcdevtools-android.md) — CI/CD tooling
+- [Tools/mcp-setup.md](Tools/mcp-setup.md) — MCP server configuration
+- [Tools/context7-usage.md](Tools/context7-usage.md) — Context7 query patterns
+- [Workflow/git-commits.md](Workflow/git-commits.md) — Conventional Commits
+- [Workflow/git-branches.md](Workflow/git-branches.md) — Git Flow branch naming
+- [Workflow/plan-mode.md](Workflow/plan-mode.md) — Structured planning
+- [Skills/skills-index.md](Skills/skills-index.md) — Skill routing & discovery
+
+---
+
 ## Available Skills
 
 Use these slash commands to load detailed context when needed.
@@ -211,6 +266,25 @@ inner class UserProfileTests {
 
 ---
 
+## Gradle Quick Reference
+
+| Task | Command |
+|------|---------|
+| Build debug APK | `./gradlew assembleDebug` |
+| Build release AAB | `./gradlew bundleRelease` |
+| Run all unit tests | `./gradlew test` |
+| Run module tests | `./gradlew :feature:home:test` |
+| Check code style | `./gradlew ktlintCheck` |
+| Auto-fix formatting | `./gradlew ktlintFormat` |
+| Run static analysis | `./gradlew detekt` |
+| Check dependencies | `./gradlew dependencies` |
+| Clean build | `./gradlew clean` |
+| Build + install debug | `./gradlew installDebug` |
+
+> See [Tools/gradle.md](Tools/gradle.md) for full Gradle configuration guide.
+
+---
+
 ## Git Quick Reference
 
 **Commits**: `<type>(<scope>): <subject>`
@@ -245,4 +319,4 @@ This documentation evolves. When you encounter:
 
 ---
 
-**Remember**: You're not just writing code; you're building a foundation for multiple products and long-term success. Every decision matters. 🚀
+**Remember**: You're not just writing code; you're building a foundation for multiple products and long-term success. Every decision matters.

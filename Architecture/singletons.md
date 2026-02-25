@@ -241,7 +241,7 @@ object NetworkModule {
         return Retrofit.Builder()
             .baseUrl(config.apiBaseUrl)
             .client(okHttpClient)
-            .addConverterFactory(MoshiConverterFactory.create())
+            .addConverterFactory(Json.asConverterFactory("application/json".toMediaType()))
             .build()
     }
 
