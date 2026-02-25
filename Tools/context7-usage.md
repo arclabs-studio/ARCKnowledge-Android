@@ -354,13 +354,136 @@ lifecycle = "2.8.7"          # Compatible with December BOM # verify latest
 
 ---
 
+## 🌐 Android Developers Official Documentation
+
+Context7 covers **library-level** documentation (API references, code examples). For **platform-level** guidance — architecture patterns, design guidelines, quality standards, device-specific development — use the official Android Developers site directly.
+
+### Site Structure
+
+The Android Developers site is organized into three main portals:
+
+| Portal | URL | Purpose |
+|--------|-----|---------|
+| **Get Started** | `developer.android.com/get-started` | Onboarding, training courses, tutorials |
+| **Design & Plan** | `developer.android.com/design` | UI design, architecture, quality, security |
+| **Develop** | `developer.android.com/develop` | Core APIs, tools, libraries, device tech |
+
+### Get Started (`/get-started`)
+
+Use for onboarding, learning paths, and platform overview.
+
+| Section | URL | When to Use |
+|---------|-----|-------------|
+| Hello World | `/get-started/overview` | Setting up first Android project |
+| Training Courses | `/courses` | Structured learning paths for Android |
+| Tutorials / Codelabs | `/get-started/codelabs` | Step-by-step guided exercises |
+| Compose for Teams | `/develop/ui/compose/adopt` | Compose adoption strategy for existing projects |
+| Kotlin for Android | `/kotlin` | Kotlin language features for Android |
+| Latest Updates | `/latest-updates` | What's new in the latest Android release |
+| Jetpack & Compose Releases | `/jetpack/androidx/versions` | Version history of AndroidX libraries |
+
+### Design & Plan (`/design`)
+
+Use for architecture decisions, UI patterns, quality standards, and security.
+
+| Section | URL | When to Use |
+|---------|-----|-------------|
+| **UI Design** | | |
+| Design for Android | `/design/ui` | Mobile design principles and patterns |
+| Mobile | `/design/ui/mobile` | Phone-specific design guidelines |
+| Adaptive UI | `/design/ui/large-screens` | Tablet, foldable, and desktop layouts |
+| Widgets | `/design/ui/widget` | Home screen widget design |
+| **Architecture** | | |
+| Architecture Guide | `/topic/architecture/intro` | Official architecture recommendations |
+| Navigation Principles | `/guide/navigation/navigation-principles` | Navigation design patterns |
+| Modularization | `/topic/modularization` | Multi-module project structure |
+| Testing Fundamentals | `/training/testing/fundamentals` | Test strategy and pyramid |
+| **Quality** | | |
+| Quality Overview | `/quality` | App quality dimensions and standards |
+| Accessibility | `/guide/topics/ui/accessibility` | Making apps accessible to all users |
+| Technical Quality | `/quality/technical` | Performance, stability, security |
+| **Security** | | |
+| Security Overview | `/security` | Security best practices |
+| Privacy | `/privacy` | Privacy guidelines and permissions |
+| Permissions | `/privacy#app-permissions` | Runtime permissions handling |
+
+### Develop (`/develop`)
+
+Use for implementation guidance, API references, and tooling.
+
+| Section | URL | When to Use |
+|---------|-----|-------------|
+| **Core Areas** | | |
+| User Interfaces | `/develop/ui` | Compose, Views, layouts, theming |
+| Background Work | `/develop/background-work` | WorkManager, services, coroutines |
+| Data and Files | `/guide/topics/data` | Storage, databases, content providers |
+| Connectivity | `/develop/connectivity` | Network, Bluetooth, NFC |
+| Samples | `/samples` | Official sample code projects |
+| **Tools & Workflow** | | |
+| Android Studio | `/studio/write` | IDE features, debugging, profiling |
+| Build Projects | `/build/gradle-build-overview` | Gradle configuration, build variants |
+| Testing | `/training/testing` | Testing tools and strategies |
+| Performance | `/topic/performance/overview` | Performance profiling and optimization |
+| Command-line Tools | `/tools` | adb, emulator, sdkmanager |
+| **Libraries** | | |
+| Jetpack Libraries | `/jetpack/androidx/explorer` | Browse all AndroidX libraries |
+| Compose Libraries | `/jetpack/androidx/releases/compose` | Compose release notes and versions |
+| API Reference | `/reference/packages` | Full Android API reference |
+| **Device Tech** | | |
+| Adaptive UI | `/guide/topics/large-screens/get-started-with-large-screens` | Large screen development |
+| Wear OS | `/training/wearables` | Wearable app development |
+| Android for Cars | `/training/cars` | Android Auto and Automotive OS |
+| Android TV | `/training/tv` | TV app development |
+
+### When to Use Android Developers vs. Context7
+
+| Question | Source |
+|----------|--------|
+| "What parameters does `LazyColumn` accept?" | **Context7** (API reference) |
+| "How should I structure navigation in a multi-module app?" | **Android Developers** (Architecture guide) |
+| "What's the latest Room version?" | **Context7** (library docs) |
+| "How do I implement edge-to-edge on Android 15?" | **Android Developers** (platform guide) |
+| "What's the correct Hilt annotation for a ViewModel?" | **Context7** (library docs) |
+| "How should I handle runtime permissions?" | **Android Developers** (privacy guide) |
+| "What Compose BOM includes which library versions?" | **Context7** (release docs) |
+| "How do I make my app accessible with TalkBack?" | **Android Developers** (accessibility guide) |
+| "What's the recommended app architecture?" | **Android Developers** (architecture intro) |
+| "How does `StateFlow.collectAsStateWithLifecycle` work?" | **Context7** (API reference) |
+
+### Web Search Pattern
+
+When the agent needs information from Android Developers, use this pattern:
+
+```
+Search: "site:developer.android.com <topic>"
+
+Examples:
+- "site:developer.android.com room migration"
+- "site:developer.android.com compose performance"
+- "site:developer.android.com navigation type safe"
+- "site:developer.android.com workmanager constraints"
+```
+
+Or fetch directly when you know the URL:
+
+```
+Fetch: https://developer.android.com/topic/architecture/intro
+Fetch: https://developer.android.com/develop/ui/compose/state
+Fetch: https://developer.android.com/training/testing/fundamentals
+```
+
+---
+
 ## 📚 Further Reading
 
 - [MCP Setup Guide](./mcp-setup.md)
 - [Gradle Version Catalogs](./gradle.md)
 - [Skills Index](../Skills/skills-index.md)
 - [Context7 Documentation](https://context7.com)
+- [Android Developers](https://developer.android.com)
+- [Jetpack Library Explorer](https://developer.android.com/jetpack/androidx/explorer)
+- [Compose Release Notes](https://developer.android.com/jetpack/androidx/releases/compose)
 
 ---
 
-**Remember**: When in doubt, query Context7. Five seconds of documentation lookup prevents five hours of debugging a wrong API call.
+**Remember**: Context7 for library APIs, Android Developers for platform guidance. When in doubt, check both — five seconds of lookup prevents five hours of debugging.
