@@ -1,16 +1,6 @@
-# 🧩 Skills Index
+# Skills Index
 
-**Skills are AI agent context files that provide specialized knowledge for specific tasks. This index helps you find the right skill.**
-
----
-
-## Skill Sources Overview
-
-| Source | Type | Focus | Count |
-|--------|------|-------|-------|
-| **ARC Labs** | Internal Standards | Architecture, quality, workflow | 9 |
-| **External** | Community | Android-specific tools | Varies |
-| **MCP Servers** | Documentation | Official Android docs | 1 |
+**Skills are knowledge containers that provide specialized guidance for specific tasks. Agents are autonomous executors that use tools to complete workflows. This index helps you find the right resource.**
 
 ---
 
@@ -28,393 +18,332 @@ Review code quality, lint, docs            /arc-quality-standards
 Final review before merge                  /arc-final-review
 Audit entire project quality               /arc-audit
 Make commits, create PRs                   /arc-workflow
+Set up CI/CD workflows                     /arc-github-actions-ci
+Project memory across sessions             /arc-memory
+Parallel feature development               /arc-worktrees-workflow
+
+Implement a feature with TDD (delegated)   → arc-kotlin-tdd agent
+Review code (delegated)                    → arc-kotlin-reviewer agent
+Debug a build/test failure                 → arc-kotlin-debugger agent
+Manage Gradle dependencies                 → arc-gradle-manager agent
+Navigate the codebase                      → arc-project-explorer agent
+Start a Linear ticket                      → arc-linear-bridge agent
+Publish a PR                               → arc-pr-publisher agent
+Prepare a release                          → arc-release-orchestrator agent
 ```
 
 ---
 
 ## ARC Labs Skills (Internal Standards)
 
-These are the primary skills maintained by ARC Labs Studio. They encode our standards and patterns for Android development.
+Skills live in `.claude/skills/<name>/SKILL.md` and are symlinked by ARCDevTools-Android.
 
 ### /arc-android-architecture
-
 **Purpose**: Clean Architecture, MVVM, Hilt DI, Navigation Compose
 
-**When to use**:
-- Designing a new feature or module
-- Deciding how to structure layers
-- Setting up Hilt modules and bindings
-- Configuring navigation graphs
+- Clean Architecture layer rules (Presentation → Domain ← Data)
+- ViewModel + StateFlow + sealed interface UiState
+- Hilt module organization (@HiltViewModel, @Module, @Provides, @Binds)
+- Type-safe Navigation Compose 2.8+ with @Serializable routes
+- SOLID principles with Kotlin examples, dependency rule enforcement
 
-**Key knowledge**:
-- Clean Architecture layer rules (Presentation -> Domain <- Data)
-- ViewModel patterns with StateFlow and sealed interface UiState
-- Hilt module organization (AppModule, NetworkModule, RepositoryModule)
-- Type-safe Navigation Compose with Kotlin Serialization routes
+**References**: Architecture/clean-architecture.md, mvvm.md, solid-principles.md, dependency-injection.md, navigation-compose.md
+
+---
 
 ### /arc-presentation-layer
+**Purpose**: Composables, @HiltViewModel, StateFlow, Material Design 3
 
-**Purpose**: Composables, @HiltViewModel, StateFlow, Material3
+- Screen/Content composable split pattern
+- `collectAsStateWithLifecycle` (not `collectAsState`)
+- Material Design 3 dynamic color + dark theme
+- Compose performance: @Stable/@Immutable, derivedStateOf, remember
+- Accessibility: contentDescription, Modifier.semantics, 48dp touch targets
+- Clarification: `remember{}` for ephemeral UI state; business state in ViewModel
 
-**When to use**:
-- Building new screens or components
-- Implementing ViewModel state management
-- Working with Material Design 3
-- Handling UI events and navigation
+**References**: Layers/presentation.md
 
-**Key knowledge**:
-- Composable function conventions and patterns
-- ViewModel with StateFlow + UiState sealed interface
-- Material3 theming (dynamic color, dark theme)
-- Screen vs. content pattern (testability)
-- Lifecycle-aware state collection
+---
 
 ### /arc-data-layer
-
 **Purpose**: Repositories, Retrofit, Room, DataStore, DTOs
 
-**When to use**:
-- Implementing API calls with Retrofit
-- Setting up Room database and DAOs
-- Implementing repository pattern
-- Working with DataStore preferences
-- Mapping between DTOs, entities, and domain models
+- Repository pattern with @Binds Hilt module
+- Retrofit + kotlinx.serialization + OkHttp interceptors
+- Room: @Entity, @Dao, @Database, migrations, exportSchema = true
+- DataStore Preferences + error handling
+- DTO/Entity/mapper separation, network-first vs cache-first caching
+- Sealed DomainError hierarchy
 
-**Key knowledge**:
-- Repository implementation patterns (cache-first, network-first)
-- Room database setup, DAOs, entities, migrations
-- Retrofit service interfaces and interceptors
-- DataStore for preferences and typed data
-- Mapper patterns for layer boundaries
+**References**: Layers/data.md
+
+---
 
 ### /arc-tdd-patterns
-
 **Purpose**: JUnit 5, MockK, Turbine, TDD workflow
 
-**When to use**:
-- Writing unit tests for ViewModels, Use Cases, Repositories
-- Testing Kotlin Flows and coroutines
-- Setting up test fixtures and fakes
-- Following TDD (Red-Green-Refactor)
+**Stack (mandatory — never substitute)**:
+- JUnit 5: `@Test`, `@Nested`, `@DisplayName` — never JUnit 4
+- MockK: `every {}`, `coEvery {}`, `verify {}`, `coVerify {}`
+- Turbine: `.test { awaitItem() }`, `cancelAndIgnoreRemainingEvents()`
+- `runTest` + `StandardTestDispatcher` / `UnconfinedTestDispatcher`
+- `createSUT()` factory pattern, Given-When-Then structure
 
-**Key knowledge**:
-- Given-When-Then test structure
-- `makeSUT()` factory method pattern
-- MockK mocking and verification
-- Turbine for Flow testing
-- Coroutines test dispatcher setup
-- Compose UI testing
+**References**: Quality/testing.md
+
+---
 
 ### /arc-quality-standards
+**Purpose**: 9-domain review checklist, ktlint/detekt, accessibility, M3
 
-**Purpose**: Code review, ktlint/detekt, documentation, accessibility
-
-**When to use**:
-- Reviewing code for quality
-- Configuring linting rules
-- Writing KDoc documentation
-- Checking accessibility compliance
-
-**Key knowledge**:
-- ktlint and detekt rule configuration
+- Architecture, Presentation, Domain, Data, Testing, Code Style, Documentation, Accessibility, Concurrency
+- ktlint: `./gradlew ktlintCheck` / `./gradlew ktlintFormat`
+- detekt: `./gradlew detekt`
+- WCAG AA compliance, 48dp touch targets, edge-to-edge with WindowInsets
 - KDoc standards for public APIs
-- Accessibility checklist (TalkBack, content descriptions)
-- Code review checklist
-- Performance review checklist
+
+**References**: Quality/code-review.md, code-style.md, documentation.md, readme-standards.md, module-structure.md, ui-guidelines.md, compose-performance.md
+
+---
 
 ### /arc-workflow
-
 **Purpose**: Git commits, branches, PRs, Plan Mode
 
-**When to use**:
-- Making commits (Conventional Commits format)
-- Creating branches (naming conventions)
-- Opening pull requests (PR template)
-- Planning complex tasks (Plan Mode)
+- Conventional Commits: `feat(compose): add restaurant card`
+- Branch naming: `feature/ARC-123-description`
+- PR template with summary, type, testing, checklist
+- Plan Mode: when and how to use
+- Pre-PR gates: `./gradlew ktlintCheck`, `./gradlew test`
 
-**Key knowledge**:
-- Conventional Commits types and scopes
-- Branch naming: `<type>/<issue-id>-<description>`
-- PR template with summary, changes, testing sections
-- Plan Mode process (reflect, ask, plan, approve, implement)
+**References**: Workflow/git-commits.md, git-branches.md, plan-mode.md
+
+---
 
 ### /arc-project-setup
+**Purpose**: Version catalog, Gradle templates, multi-module, CI/CD
 
-**Purpose**: New modules/apps, ARCDevTools, CI/CD
+- Complete `libs.versions.toml` with 2025 versions
+- `settings.gradle.kts` + `build.gradle.kts` templates (app, feature, library)
+- Multi-module structure (`:app`, `:feature:*`, `:core:*`)
+- ARCDevTools-Android git submodule integration
+- Gradle performance: configuration cache, build cache, maxParallelForks
 
-**When to use**:
-- Creating a new Android project from scratch
-- Adding a new feature module to an existing project
-- Configuring CI/CD with GitHub Actions
-- Setting up ARCDevTools integration
+**References**: Tools/gradle.md, arcdevtools-android.md, android-studio.md, Projects/apps.md, libraries.md
 
-**Key knowledge**:
-- Standard project directory layout
-- build.gradle.kts templates
-- Version catalog setup
-- GitHub Actions workflow templates
-- ARCDevTools configuration
+---
 
 ### /arc-final-review
+**Purpose**: Guided pre-merge review (you conduct it with Claude's help)
 
-**Purpose**: Comprehensive quality check before merge
+- 8-step process: diff → categorize → domain checklists → verify
+- Verification gates: `./gradlew test ktlintCheck detekt lint`
+- Output format: 🔴 Critical / 🟡 Important / 🔵 Improvements
 
-**When to use**:
-- Before merging a PR to develop
-- Before a release branch merge to main
-- When you want a thorough review of all changes
+> **Distinction**: For fully autonomous review, use the `arc-kotlin-reviewer` agent instead.
 
-**Key knowledge**:
-- Architecture compliance checklist
-- Code quality checklist
-- Testing verification
-- Documentation completeness
-- Performance considerations
-- Accessibility verification
+---
 
 ### /arc-audit
+**Purpose**: Full project health check with A-F compliance grading
 
-**Purpose**: Full project audit by domain
-
-**When to use**:
-- Periodic project health checks
-- Onboarding to a new project
-- Preparing for a major release
-- After significant refactoring
-
-**Key knowledge**:
-- Architecture audit (layer violations, dependency direction)
-- Code quality audit (lint, formatting, naming)
-- Testing audit (coverage, test quality)
-- Documentation audit (KDoc, README, CHANGELOG)
-- Dependency audit (outdated, unused, vulnerable)
+- 9 domains: Architecture (20pts), Testing (20pts), Presentation (15pts), Data (15pts), Code Style (10pts), Domain (10pts), Documentation (5pts), Accessibility (5pts), Concurrency (flags)
+- Grading: A = 90-100 / B = 75-89 / C = 60-74 / D = 45-59 / F = <45
+- Run quarterly, pre-release, or when onboarding to a project
 
 ---
 
-## External Skills (Community)
+### /arc-github-actions-ci
+**Purpose**: GitHub Actions CI/CD for Android builds and releases
 
-### Android-Specific Skills
+- `android-test.yml` — JUnit test runner with Gradle caching
+- `android-lint.yml` — ktlintCheck + detekt + lint
+- `android-release.yml` — signed AAB build from GitHub Secrets
+- `android-distribute.yml` — Firebase App Distribution
+- Versioning strategies, secrets reference table
 
-| Skill | Purpose | Source |
-|-------|---------|--------|
-| `compose-ui` | Advanced Compose UI patterns, custom layouts, animations | Community |
-| `kotlin-coroutines` | Coroutines and Flow advanced patterns, structured concurrency | Community |
-| `hilt-advanced` | Advanced DI patterns, custom scopes, assisted inject | Community |
-| `room-migrations` | Database migration strategies, auto-migration, testing | Community |
-| `gradle-optimization` | Build speed optimization, configuration cache, build scans | Community |
-| `compose-testing` | Advanced Compose UI testing, screenshot testing | Community |
+---
 
-### General Development Skills
+### /arc-memory
+**Purpose**: Persistent context across Claude Code sessions
 
-| Skill | Purpose | Source |
-|-------|---------|--------|
-| `git-advanced` | Rebase strategies, cherry-pick, bisect | Community |
-| `ci-cd` | GitHub Actions advanced patterns, matrix builds | Community |
-| `code-review` | Effective code review practices | Community |
-| `performance` | Android app performance profiling and optimization | Community |
+- `/memory` directory structure (README, ARCHITECTURE, DECISIONS, PATTERNS, DEPENDENCIES, features/)
+- Session start/end workflow
+- CLAUDE.md integration
+- Templates in `.claude/skills/arc-memory/templates/`
 
-### MCP Servers
+---
 
-| Server | Purpose | Status |
+### /arc-worktrees-workflow
+**Purpose**: Parallel feature development with git worktrees
+
+- Worktree creation with submodule initialization
+- Shell aliases: `zwn ARC-123`, `zwr ARC-123`, `zwl`
+- Maximum 3 active worktrees
+- Cleanup after PR merge
+
+---
+
+## ARC Labs Agents
+
+Agents autonomously execute complete workflows. See [AGENTS.md](../AGENTS.md) for full documentation.
+
+| Agent | Purpose | Model | R/O |
+|-------|---------|-------|-----|
+| `arc-kotlin-tdd` | TDD feature implementation | Sonnet | No |
+| `arc-kotlin-reviewer` | 9-domain code review report | Sonnet | Yes |
+| `arc-kotlin-debugger` | Build/test failure diagnosis | Sonnet | No |
+| `arc-gradle-manager` | Gradle dependency management | Haiku | No |
+| `arc-project-explorer` | Codebase navigation | Haiku | Yes |
+| `arc-linear-bridge` | Ticket → branch + test skeleton | Haiku | No |
+| `arc-pr-publisher` | PR creation + Linear update | Sonnet | No |
+| `arc-release-orchestrator` | Version bump + release branch | Sonnet | No |
+| `arc-play-distribution` | Firebase App Distribution | Haiku | No |
+| `arc-play-store-listing` | Play Store ASO | Sonnet | No |
+| `arc-room-migration` | Room schema migrations | Sonnet | No |
+| `arc-dependency-auditor` | Dependency health audit | Haiku | Yes |
+
+---
+
+## Community Skills Integration (Audited)
+
+These external skills were evaluated and selectively absorbed into ARC Labs skills. **Do not install them wholesale** — the following have been audited for conflicts.
+
+### What We Absorbed
+
+| Source | Content Absorbed | Into |
+|--------|-----------------|------|
+| `compose-skill` (aldefy) | 13 Compose reference guides (recomposition, modifiers, performance, theming) | `arc-android-presentation-layer` |
+| `awesome-android-agent-skills` (new-silvermoon) | compose-navigation, compose-performance-audit, android-coroutines, android-retrofit, coil-compose, android-gradle-logic | Multiple skills |
+| `claude-android-ninja` (Drjacky) | Security patterns, JaCoCo config, M3 Adaptive, convention plugins | `arc-android-quality-standards`, `arc-android-project-setup` |
+| `platform-design-skills` (ehmo) | Unique M3 rules: predictive back, edge-to-edge, gesture zones, notification channels | `arc-android-quality-standards`, `arc-android-presentation-layer` |
+| `kotlin-specialist` (Jeffallan) | Coroutines/Flow advanced patterns, DSL idioms | `arc-android-architecture` |
+| `claude-android-skill` (dpconde) | `libs.versions.toml` template, `settings.gradle.kts` template | `arc-android-project-setup` |
+
+### Conflicts Found (Excluded)
+
+| Source | Excluded Content | Reason |
+|--------|-----------------|--------|
+| awesome-skills | `android-testing` skill | JUnit 4 conflicts with ARC Labs' JUnit 5 mandate |
+| claude-android-ninja | Testing philosophy (fakes-only, no MockK) | Conflicts with MockK mandate |
+| claude-android-ninja | Navigation3 patterns | Too bleeding-edge; ARC Labs uses Navigation 2.x |
+| claude-android-skill | Testing, optional domain layer | Multiple conflicts with ARC Labs architecture |
+| compose-skill | 5 source code files (~2.3MB) | Would destroy context windows |
+
+---
+
+## MCP Servers
+
+| Server | Purpose | Config |
 |--------|---------|--------|
-| `android-mcp-server` | Android developer documentation | Available |
-| `kotlin-mcp-server` | Kotlin language documentation | Available |
-
-**Gap Note**: There is no equivalent to MCP Cupertino (Apple docs MCP server) for Android. For official Android documentation, use web search as a fallback, or check the android-mcp-server for available documentation.
-
----
-
-## Coverage Matrix
-
-| Area | ARC Skills | External Skills | Gap |
-|------|-----------|-----------------|-----|
-| Architecture (Clean, MVVM) | Full | Full | None |
-| UI (Jetpack Compose) | Full | Full | None |
-| Data (Room, Retrofit, DataStore) | Full | Full | None |
-| Dependency Injection (Hilt) | Full | Full | None |
-| Testing (JUnit 5, MockK, Turbine) | Full | Partial | Advanced UI testing |
-| CI/CD (GitHub Actions) | Full | Full | None |
-| Performance Profiling | Partial | Full | Systrace, Macrobenchmark |
-| Accessibility | Partial | Full | Automated accessibility scanning |
-| Security | Minimal | Partial | ProGuard rules, network security |
-| Gradle Build System | Partial | Full | Convention plugins, composite builds |
-| Kotlin Multiplatform | None | Partial | Full KMP support |
+| **Context7** | Library docs (Compose, Hilt, Room, etc.) | See Tools/mcp-setup.md |
+| **Linear** | Issue tracking | See Tools/mcp-setup.md |
+| **GitHub** | Branch/PR management | See Tools/mcp-setup.md |
+| **Android Source Explorer** | AOSP + Jetpack source exploration | See Tools/mcp-setup.md |
+| **Android Docs MCP** | developer.android.com access | See Tools/mcp-setup.md |
+| **Mobile MCP** | ADB emulator automation | See Tools/mcp-setup.md |
+| **Play Store MCP** | Google Play Console (optional) | See Tools/mcp-setup.md |
 
 ---
 
 ## Common Scenarios
 
 ### 1. "I need to build a new feature"
-
-Follow this sequence of skills:
-
 ```
-/arc-android-architecture   --> Design the architecture and layer structure
-/arc-data-layer             --> Implement data access (API, DB, cache)
-/arc-presentation-layer     --> Implement UI (ViewModel, Screen, components)
-/arc-tdd-patterns           --> Write tests for all layers
-/arc-quality-standards      --> Review quality before PR
-/arc-workflow               --> Create branch, commits, PR
+/arc-android-architecture   → Design layers
+/arc-tdd-patterns           → Write failing tests (RED)
+/arc-data-layer             → Implement data access
+/arc-presentation-layer     → Implement UI
+/arc-quality-standards      → Review before PR
+/arc-workflow               → Commit + PR
+
+Or delegate: arc-kotlin-tdd agent handles the full TDD cycle
 ```
 
 ### 2. "I need to fix a bug"
-
 ```
-/arc-tdd-patterns           --> Write a failing test that reproduces the bug
+/arc-tdd-patterns           → Write failing test reproducing bug
 /arc-data-layer or
-  /arc-presentation-layer   --> Fix the code in the appropriate layer
-/arc-quality-standards      --> Verify fix quality
-/arc-workflow               --> Commit with conventional message (fix type)
+  /arc-presentation-layer   → Fix in appropriate layer
+/arc-quality-standards      → Verify fix quality
+/arc-workflow               → Commit (fix type)
 ```
 
 ### 3. "I need to review code"
-
 ```
-/arc-quality-standards      --> Review checklist (lint, format, docs)
-/arc-android-architecture   --> Verify architecture compliance
-/arc-tdd-patterns           --> Verify test quality and coverage
-/arc-final-review           --> Comprehensive final review
+/arc-quality-standards      → Domain-by-domain checklist
+/arc-final-review           → Final structured review
+
+Or delegate: arc-kotlin-reviewer agent produces 9-domain report
 ```
 
 ### 4. "I need to set up a new project"
-
 ```
-/arc-project-setup          --> Create project structure and configuration
-/arc-android-architecture   --> Set up architecture layers
-/arc-workflow               --> Set up Git workflow (branches, hooks)
-/arc-quality-standards      --> Configure linting and documentation
-```
-
-### 5. "I need to add a new library"
-
-```
-/arc-project-setup          --> Create library module structure
-/arc-quality-standards      --> Set up documentation requirements
-/arc-tdd-patterns           --> Set up 100% test coverage
-/arc-workflow               --> Create branch and initial commits
+/arc-project-setup          → Project structure + version catalog
+/arc-android-architecture   → Set up Clean Architecture layers
+/arc-github-actions-ci      → Configure CI/CD workflows
+/arc-workflow               → Git branching + hooks
 ```
 
-### 6. "I need to refactor existing code"
-
+### 5. "I need to add a Room database column"
 ```
-/arc-tdd-patterns           --> Ensure tests exist before refactoring
-/arc-android-architecture   --> Verify target architecture
-/arc-quality-standards      --> Review refactored code quality
-/arc-final-review           --> Comprehensive review before merge
+Delegate to: arc-room-migration agent (most conservative — confirms before any breaking change)
 ```
 
 ---
 
-## Priority Order (When Multiple Skills Apply)
+## Priority Order
 
-When a task requires multiple skills, apply them in this order:
-
-1. **Architecture first** - Get the structure right before writing code
-2. **Implementation second** - Build on a solid architectural foundation
-3. **Testing third** - Verify behavior with comprehensive tests
-4. **Quality last** - Polish, document, and review
-
-This order prevents rework. Architecture mistakes are the most expensive to fix, so get them right first.
-
----
-
-## Skill Combination Patterns
-
-### Full Feature Development
-```
-Architecture --> Data Layer --> Presentation Layer --> Testing --> Quality
-```
-
-### Bug Fix
-```
-Testing (reproduce) --> Implementation (fix) --> Quality (verify)
-```
-
-### Refactoring
-```
-Testing (ensure coverage) --> Architecture (design target) --> Implementation --> Quality
-```
-
-### Code Review
-```
-Quality --> Architecture --> Testing --> Final Review
-```
+1. **Architecture first** — get structure right before writing code
+2. **Tests second** (TDD) — write tests before production code
+3. **Implementation third** — build on solid foundations
+4. **Quality last** — polish, document, review
 
 ---
 
 ## Creating Custom Skills
 
-ARC Labs skills are stored as Markdown instruction files inside the `.claude/commands/` directory at the project or organization level.
+Skills live at `.claude/skills/<name>/SKILL.md` with this frontmatter:
 
-### Directory Structure
-
-```
-.claude/
-  commands/
-    arc-android-architecture.md
-    arc-presentation-layer.md
-    arc-data-layer.md
-    arc-tdd-patterns.md
-    arc-quality-standards.md
-    arc-workflow.md
-    arc-project-setup.md
-    arc-final-review.md
-    arc-audit.md
+```yaml
+---
+name: arc-<name>
+description: |
+  Multi-line description with trigger phrases users might say.
+user-invocable: true
+metadata:
+  author: ARC Labs Studio
+  version: "1.0.0"
+---
 ```
 
-### Skill File Template
+Body structure: Title → Instructions → References → Common Mistakes → Examples → Related Skills
 
-```markdown
-# Skill: /arc-<name>
+Reference docs go in `.claude/skills/<name>/references/` (copied from the repo's top-level docs).
 
-## Description
-Brief description of what this skill does.
-
-## Preconditions
-- [ ] List of conditions that must be true before running
-
-## Steps
-1. Step one with detailed instructions
-2. Step two referencing ARC Labs conventions
-3. Step three with validation checks
-
-## Inputs
-- `$ARGUMENTS` -- Description of expected arguments
-
-## Outputs
-- List of files created or modified
-- Expected state after completion
-
-## Example
-Show a concrete example of running the skill and its output.
-```
-
-### Skill Resolution Order
-
-When a skill is invoked, Claude Code resolves it in the following order:
-
-1. **Project-level** -- `.claude/commands/arc-<name>.md` in the current repo
-2. **Organization-level** -- Shared commands from ARCDevTools-Android
-3. **Built-in** -- Default Claude Code slash commands
+To add a new skill:
+1. Create `.claude/skills/arc-<name>/SKILL.md`
+2. Copy relevant reference docs into `references/`
+3. Add to this index and to CLAUDE.md skills table
+4. Commit and update ARCDevTools-Android to symlink it
 
 ---
 
-## Coverage Gaps
+## Coverage Matrix
 
-The following areas do not yet have dedicated skills:
-
-| Gap | Description | Priority |
-|-----|-------------|----------|
-| `arc-migrate` | Migrate between Gradle versions or library major versions | High |
-| `arc-benchmark` | Set up and run performance benchmarks (Macrobenchmark) | Medium |
-| `arc-accessibility` | Audit Compose UI for accessibility compliance | Medium |
-| `arc-security` | Scan for common security vulnerabilities | High |
-| `arc-localization` | Manage string resources and translation workflows | Low |
-| `arc-compose-preview` | Generate Compose Preview functions for all screens | Low |
-| `arc-api-client` | Generate API client code from OpenAPI/Swagger specs | Medium |
-| `arc-modularize` | Break a monolithic module into Clean Architecture layers | High |
-
-If you identify a repeated workflow that is not covered by an existing skill, open a Linear issue with the label `skill-request`.
+| Area | ARC Skills | Status |
+|------|-----------|--------|
+| Architecture (Clean, MVVM, Hilt) | Full | ✅ |
+| UI (Jetpack Compose, M3) | Full | ✅ |
+| Data (Room, Retrofit, DataStore) | Full | ✅ |
+| Testing (JUnit 5, MockK, Turbine) | Full | ✅ |
+| CI/CD (GitHub Actions) | Full | ✅ |
+| Code Style (ktlint, detekt) | Full | ✅ |
+| Accessibility (WCAG 2.2, M3) | Full | ✅ |
+| Performance (Compose, Gradle) | Good | ✅ |
+| Memory / Worktrees | Full | ✅ |
+| Security (ProGuard, cert pinning) | Partial | 🟡 |
+| Kotlin Multiplatform | None | ❌ |
+| Macrobenchmark | None | ❌ |
 
 ---
 
@@ -422,21 +351,6 @@ If you identify a repeated workflow that is not covered by an existing skill, op
 
 | Component | Version | Last Updated |
 |-----------|---------|-------------|
-| ARC Labs Skills | 1.0.0 | 2026-02-25 |
-| ARCKnowledge-Android | 1.0.0 | 2026-02-25 |
-| Skills Index | 1.0.0 | 2026-02-25 |
-
----
-
-## Further Reading
-
-- [Clean Architecture](../Architecture/clean-architecture.md)
-- [Testing Standards](../Quality/testing.md)
-- [README Standards](../Quality/readme-standards.md)
-- [Git Commits](../Workflow/git-commits.md)
-- [Git Branches](../Workflow/git-branches.md)
-- [Plan Mode](../Workflow/plan-mode.md)
-
----
-
-**Note**: Skills are living documents. When you find gaps or outdated information, flag it for updates. The goal is comprehensive, accurate coverage of all Android development patterns used at ARC Labs.
+| ARC Labs Skills | 2.0.0 | 2026-03-23 |
+| ARCKnowledge-Android | 1.1.0 | 2026-03-23 |
+| Skills Index | 2.0.0 | 2026-03-23 |
