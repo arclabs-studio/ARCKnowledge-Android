@@ -1,0 +1,35 @@
+# ARCKnowledge-Android Git Attributes
+# Optimized for use as a Git submodule
+
+# Auto-detect text files and normalize line endings
+* text=auto
+
+# Markdown files
+*.md text diff=markdown
+
+# Ensure consistent line endings for documentation
+*.md eol=lf
+
+# Kotlin/Android source files
+*.kt text eol=lf
+*.kts text eol=lf
+
+# Exclude development files from archive exports
+.gitattributes export-ignore
+.gitignore export-ignore
+.DS_Store export-ignore
+
+# Mark documentation as linguist-documentation for GitHub stats
+*.md linguist-documentation
+
+# Prevent binary files from being diffed
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.pdf binary
+*.apk binary
+*.aab binary
+*.aar binary
+*.jar binary
