@@ -1,0 +1,27 @@
+name: Claude Code Review
+
+on:
+  pull_request:
+    types: [opened, synchronize, ready_for_review, reopened]
+
+jobs:
+  claude-review:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: write
+      id-token: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Run Claude Code Review
+        id: claude-review
+        uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          prompt: 'Review this pull request for code quality, potential bugs, and adherence to ARC Labs Android/Kotlin standards. Focus on: Clean Architecture layer boundaries, Hilt DI correctness, Jetpack Compose patterns, JUnit 5 + MockK + Turbine testing, ktlint/detekt compliance, and Kotlin best practices. Flag any use of !! operator, business logic in Composables/ViewModels, or reverse layer dependencies.'

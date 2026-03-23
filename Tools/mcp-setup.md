@@ -24,12 +24,10 @@ AI agents work best when they have access to **current, authoritative informatio
 | **Context7** | Library documentation (Compose, Hilt, Room, Retrofit, Coroutines) | Required |
 | **Linear** | Issue tracking, sprint management, project planning | Required |
 | **GitHub** | Repository management, PR creation, branch operations | Required |
-
-### For iOS Development (Cross-Reference)
-
-| Server | Purpose | Priority |
-|--------|---------|----------|
-| **Cupertino** | Apple developer documentation (SwiftUI, UIKit, frameworks) | Required for iOS |
+| **Android Source Explorer** | AOSP + Jetpack source code exploration (API level 36) | Recommended |
+| **Android Docs MCP** | developer.android.com real-time access | Recommended |
+| **Mobile MCP** | ADB-based emulator automation and UI testing | Recommended |
+| **Play Store MCP** | Google Play Console releases and track management | Optional |
 
 ---
 
@@ -173,6 +171,146 @@ Room migration documentation to ensure you're using current APIs.
 
 ---
 
+## 🚀 Android Source Explorer Setup
+
+Explores AOSP and Jetpack source code on-demand using Tree-sitter + LSP. Supports API level 36 (Android 16) and AndroidX Compose/Lifecycle/Activity.
+
+### Installation
+
+```bash
+# Install via uv
+pip install uv
+uv tool install android-source-explorer-mcp
+
+# Sync Android sources (one-time, ~2GB)
+uv run android-source-explorer sync --api-level 36 --androidx "compose,lifecycle,activity,navigation"
+```
+
+### MCP Configuration
+
+```json
+{
+  "mcpServers": {
+    "android-source-explorer": {
+      "command": "uv",
+      "args": ["run", "android-source-explorer", "serve"]
+    }
+  }
+}
+```
+
+### When to Use
+
+Use when debugging unexpected framework behavior, understanding internal Compose mechanics, or verifying how AndroidX APIs are implemented.
+
+---
+
+## 🚀 Android Docs MCP Setup
+
+Provides real-time access to developer.android.com — search docs, look up API references, browse packages, and check release notes.
+
+### Installation
+
+```bash
+# Requires Bun
+brew install bun
+git clone https://github.com/ankit-verma-209171/android-docs-mcp
+cd android-docs-mcp && bun install
+```
+
+### MCP Configuration
+
+```json
+{
+  "mcpServers": {
+    "android-docs": {
+      "command": "bun",
+      "args": ["run", "/path/to/android-docs-mcp/src/index.ts"]
+    }
+  }
+}
+```
+
+### When to Use
+
+Use when Context7 doesn't have the specific library, or when you need the official API reference for a specific Android version.
+
+---
+
+## 🚀 Mobile MCP Setup
+
+Cross-platform ADB + simctl automation for Android and iOS. Enables UI testing, screenshot capture, location simulation, and push notification testing from Claude.
+
+### Installation
+
+```bash
+npx -y @mobilenext/mobile-mcp@latest
+```
+
+### MCP Configuration
+
+```json
+{
+  "mcpServers": {
+    "mobile-mcp": {
+      "command": "npx",
+      "args": ["-y", "@mobilenext/mobile-mcp@latest"]
+    }
+  }
+}
+```
+
+### Prerequisites
+
+- Android: ADB installed and device/emulator connected
+- iOS: Xcode + Simulator (cross-platform support)
+
+### When to Use
+
+Use for visual UI verification, automated testing flows, screenshot capture to validate layout changes, and testing push notifications.
+
+---
+
+## 🚀 Play Store MCP Setup (Optional)
+
+Manages Google Play Console releases: deploy versions, promote between tracks (internal → alpha → beta → production), view release status.
+
+### Installation
+
+```bash
+# Build from source (Kotlin JAR)
+git clone https://github.com/antoniolg/play-store-mcp
+cd play-store-mcp && ./gradlew shadowJar
+```
+
+### MCP Configuration
+
+```json
+{
+  "mcpServers": {
+    "play-store": {
+      "command": "java",
+      "args": ["-jar", "/path/to/play-store-mcp-all.jar"],
+      "env": {
+        "PLAY_STORE_SERVICE_ACCOUNT_KEY_PATH": "$PLAY_STORE_KEY_PATH"
+      }
+    }
+  }
+}
+```
+
+### Prerequisites
+
+- Google Play Console service account with Editor permissions
+- Service account JSON key file
+- App already published (can't create new apps via API)
+
+### When to Use
+
+Use for promoting builds between tracks without opening Play Console, checking release status, and scripting deployment workflows.
+
+---
+
 ## 🔧 Full MCP Configuration Template
 
 Copy this complete configuration for a new ARC Labs Android project:
@@ -188,15 +326,23 @@ Copy this complete configuration for a new ARC Labs Android project:
       "command": "npx",
       "args": ["-y", "@anthropic/linear-mcp@latest"],
       "env": {
-        "LINEAR_API_KEY": "<your-linear-api-key>"
+        "LINEAR_API_KEY": "$LINEAR_API_KEY"
       }
     },
     "github": {
       "command": "npx",
       "args": ["-y", "@anthropic/github-mcp@latest"],
       "env": {
-        "GITHUB_TOKEN": "<your-github-token>"
+        "GITHUB_TOKEN": "$GITHUB_TOKEN"
       }
+    },
+    "android-source-explorer": {
+      "command": "uv",
+      "args": ["run", "android-source-explorer", "serve"]
+    },
+    "mobile-mcp": {
+      "command": "npx",
+      "args": ["-y", "@mobilenext/mobile-mcp@latest"]
     }
   }
 }
@@ -226,14 +372,23 @@ Then reference them in the MCP config:
 
 ## ✅ MCP Setup Checklist
 
+### Required
 - [ ] Context7 MCP installed and resolving library IDs
 - [ ] Linear MCP installed with valid API key
 - [ ] GitHub MCP installed with valid token
 - [ ] Project CLAUDE.md documents MCP availability
 - [ ] API keys stored in environment variables (not committed)
+
+### Recommended
+- [ ] Android Source Explorer installed and synced (API 36 + AndroidX)
+- [ ] Mobile MCP installed and device/emulator accessible via ADB
+- [ ] Android Docs MCP installed (if Context7 coverage is insufficient)
+
+### Verification
 - [ ] Agent verified: can fetch Compose docs via Context7
 - [ ] Agent verified: can list Linear issues
 - [ ] Agent verified: can list GitHub branches
+- [ ] Agent verified: can take emulator screenshot via Mobile MCP
 
 ---
 

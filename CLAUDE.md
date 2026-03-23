@@ -31,9 +31,12 @@ Before implementing library-specific code, **query Context7 for current document
 | **Context7** | Library docs (Compose, Hilt, Room, Retrofit, Coroutines) | Before calling any library API |
 | **Linear** | Issue tracking, sprint management | Creating/updating issues, checking sprint |
 | **GitHub** | Branch/PR management | Creating branches, opening PRs |
+| **Android Source Explorer** | AOSP + Jetpack source code exploration | Debugging internals, understanding framework behavior |
+| **Android Docs MCP** | developer.android.com access | Official API reference always up-to-date |
+| **Mobile MCP** | ADB automation for testing | UI testing, screenshot verification, emulator control |
 
-> **Setup**: See [Tools/mcp-setup.md](Tools/mcp-setup.md) for installation.
-> **Usage**: See [Tools/context7-usage.md](Tools/context7-usage.md) for query patterns.
+> **Setup**: See [Tools/mcp-setup.md](Tools/mcp-setup.md) for installation of all servers.
+> **Usage**: See [Tools/context7-usage.md](Tools/context7-usage.md) for Context7 query patterns.
 
 ---
 
@@ -44,14 +47,15 @@ Read in this order when joining a new ARC Labs Android project:
 | # | Document | What You'll Learn |
 |---|----------|--------------------|
 | 1 | **This file (CLAUDE.md)** | Philosophy, rules, quick references |
-| 2 | [Architecture/clean-architecture.md](Architecture/clean-architecture.md) | Layer boundaries, dependency rules |
-| 3 | [Architecture/mvvm.md](Architecture/mvvm.md) | ViewModel + StateFlow + UiState pattern |
-| 4 | [Architecture/dependency-injection.md](Architecture/dependency-injection.md) | Hilt setup, modules, scopes |
-| 5 | [Layers/presentation.md](Layers/presentation.md) | Composables, ViewModels, navigation |
-| 6 | [Layers/domain.md](Layers/domain.md) | Entities, Use Cases, Repository interfaces |
-| 7 | [Layers/data.md](Layers/data.md) | Retrofit, Room, DataStore, DTOs |
-| 8 | [Quality/testing.md](Quality/testing.md) | JUnit 5, MockK, Turbine, coverage |
-| 9 | [Tools/gradle.md](Tools/gradle.md) | Build system, version catalogs, tasks |
+| 2 | [AGENTS.md](AGENTS.md) | Available subagents, when to trigger each |
+| 3 | [Architecture/clean-architecture.md](Architecture/clean-architecture.md) | Layer boundaries, dependency rules |
+| 4 | [Architecture/mvvm.md](Architecture/mvvm.md) | ViewModel + StateFlow + UiState pattern |
+| 5 | [Architecture/dependency-injection.md](Architecture/dependency-injection.md) | Hilt setup, modules, scopes |
+| 6 | [Layers/presentation.md](Layers/presentation.md) | Composables, ViewModels, navigation |
+| 7 | [Layers/domain.md](Layers/domain.md) | Entities, Use Cases, Repository interfaces |
+| 8 | [Layers/data.md](Layers/data.md) | Retrofit, Room, DataStore, DTOs |
+| 9 | [Quality/testing.md](Quality/testing.md) | JUnit 5, MockK, Turbine, coverage |
+| 10 | [Tools/gradle.md](Tools/gradle.md) | Build system, version catalogs, tasks |
 
 **Load on demand** (when the task requires it):
 - [Architecture/navigation-compose.md](Architecture/navigation-compose.md) — Type-safe Navigation Compose
@@ -85,21 +89,29 @@ Use these slash commands to load detailed context when needed.
 | Skill | Use When |
 |-------|----------|
 | `/arc-android-architecture` | Designing new features, setting up layers, MVVM pattern |
-| `/arc-project-setup` | Creating new modules/apps, integrating ARCDevTools, CI/CD |
+| `/arc-android-project-setup` | Creating new modules/apps, integrating ARCDevTools, CI/CD |
 
 ### During Implementation
 | Skill | Use When |
 |-------|----------|
-| `/arc-presentation-layer` | Creating Composables/ViewModels, StateFlow, navigation |
-| `/arc-data-layer` | Implementing Repositories, API clients, DTOs, Room, DataStore |
-| `/arc-tdd-patterns` | Writing tests, JUnit 5/MockK/Turbine, TDD workflow |
+| `/arc-android-presentation-layer` | Creating Composables/ViewModels, StateFlow, navigation |
+| `/arc-android-data-layer` | Implementing Repositories, API clients, DTOs, Room, DataStore |
+| `/arc-android-tdd-patterns` | Writing tests, JUnit 5/MockK/Turbine, TDD workflow |
 
 ### Before Commit/PR
 | Skill | Use When |
 |-------|----------|
-| `/arc-final-review` | **Final review before merge** - comprehensive quality check by domain |
-| `/arc-quality-standards` | Code review, ktlint/detekt, documentation, accessibility |
-| `/arc-workflow` | Git commits, branches, PRs, Plan Mode |
+| `/arc-android-final-review` | **Final review before merge** — comprehensive quality check by domain |
+| `/arc-android-quality-standards` | Code review, ktlint/detekt, documentation, accessibility |
+| `/arc-android-workflow` | Git commits, branches, PRs, Plan Mode |
+
+### Workflow & Infrastructure
+| Skill | Use When |
+|-------|----------|
+| `/arc-android-github-actions-ci` | GitHub Actions workflows, release builds, Firebase distribution |
+| `/arc-android-memory` | Setting up persistent memory directories across sessions |
+| `/arc-android-worktrees-workflow` | Parallel feature development with git worktrees |
+| `/arc-android-audit` | Full project health check with A-F grading |
 
 ### Quick Decision Guide
 
@@ -114,13 +126,35 @@ Writing or reviewing tests              → /arc-tdd-patterns
 Code review or fixing lint errors       → /arc-quality-standards
 Final review before merge               → /arc-final-review
 Making commits or creating PRs          → /arc-workflow
+Setting up CI/CD                        → /arc-github-actions-ci
+Full project health check               → /arc-audit
 ```
 
 **Progressive Disclosure**: Start with this document. Load skills only when needed for specific tasks.
 
 ### Skills Setup
 
-Skills are **installed automatically** when you run `./ARCDevTools/arcdevtools-setup`. The setup script also updates `.gitignore` to exclude symlinked skills. No additional configuration required.
+Skills live in `.claude/skills/<name>/SKILL.md` and are **installed automatically** when you run `./ARCDevTools/arcdevtools-setup`. The setup script symlinks them into downstream projects and updates `.gitignore`. No additional configuration required.
+
+## Available Agents
+
+ARC Labs agents are **autonomous executors** that handle complete workflows. They invoke skills dynamically as needed.
+
+| Agent | Triggers | Model |
+|-------|----------|-------|
+| `arc-kotlin-tdd` | "Implement X", "write tests first", "create a ViewModel/UseCase" | Sonnet |
+| `arc-kotlin-reviewer` | "Review this code", "pre-merge review", "audit this file" | Sonnet |
+| `arc-kotlin-debugger` | "BUILD FAILED", "Unresolved reference", "Hilt error" | Sonnet |
+| `arc-gradle-manager` | "Add a dependency", "update library", "add Gradle module" | Haiku |
+| `arc-project-explorer` | "Where is X?", "find all ViewModels", "trace data flow" | Haiku |
+| `arc-linear-bridge` | "Start working on ARC-[N]", "scaffold ticket" | Haiku |
+| `arc-pr-publisher` | "Create a PR", "publish my branch", "submit for review" | Sonnet |
+| `arc-release-orchestrator` | "Prepare release", "bump version to X.Y.Z" | Sonnet |
+| `arc-play-distribution` | "Send to Firebase", "create beta build" | Haiku |
+| `arc-room-migration` | "Add Room column", "rename DB field", "migration crash" | Sonnet |
+| `arc-dependency-auditor` | "Audit dependencies", "check outdated packages" | Haiku |
+
+> See [AGENTS.md](AGENTS.md) for complete agent documentation, triggers, and design principles.
 
 ---
 
