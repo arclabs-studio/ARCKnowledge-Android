@@ -34,6 +34,7 @@ Before implementing library-specific code, **query Context7 for current document
 | **Android Source Explorer** | AOSP + Jetpack source code exploration | Debugging internals, understanding framework behavior |
 | **Android Docs MCP** | developer.android.com access | Official API reference always up-to-date |
 | **Mobile MCP** | ADB automation for testing | UI testing, screenshot verification, emulator control |
+| **Android Skills (Google)** | 6 official Google skills on-demand (AGP 9, XML→Compose, Nav3, R8, Play Billing, edge-to-edge) | AGP migration, Compose migration, R8 analysis |
 
 > **Setup**: See [Tools/mcp-setup.md](Tools/mcp-setup.md) for installation of all servers.
 > **Usage**: See [Tools/context7-usage.md](Tools/context7-usage.md) for Context7 query patterns.
@@ -64,6 +65,8 @@ Read in this order when joining a new ARC Labs Android project:
 - [Quality/code-style.md](Quality/code-style.md) — ktlint + detekt configuration
 - [Quality/compose-performance.md](Quality/compose-performance.md) — Recomposition, stability, optimization
 - [Quality/code-review.md](Quality/code-review.md) — Review checklist
+- [Quality/security.md](Quality/security.md) — OWASP Mobile security audit reference
+- [Tools/android-cli.md](Tools/android-cli.md) — Google Android CLI (agent-first tooling, preview)
 - [Quality/documentation.md](Quality/documentation.md) — KDoc + Dokka
 - [Quality/module-structure.md](Quality/module-structure.md) — Gradle multi-module organization
 - [Quality/ui-guidelines.md](Quality/ui-guidelines.md) — Material Design 3, accessibility
@@ -97,12 +100,14 @@ Use these slash commands to load detailed context when needed.
 | `/arc-android-presentation-layer` | Creating Composables/ViewModels, StateFlow, navigation |
 | `/arc-android-data-layer` | Implementing Repositories, API clients, DTOs, Room, DataStore |
 | `/arc-android-tdd-patterns` | Writing tests, JUnit 5/MockK/Turbine, TDD workflow |
+| `/arc-android-coroutines` | Coroutine scopes, dispatchers, cancellation, Flow, structured concurrency |
 
 ### Before Commit/PR
 | Skill | Use When |
 |-------|----------|
 | `/arc-android-final-review` | **Final review before merge** — comprehensive quality check by domain |
 | `/arc-android-quality-standards` | Code review, ktlint/detekt, documentation, accessibility |
+| `/arc-android-security-audit` | OWASP Mobile audit, pre-release security review |
 | `/arc-android-workflow` | Git commits, branches, PRs, Plan Mode |
 
 ### Workflow & Infrastructure
@@ -128,6 +133,8 @@ Final review before merge               → /arc-final-review
 Making commits or creating PRs          → /arc-workflow
 Setting up CI/CD                        → /arc-github-actions-ci
 Full project health check               → /arc-audit
+Security audit / OWASP review          → /arc-android-security-audit
+Coroutine scopes, Flow, cancellation   → /arc-android-coroutines
 ```
 
 **Progressive Disclosure**: Start with this document. Load skills only when needed for specific tasks.
@@ -153,6 +160,7 @@ ARC Labs agents are **autonomous executors** that handle complete workflows. The
 | `arc-play-distribution` | "Send to Firebase", "create beta build" | Haiku |
 | `arc-room-migration` | "Add Room column", "rename DB field", "migration crash" | Sonnet |
 | `arc-dependency-auditor` | "Audit dependencies", "check outdated packages" | Haiku |
+| `arc-kotlin-security-auditor` | "Audit security", "OWASP review", "is this secure?", "pentest" | Sonnet |
 
 > See [AGENTS.md](AGENTS.md) for complete agent documentation, triggers, and design principles.
 
