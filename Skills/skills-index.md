@@ -183,6 +183,19 @@ Skills live in `.claude/skills/<name>/SKILL.md` and are symlinked by ARCDevTools
 
 ---
 
+### /arc-android-security-audit
+**Purpose**: OWASP Mobile Top 10 vulnerability scanner for Android apps
+
+- Context detection (manifest, deps, permissions → identify risk profile and active verticals)
+- 10 universal categories: Storage, Network/TLS, IPC, Auth, Crypto, WebView, Logging, Binary, UI, Supply Chain
+- 4 vertical checklists: 🏦 Fintech, 🏥 Health/HIPAA, 🏢 Enterprise/MDM, 🛒 E-commerce
+- Reporting: 🔴 Critical / 🟡 High / 🔵 Info (aligned with `/arc-final-review`)
+- Kotlin 2.0 + Compose + Hilt + Room remediation examples
+
+> **Adapted from** `MartinPSDev/skills/security/bug-hunter` (Apache-2.0). Attribution preserved in skill frontmatter.
+
+---
+
 ## ARC Labs Agents
 
 Agents autonomously execute complete workflows. See [AGENTS.md](../AGENTS.md) for full documentation.
@@ -201,6 +214,7 @@ Agents autonomously execute complete workflows. See [AGENTS.md](../AGENTS.md) fo
 | `arc-play-store-listing` | Play Store ASO | Sonnet | No |
 | `arc-room-migration` | Room schema migrations | Sonnet | No |
 | `arc-dependency-auditor` | Dependency health audit | Haiku | Yes |
+| `arc-kotlin-security-auditor` | OWASP Mobile security audit | Sonnet | Yes |
 
 ---
 
@@ -215,6 +229,7 @@ These external skills were evaluated and selectively absorbed into ARC Labs skil
 | `compose-skill` (aldefy) | 13 Compose reference guides (recomposition, modifiers, performance, theming) | `arc-android-presentation-layer` |
 | `awesome-android-agent-skills` (new-silvermoon) | compose-navigation, compose-performance-audit, android-coroutines, android-retrofit, coil-compose, android-gradle-logic | Multiple skills |
 | `claude-android-ninja` (Drjacky) | Security patterns, JaCoCo config, M3 Adaptive, convention plugins | `arc-android-quality-standards`, `arc-android-project-setup` |
+| `bug-hunter` (MartinPSDev) | OWASP Mobile Top 10 scanner + vertical checklists (Fintech, Health, Enterprise, E-commerce) | Adapted into `arc-android-security-audit` (Apache-2.0 attribution) |
 | `platform-design-skills` (ehmo) | Unique M3 rules: predictive back, edge-to-edge, gesture zones, notification channels | `arc-android-quality-standards`, `arc-android-presentation-layer` |
 | `kotlin-specialist` (Jeffallan) | Coroutines/Flow advanced patterns, DSL idioms | `arc-android-architecture` |
 | `claude-android-skill` (dpconde) | `libs.versions.toml` template, `settings.gradle.kts` template | `arc-android-project-setup` |
@@ -242,6 +257,7 @@ These external skills were evaluated and selectively absorbed into ARC Labs skil
 | **Android Docs MCP** | developer.android.com access | See Tools/mcp-setup.md |
 | **Mobile MCP** | ADB emulator automation | See Tools/mcp-setup.md |
 | **Play Store MCP** | Google Play Console (optional) | See Tools/mcp-setup.md |
+| **Android Skills (Google)** | 6 official skills on-demand via MCP | See Tools/mcp-setup.md and Tools/android-cli.md |
 
 ---
 
@@ -341,7 +357,7 @@ To add a new skill:
 | Accessibility (WCAG 2.2, M3) | Full | ✅ |
 | Performance (Compose, Gradle) | Good | ✅ |
 | Memory / Worktrees | Full | ✅ |
-| Security (ProGuard, cert pinning) | Partial | 🟡 |
+| Security (OWASP Mobile Top 10 + verticals) | Full | ✅ |
 | Kotlin Multiplatform | None | ❌ |
 | Macrobenchmark | None | ❌ |
 
@@ -351,6 +367,6 @@ To add a new skill:
 
 | Component | Version | Last Updated |
 |-----------|---------|-------------|
-| ARC Labs Skills | 2.0.0 | 2026-03-23 |
-| ARCKnowledge-Android | 1.1.0 | 2026-03-23 |
-| Skills Index | 2.0.0 | 2026-03-23 |
+| ARC Labs Skills | 2.1.0 | 2026-04-18 |
+| ARCKnowledge-Android | 1.2.0 | 2026-04-18 |
+| Skills Index | 2.1.0 | 2026-04-18 |

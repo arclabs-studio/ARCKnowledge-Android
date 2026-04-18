@@ -9,7 +9,7 @@ Subagents are **autonomous executors** — they take a task, use tools, and retu
 
 ---
 
-## The 12 ARC Labs Android Agents
+## The 13 ARC Labs Android Agents
 
 ### `arc-kotlin-tdd`
 **Implements features using strict TDD** — writes JUnit 5 + MockK test suites before any production code.
@@ -169,6 +169,19 @@ Skills invoked dynamically: `arc-android-project-setup`
 
 ---
 
+### `arc-kotlin-security-auditor`
+**Read-only OWASP Mobile security auditor** — scans for OWASP Mobile Top 10 vulnerabilities and produces severity-graded reports with Kotlin 2.0 remediations.
+
+| | |
+|--|--|
+| **Model** | claude-sonnet-4-6 |
+| **Read-only** | Yes |
+| **Triggers** | "Audit security", "review for vulnerabilities", "pentest", "is this secure?", "OWASP review", "bug bounty prep", "check manifest for security issues", "security before release" |
+
+Skills invoked dynamically: `arc-android-security-audit`, `arc-android-quality-standards`, `arc-android-data-layer`
+
+---
+
 ## Master Table — Skills and MCPs per Agent
 
 | Agent | ARC Labs Skills | MCPs |
@@ -185,12 +198,13 @@ Skills invoked dynamically: `arc-android-project-setup`
 | `arc-play-store-listing` | app-marketing-context, keyword-research, metadata-optimization | WebSearch, WebFetch |
 | `arc-room-migration` | arc-android-data-layer, arc-android-tdd-patterns | — |
 | `arc-dependency-auditor` | arc-android-project-setup | — |
+| `arc-kotlin-security-auditor` | arc-android-security-audit, arc-android-quality-standards, arc-android-data-layer | android-skills (r8-analyzer), context7 |
 
 ---
 
 ## Design Principles
 
-- **Minimum privilege**: read-only agents (`arc-kotlin-reviewer`, `arc-project-explorer`, `arc-dependency-auditor`) have no Edit/Write tools
+- **Minimum privilege**: read-only agents (`arc-kotlin-reviewer`, `arc-project-explorer`, `arc-dependency-auditor`, `arc-kotlin-security-auditor`) have no Edit/Write tools
 - **Dynamic skill invocation**: agents invoke skills relevant to the task, not all skills by default
 - **Environment first**: `arc-kotlin-debugger` always checks Gradle daemon and cache before touching code
 - **Model selection**: Haiku for deterministic tasks (Gradle, exploration, scaffolding); Sonnet for complex reasoning (TDD, review, debugging, releases, migrations)
