@@ -27,6 +27,7 @@ AI agents work best when they have access to **current, authoritative informatio
 | **Android Source Explorer** | AOSP + Jetpack source code exploration (API level 36) | Recommended |
 | **Android Docs MCP** | developer.android.com real-time access | Recommended |
 | **Mobile MCP** | ADB-based emulator automation and UI testing | Recommended |
+| **Android Skills (Google)** | 6 official Google skills on-demand (AGP 9, XML→Compose, Nav3, R8, Play Billing, edge-to-edge) | Recommended |
 | **Play Store MCP** | Google Play Console releases and track management | Optional |
 
 ---
@@ -271,6 +272,51 @@ Use for visual UI verification, automated testing flows, screenshot capture to v
 
 ---
 
+## 🚀 Android Skills MCP Setup (Recommended)
+
+Exposes Google's 6 official Android skills to Claude Code agents on-demand, without copying files. Uses BM25 search and loads in <200ms.
+
+### Installation
+
+```bash
+claude mcp add android-skills -- npx -y android-skills-mcp
+```
+
+### MCP Configuration
+
+```json
+{
+  "mcpServers": {
+    "android-skills": {
+      "command": "npx",
+      "args": ["-y", "android-skills-mcp"]
+    }
+  }
+}
+```
+
+### Available Skills
+
+| Skill | Use When |
+|-------|---------|
+| `agp-9-upgrade` | Migrating to Android Gradle Plugin 9 |
+| `migrate-xml-views-to-jetpack-compose` | Converting XML layouts to Compose |
+| `navigation-3` | Setting up or migrating to Navigation 3 |
+| `r8-analyzer` | Diagnosing R8/ProGuard shrinking issues |
+| `play-billing-library-version-upgrade` | Upgrading Play Billing Library |
+| `edge-to-edge` | Implementing edge-to-edge display support |
+
+### When to Use
+
+- AGP upgrade triggered a build failure → skill covers all breaking changes
+- Migrating XML layouts to Compose → skill provides step-by-step patterns
+- R8 stripping needed classes in release build → skill diagnoses ProGuard rules
+- Updating Play Billing to latest → skill covers API migration
+
+> **Source:** `github.com/android/skills` (Apache-2.0) — maintained by Google. See [Tools/android-cli.md](android-cli.md) for the full Android CLI binary.
+
+---
+
 ## 🚀 Play Store MCP Setup (Optional)
 
 Manages Google Play Console releases: deploy versions, promote between tracks (internal → alpha → beta → production), view release status.
@@ -343,6 +389,10 @@ Copy this complete configuration for a new ARC Labs Android project:
     "mobile-mcp": {
       "command": "npx",
       "args": ["-y", "@mobilenext/mobile-mcp@latest"]
+    },
+    "android-skills": {
+      "command": "npx",
+      "args": ["-y", "android-skills-mcp"]
     }
   }
 }
@@ -383,6 +433,7 @@ Then reference them in the MCP config:
 - [ ] Android Source Explorer installed and synced (API 36 + AndroidX)
 - [ ] Mobile MCP installed and device/emulator accessible via ADB
 - [ ] Android Docs MCP installed (if Context7 coverage is insufficient)
+- [ ] Android Skills MCP configured (`claude mcp add android-skills -- npx -y android-skills-mcp`)
 
 ### Verification
 - [ ] Agent verified: can fetch Compose docs via Context7
