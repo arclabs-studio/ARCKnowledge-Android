@@ -20,7 +20,7 @@ Subagents are **autonomous executors** — they take a task, use tools, and retu
 | **Read-only** | No |
 | **Triggers** | "Implement a feature", "write tests first", "create a UseCase", "create a ViewModel", "add a Repository", "start TDD" |
 
-Skills invoked dynamically: `arc-android-tdd-patterns`, `arc-android-architecture`, `arc-android-presentation-layer`, `arc-android-data-layer`
+Skills invoked dynamically: `arc-android-tdd-patterns`, `arc-android-architecture`, `arc-android-coroutines`, `arc-android-presentation-layer`, `arc-android-data-layer`
 
 ---
 
@@ -33,7 +33,7 @@ Skills invoked dynamically: `arc-android-tdd-patterns`, `arc-android-architectur
 | **Read-only** | Yes |
 | **Triggers** | "Review this code", "pre-merge review", "check for architecture violations", "audit this file", "review before I commit" |
 
-Skills invoked dynamically: `arc-android-quality-standards`, `arc-android-architecture`, `arc-android-presentation-layer`, `arc-android-data-layer`
+Skills invoked dynamically: `arc-android-quality-standards`, `arc-android-architecture`, `arc-android-coroutines`, `arc-android-presentation-layer`, `arc-android-data-layer`
 
 > **Distinction**: For guided review where you conduct the review with Claude's help, use the `/arc-android-final-review` skill instead.
 
@@ -48,7 +48,7 @@ Skills invoked dynamically: `arc-android-quality-standards`, `arc-android-archit
 | **Read-only** | No |
 | **Triggers** | "Build failed", "BUILD FAILED", "Unresolved reference", "MissingBinding", "Hilt compilation error", coroutine deadlocks, "FAILED" in test output, pasted Gradle error logs |
 
-Skills invoked dynamically: `arc-android-project-setup`, `arc-android-tdd-patterns`, `arc-android-architecture`
+Skills invoked dynamically: `arc-android-project-setup`, `arc-android-tdd-patterns`, `arc-android-architecture`, `arc-android-coroutines`
 
 ---
 
@@ -186,9 +186,9 @@ Skills invoked dynamically: `arc-android-security-audit`, `arc-android-quality-s
 
 | Agent | ARC Labs Skills | MCPs |
 |-------|----------------|------|
-| `arc-kotlin-tdd` | arc-android-tdd-patterns, arc-android-architecture, arc-android-presentation-layer, arc-android-data-layer | linear_get_issue |
-| `arc-kotlin-reviewer` | arc-android-quality-standards, arc-android-architecture, arc-android-presentation-layer, arc-android-data-layer | — |
-| `arc-kotlin-debugger` | arc-android-project-setup, arc-android-tdd-patterns, arc-android-architecture | — |
+| `arc-kotlin-tdd` | arc-android-tdd-patterns, arc-android-architecture, arc-android-coroutines, arc-android-presentation-layer, arc-android-data-layer | linear_get_issue |
+| `arc-kotlin-reviewer` | arc-android-quality-standards, arc-android-architecture, arc-android-coroutines, arc-android-presentation-layer, arc-android-data-layer | — |
+| `arc-kotlin-debugger` | arc-android-project-setup, arc-android-tdd-patterns, arc-android-architecture, arc-android-coroutines | — |
 | `arc-gradle-manager` | arc-android-project-setup | — |
 | `arc-project-explorer` | — (inlined) | — |
 | `arc-linear-bridge` | arc-android-tdd-patterns, arc-android-memory | linear_get_issue, linear_list_issues, github_create_branch, workflow_generate_branch_name |

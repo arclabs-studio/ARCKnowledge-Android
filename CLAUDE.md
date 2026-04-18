@@ -100,6 +100,7 @@ Use these slash commands to load detailed context when needed.
 | `/arc-android-presentation-layer` | Creating Composables/ViewModels, StateFlow, navigation |
 | `/arc-android-data-layer` | Implementing Repositories, API clients, DTOs, Room, DataStore |
 | `/arc-android-tdd-patterns` | Writing tests, JUnit 5/MockK/Turbine, TDD workflow |
+| `/arc-android-coroutines` | Coroutine scopes, dispatchers, cancellation, Flow, structured concurrency |
 
 ### Before Commit/PR
 | Skill | Use When |
@@ -133,6 +134,7 @@ Making commits or creating PRs          → /arc-workflow
 Setting up CI/CD                        → /arc-github-actions-ci
 Full project health check               → /arc-audit
 Security audit / OWASP review          → /arc-android-security-audit
+Coroutine scopes, Flow, cancellation   → /arc-android-coroutines
 ```
 
 **Progressive Disclosure**: Start with this document. Load skills only when needed for specific tasks.

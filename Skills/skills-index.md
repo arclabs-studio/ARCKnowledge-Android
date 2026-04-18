@@ -196,6 +196,24 @@ Skills live in `.claude/skills/<name>/SKILL.md` and are symlinked by ARCDevTools
 
 ---
 
+### /arc-android-coroutines
+**Purpose**: Kotlin Coroutines structured concurrency — scopes, dispatchers, cancellation, exception handling, Flow, testing
+
+- CoroutineScope hierarchy and structured concurrency rules (never GlobalScope in production)
+- Dispatchers (Main, IO, Default, Unconfined) — correct usage per layer; main-safe suspend functions
+- Cancellation propagation: cooperative loops, NonCancellable cleanup, withTimeout semantics
+- Exception handling: SupervisorJob, CoroutineExceptionHandler, launch vs async exception propagation
+- Channels and Flow (cold vs hot, StateFlow, SharedFlow, collectLatest, produce)
+- Android lifecycle integration (viewModelScope, lifecycleScope, repeatOnLifecycle, flowWithLifecycle)
+- Testing with runTest, StandardTestDispatcher, advanceTimeBy, setMain/resetMain
+- 32-entry triage playbook (topic/error → reference file)
+
+**References**: 32 structured practice files in `references/`
+
+> **Adapted from** `santimattius/structured-coroutines/kotlin-coroutines-skill` (MIT). Attribution preserved in skill frontmatter.
+
+---
+
 ## ARC Labs Agents
 
 Agents autonomously execute complete workflows. See [AGENTS.md](../AGENTS.md) for full documentation.
@@ -232,6 +250,7 @@ These external skills were evaluated and selectively absorbed into ARC Labs skil
 | `bug-hunter` (MartinPSDev) | OWASP Mobile Top 10 scanner + vertical checklists (Fintech, Health, Enterprise, E-commerce) | Adapted into `arc-android-security-audit` (Apache-2.0 attribution) |
 | `platform-design-skills` (ehmo) | Unique M3 rules: predictive back, edge-to-edge, gesture zones, notification channels | `arc-android-quality-standards`, `arc-android-presentation-layer` |
 | `kotlin-specialist` (Jeffallan) | Coroutines/Flow advanced patterns, DSL idioms | `arc-android-architecture` |
+| `kotlin-coroutines-skill` (santimattius) | Standalone skill: 32 structured concurrency practices + triage playbook (scopes, dispatchers, cancellation, Flow, testing) | `arc-android-coroutines` (standalone) |
 | `claude-android-skill` (dpconde) | `libs.versions.toml` template, `settings.gradle.kts` template | `arc-android-project-setup` |
 
 ### Conflicts Found (Excluded)
@@ -358,6 +377,7 @@ To add a new skill:
 | Performance (Compose, Gradle) | Good | ✅ |
 | Memory / Worktrees | Full | ✅ |
 | Security (OWASP Mobile Top 10 + verticals) | Full | ✅ |
+| Concurrency (Coroutines, Flow, Channels) | Full | ✅ |
 | Kotlin Multiplatform | None | ❌ |
 | Macrobenchmark | None | ❌ |
 
@@ -367,6 +387,6 @@ To add a new skill:
 
 | Component | Version | Last Updated |
 |-----------|---------|-------------|
-| ARC Labs Skills | 2.1.0 | 2026-04-18 |
+| ARC Labs Skills | 2.2.0 | 2026-04-18 |
 | ARCKnowledge-Android | 1.2.0 | 2026-04-18 |
-| Skills Index | 2.1.0 | 2026-04-18 |
+| Skills Index | 2.2.0 | 2026-04-18 |
