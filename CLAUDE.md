@@ -34,6 +34,7 @@ Before implementing library-specific code, **query Context7 for current document
 | **Android Source Explorer** | AOSP + Jetpack source code exploration | Debugging internals, understanding framework behavior |
 | **Android Docs MCP** | developer.android.com access | Official API reference always up-to-date |
 | **Mobile MCP** | ADB automation for testing | UI testing, screenshot verification, emulator control |
+| **DTA** | Direct Android device access (screen, network, layout, mocking, build) | UI/layout debugging, network inspection, app interaction testing |
 | **Android Skills (Google)** | 6 official Google skills on-demand (AGP 9, XML→Compose, Nav3, R8, Play Billing, edge-to-edge) | AGP migration, Compose migration, R8 analysis |
 
 > **Setup**: See [Tools/mcp-setup.md](Tools/mcp-setup.md) for installation of all servers.
@@ -101,6 +102,7 @@ Use these slash commands to load detailed context when needed.
 | `/arc-android-data-layer` | Implementing Repositories, API clients, DTOs, Room, DataStore |
 | `/arc-android-tdd-patterns` | Writing tests, JUnit 5/MockK/Turbine, TDD workflow |
 | `/arc-android-coroutines` | Coroutine scopes, dispatchers, cancellation, Flow, structured concurrency |
+| `/material-3-skill` | Deep MD3: tokens, 30+ Compose components, M3 Expressive, compliance audit |
 
 ### Before Commit/PR
 | Skill | Use When |
@@ -135,6 +137,7 @@ Setting up CI/CD                        → /arc-github-actions-ci
 Full project health check               → /arc-audit
 Security audit / OWASP review          → /arc-android-security-audit
 Coroutine scopes, Flow, cancellation   → /arc-android-coroutines
+Deep MD3 tokens/components/audit       → /material-3-skill
 ```
 
 **Progressive Disclosure**: Start with this document. Load skills only when needed for specific tasks.

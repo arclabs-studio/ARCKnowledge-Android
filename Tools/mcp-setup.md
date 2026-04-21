@@ -27,6 +27,7 @@ AI agents work best when they have access to **current, authoritative informatio
 | **Android Source Explorer** | AOSP + Jetpack source code exploration (API level 36) | Recommended |
 | **Android Docs MCP** | developer.android.com real-time access | Recommended |
 | **Mobile MCP** | ADB-based emulator automation and UI testing | Recommended |
+| **DTA** | Direct Android device access: screen, network, layout, mocking, build & launch | Recommended |
 | **Android Skills (Google)** | 6 official Google skills on-demand (AGP 9, XML→Compose, Nav3, R8, Play Billing, edge-to-edge) | Recommended |
 | **Play Store MCP** | Google Play Console releases and track management | Optional |
 
@@ -317,6 +318,66 @@ claude mcp add android-skills -- npx -y android-skills-mcp
 
 ---
 
+## 🚀 DTA Setup (Development Tools for Android)
+
+Toolkit that gives AI agents direct access to Android devices through MCP: full UI hierarchy (Compose + WebView DOM), auto-recorded network traffic (OkHttp + WebSocket), HTTP/WebSocket mocking, build & launch from a single MCP call, and interaction (tap/swipe/input) with verification.
+
+### Option A: Android Studio Plugin (Recommended)
+
+**Settings → Plugins → Marketplace → search "DTA"**
+
+The plugin embeds the daemon, auto-injects sidekick into debug builds, and exposes the MCP server from the MCP tab — no CLI or manual setup needed.
+
+### Option B: CLI
+
+```bash
+brew tap yamsergey/packages
+brew install dta-cli
+```
+
+**Requirements:** Java 21+
+
+#### MCP Configuration
+
+```bash
+# Claude Code
+claude mcp add dta -- dta-cli mcp
+```
+
+Or in `.claude/mcp.json`:
+
+```json
+{
+  "mcpServers": {
+    "dta": {
+      "command": "dta-cli",
+      "args": ["mcp"]
+    }
+  }
+}
+```
+
+### Available Tools
+
+| Tool | Description |
+|------|-------------|
+| `get_screen` | Full UI hierarchy with bounds, Compose data, and WebView DOM |
+| `get_network` | Complete HTTP/WebSocket history recorded from app launch |
+| `mock_http` | Create mock rules for captured HTTP requests |
+| `run_app` | Build + install + launch with sidekick auto-injected |
+| `tap` / `swipe` / `input_text` | App interaction for verification flows |
+
+### When to Use
+
+- **Layout debugging**: agent sees the real UI hierarchy (not the limited `adb uiautomator dump` accessibility tree)
+- **Network inspection**: verify requests/responses without opening Android Studio Network Profiler
+- **API mocking**: simulate error states or specific responses during development
+- **End-to-end verification**: interact → inspect screen state → inspect network traffic
+
+> **Source:** `github.com/yamsergey/dta` (Apache-2.0). Complements Mobile MCP (cross-platform basic ADB) with deeper Android-specific capabilities.
+
+---
+
 ## 🚀 Play Store MCP Setup (Optional)
 
 Manages Google Play Console releases: deploy versions, promote between tracks (internal → alpha → beta → production), view release status.
@@ -390,6 +451,10 @@ Copy this complete configuration for a new ARC Labs Android project:
       "command": "npx",
       "args": ["-y", "@mobilenext/mobile-mcp@latest"]
     },
+    "dta": {
+      "command": "dta-cli",
+      "args": ["mcp"]
+    },
     "android-skills": {
       "command": "npx",
       "args": ["-y", "android-skills-mcp"]
@@ -434,6 +499,7 @@ Then reference them in the MCP config:
 - [ ] Mobile MCP installed and device/emulator accessible via ADB
 - [ ] Android Docs MCP installed (if Context7 coverage is insufficient)
 - [ ] Android Skills MCP configured (`claude mcp add android-skills -- npx -y android-skills-mcp`)
+- [ ] DTA installed (AS plugin or CLI) and device/emulator connected
 
 ### Verification
 - [ ] Agent verified: can fetch Compose docs via Context7

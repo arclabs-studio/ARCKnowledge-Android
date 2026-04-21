@@ -21,6 +21,7 @@ Make commits, create PRs                   /arc-workflow
 Set up CI/CD workflows                     /arc-github-actions-ci
 Project memory across sessions             /arc-memory
 Parallel feature development               /arc-worktrees-workflow
+Implement MD3 tokens/components/audit      /material-3-skill
 
 Implement a feature with TDD (delegated)   → arc-kotlin-tdd agent
 Review code (delegated)                    → arc-kotlin-reviewer agent
@@ -62,6 +63,22 @@ Skills live in `.claude/skills/<name>/SKILL.md` and are symlinked by ARCDevTools
 - Clarification: `remember{}` for ephemeral UI state; business state in ViewModel
 
 **References**: Layers/presentation.md
+
+---
+
+### /material-3-skill
+**Purpose**: Material Design 3 — tokens, 30+ componentes, theming, M3 Expressive, auditoría de cumplimiento
+
+- Design token system `md.sys`: color roles (primary, secondary, surface + on-* variants), type scale (Display→Label Large/Medium/Small), shape (none→full), tonal elevation
+- Dynamic color: `dynamicLightColorScheme` / `dynamicDarkColorScheme` on Android 12+ + static fallback schemes
+- 30+ components with Compose (`androidx.compose.material3`) mappings: buttons (5 types), FAB, cards, dialogs, text fields, navigation rail/bar/drawer, chips, sliders, date/time pickers, and more
+- M3 Expressive (May 2025): spring-based motion physics, shape morphing — fully supported in Compose
+- Responsive layouts: 5 window size classes, `NavigationSuiteScaffold`, adaptive pane UIs
+- MD3 compliance audit: scored report across 10 categories (color, typography, shape, elevation, components, layout, navigation, motion, accessibility, theming)
+
+**References**: references/color-system.md, component-catalog.md, theming-and-dynamic-color.md, typography-and-shape.md, navigation-patterns.md, layout-and-responsive.md
+
+> **Source:** `hamen/material-3-skill` (MIT). Community skill — complements `arc-android-presentation-layer` (M3 basics) with deep token, component, and audit guidance.
 
 ---
 
@@ -252,6 +269,7 @@ These external skills were evaluated and selectively absorbed into ARC Labs skil
 | `kotlin-specialist` (Jeffallan) | Coroutines/Flow advanced patterns, DSL idioms | `arc-android-architecture` |
 | `kotlin-coroutines-skill` (santimattius) | Standalone skill: 32 structured concurrency practices + triage playbook (scopes, dispatchers, cancellation, Flow, testing) | `arc-android-coroutines` (standalone) |
 | `claude-android-skill` (dpconde) | `libs.versions.toml` template, `settings.gradle.kts` template | `arc-android-project-setup` |
+| `material-3-skill` (hamen) | Complete MD3 token system, 30+ Compose component catalog, M3 Expressive (spring motion + shape morphing), 10-category audit, dynamic color, responsive layout | `/material-3-skill` (standalone, original name, MIT) |
 
 ### Conflicts Found (Excluded)
 
@@ -275,6 +293,7 @@ These external skills were evaluated and selectively absorbed into ARC Labs skil
 | **Android Source Explorer** | AOSP + Jetpack source exploration | See Tools/mcp-setup.md |
 | **Android Docs MCP** | developer.android.com access | See Tools/mcp-setup.md |
 | **Mobile MCP** | ADB emulator automation | See Tools/mcp-setup.md |
+| **DTA** | Direct Android device access via MCP (screen, network, layout, mocking) | See Tools/mcp-setup.md |
 | **Play Store MCP** | Google Play Console (optional) | See Tools/mcp-setup.md |
 | **Android Skills (Google)** | 6 official skills on-demand via MCP | See Tools/mcp-setup.md and Tools/android-cli.md |
 
@@ -387,6 +406,6 @@ To add a new skill:
 
 | Component | Version | Last Updated |
 |-----------|---------|-------------|
-| ARC Labs Skills | 2.2.0 | 2026-04-18 |
-| ARCKnowledge-Android | 1.2.0 | 2026-04-18 |
-| Skills Index | 2.2.0 | 2026-04-18 |
+| ARC Labs Skills | 2.3.0 | 2026-04-21 |
+| ARCKnowledge-Android | 1.3.0 | 2026-04-21 |
+| Skills Index | 2.3.0 | 2026-04-21 |
