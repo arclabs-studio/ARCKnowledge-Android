@@ -29,11 +29,11 @@
 
 | App | Status | Description |
 |-----|--------|-------------|
-| FavRes-Android | Planned | Favorite restaurants tracker |
+| FavRes-Android | **In progress** (started 2026-10-21) · repo `arclabs-studio/FavRes-Android` · Linear team `FavRes-Android` (key `FVRSAN`) | Private restaurant journal (port of FavRes iOS) |
 | FavBook-Android | Planned | Book collection manager |
 | TicketMind-Android | Planned | Event ticket organizer |
 
-All apps share common libraries (ARCDesignSystem, ARCLogger-Android, ARCNetworking-Android, ARCStorage-Android) and follow identical architecture patterns.
+All apps follow identical architecture patterns. Shared code starts life as `:core:*` modules inside FavRes-Android; the ARC*-Android libraries (ARCDesignSystem-Android, ARCLogger-Android, ARCNetworking-Android, ARCStorage-Android, ARCTesting-Android) are **planned — extracted from FavRes-Android `:core:*` modules with the second app**. See [Libraries](libraries.md#current-arc-labs-libraries).
 
 ---
 

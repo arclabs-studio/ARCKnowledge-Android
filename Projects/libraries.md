@@ -185,17 +185,20 @@ interface SearchRestaurantsUseCase {
 
 | Library | Type | Purpose | Status |
 |---------|------|---------|--------|
-| ARCDesignSystem | UI Component | Material3 theme, shared composables, design tokens | Planned |
-| ARCDevTools-Android | Utility | Tooling, linting (ktlint/detekt), CI/CD config | Planned |
-| ARCLogger-Android | Utility | Structured logging with tag-based filtering | Planned |
-| ARCNetworking-Android | Data | Retrofit wrappers, interceptors, error handling | Planned |
-| ARCStorage-Android | Data | Room wrappers, DataStore utilities, cache management | Planned |
-| ARCTesting-Android | Utility | Test utilities, fakes, assertion helpers | Planned |
+| ARCDevTools-Android | Utility | Tooling, linting (ktlint/detekt), hooks, CI/CD workflows | Active (v0.1.0) |
+| ARCKnowledge-Android | Knowledge | This knowledge base | Active (v0.2.0) |
+| ARCDesignSystem-Android | UI Component | Material 3 Expressive theme, shared composables, design tokens | Planned — extracted from FavRes-Android `:core:designsystem` / `:core:ui` with the second app |
+| ARCLogger-Android | Utility | Structured logging with tag-based filtering | Planned — extracted from FavRes-Android `:core:common` with the second app |
+| ARCNetworking-Android | Data | Retrofit 3 / OkHttp 5 wrappers, interceptors, error handling (Vapor phase) | Planned — extracted from FavRes-Android `:core:network` once it exists |
+| ARCStorage-Android | Data | Room 3 / DataStore utilities, cache management | Planned — extracted from FavRes-Android `:core:database` / `:core:datastore` with the second app |
+| ARCTesting-Android | Utility | Test utilities, fakes, assertion helpers | Planned — extracted from FavRes-Android `:core:testing` with the second app |
+
+> **Extraction rule:** no ARC*-Android library is created speculatively. Code lives in FavRes-Android `:core:*` modules first and is extracted into a package when a second app needs it.
 
 ### Library Dependency Graph
 
 ```
-ARCDesignSystem
+ARCDesignSystem-Android
     └── (no ARC dependencies, only Compose)
 
 ARCLogger-Android
