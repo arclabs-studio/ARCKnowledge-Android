@@ -27,7 +27,7 @@ Android Studio is the official IDE for Android development, provided and maintai
 | Android Studio | Latest stable (2026.2.x or newer) |
 | Gradle | 9.8.2 |
 | Android Gradle Plugin (AGP) | 9.4.0 |
-| JDK | JBR bundled with Android Studio (currently 25); bytecode target `jvmTarget` 17 |
+| JDK | JBR bundled with Android Studio (currently 25); Gradle daemon pinned to JDK 21 (detekt 1.23.8 fails on JDK 25); bytecode target `jvmTarget` 17 |
 | Kotlin | 2.4.21 |
 | Compose Compiler | Kotlin compiler plugin (integrated since Kotlin 2.0) |
 
@@ -189,7 +189,7 @@ include(":feature-profile")
 
 | Setting | Value | Notes |
 |---------|-------|-------|
-| `compileSdk` | 36 | Android 16 |
+| `compileSdk` | 36 | Android 16 — pending: compileSdk 37 required by Compose 1.12 stack |
 | `minSdk` | 26 | Android 8.0 |
 | `targetSdk` | 36 | Google Play requires targetSdk ≥ 36 for updates since 2026-08-31 |
 
@@ -223,7 +223,7 @@ plugins {
 
 android {
     namespace = "com.example.myapp"
-    compileSdk = 36
+    compileSdk = 36   // pending: compileSdk 37 required by Compose 1.12 stack
 
     defaultConfig {
         applicationId = "com.example.myapp"
@@ -1028,7 +1028,7 @@ Instrumented tests run on a device or emulator and have access to the Android fr
 class HomeScreenTest {
 
     @get:Rule
-    val composeTestRule = createComposeRule()
+    val composeTestRule = createComposeRule()   // androidx.compose.ui.test.junit4.v2 (Compose 1.12)
 
     @Test
     fun homeScreen_displaysSearchBar() {
@@ -1255,7 +1255,7 @@ Use this checklist when setting up a new project or onboarding to an existing on
 
 ### Project Configuration
 
-- [ ] `compileSdk` is set to 36
+- [ ] `compileSdk` is set to 36 (pending: compileSdk 37 required by Compose 1.12 stack)
 - [ ] `minSdk` is set to 26
 - [ ] `targetSdk` is set to 36
 - [ ] Kotlin version is 2.4.21 (AGP 9 built-in Kotlin)

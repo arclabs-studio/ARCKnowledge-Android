@@ -136,32 +136,41 @@ core:domain -> core:model (pure Kotlin, no Android dependencies)
 |---|---|---|
 | Language | Kotlin (K2) | 2.4.21 |
 | Build | Android Gradle Plugin / Gradle | 9.4.0 / 9.8.2 |
-| JDK | JBR bundled with Android Studio (currently 25) · bytecode target `jvmTarget` 17 | — |
+| JDK | JBR bundled with Android Studio (currently 25) for the IDE/CLI; **Gradle daemon pinned to JDK 21** (`gradle/gradle-daemon-jvm.properties` + foojay resolver) because detekt 1.23.8 fails on JDK 25 · bytecode target `jvmTarget` 17 | — / 21 |
 | SDK | `compileSdk` = `targetSdk` | 36 |
+| SDK | ⚠️ pending: compileSdk 37 required by Compose 1.12 stack (BOM 2026.09.00, material3 1.5.0-beta01, Nav3 1.2.0 declare `minCompileSdk` 37) — awaiting confirmation; targetSdk stays 36 | — |
 | SDK | `minSdk` | 26 |
 | Annotation processing | KSP (KSP2) — **no kapt** | 2.3.12 |
 | UI | Compose BOM | 2026.09.00 |
 | UI | material3 (M3 Expressive, pinned above the BOM) | 1.5.0-beta01 |
 | UI | material3-adaptive | 1.3.0 |
+| AndroidX | core-ktx / activity-compose | 1.19.1 / 1.13.0 |
 | Navigation | Navigation 3 (`androidx.navigation3`) | 1.2.0 |
 | Navigation | lifecycle-viewmodel-navigation3 (Lifecycle) | 2.11.0 |
-| DI | Hilt | 2.60.1 |
+| DI | Hilt · `androidx.hilt:hilt-lifecycle-viewmodel-compose` | 2.60.1 · 1.4.0 |
 | Persistence | Room 3 (`androidx.room3`, KSP-only) | 3.0.3 |
 | Persistence | DataStore | 1.2.1 |
-| Serialization | kotlinx.serialization | 1.12 |
-| Concurrency | kotlinx.coroutines | 1.11 |
+| Serialization | kotlinx.serialization | 1.12.0 |
+| Concurrency | kotlinx.coroutines | 1.11.0 |
 | Images | Coil 3 | 3.6.3 |
-| Backend | Firebase BoM | 35.0.2 |
-| Identity | Credential Manager | 1.6.0 |
+| Backend | Firebase BoM · google-services plugin | 35.0.2 · 4.5.0 |
+| Identity | Credential Manager · googleid | 1.6.0 · 1.2.1 |
 | Payments | RevenueCat `purchases-android` | 10.28.1 |
 | Maps | maps-compose | 9.0.1 |
-| Tests | JUnit 5 Gradle plugin (mannodermaus) | 2.0.2 |
-| Tests | Turbine · Robolectric · Compose Preview Screenshot Testing | verify before use · verify before use · ≥ 0.0.1-alpha16 |
-| Quality | detekt | 1.23.8 |
-| Quality | ktlint | 1.8 |
+| Tests | JUnit 5 Gradle plugin (mannodermaus, id `de.mannodermaus.android-junit`) · JUnit Jupiter BOM · JUnit 4 (Compose rules) | 2.0.2 · 5.14.4 · 4.13.2 |
+| Tests | Turbine · Robolectric · Compose Preview Screenshot Testing | 1.2.1 · 4.17 · 0.0.1-alpha16 |
+| Quality | detekt · compose-rules (`io.nlopez.compose.rules:detekt`) | 1.23.8 · 0.4.28 |
+| Quality | ktlint (engine) · jlleitschuh ktlint Gradle plugin | 1.8.0 · 14.2.0 |
 | Networking (Vapor phase only) | Retrofit 3 + OkHttp 5 + kotlinx.serialization converter | verify before use |
 
-> **"verify before use"** means the version is intentionally not pinned in this knowledge base. Look it up (`android docs`, Context7, Maven Central) when the dependency is first added and record it in the project catalog. Never guess a version.
+> Every version above except the Vapor-phase networking row was resolved by a Gradle build of ARCDevTools-Android 0.2.0 (`templates/gradle/libs.versions.toml`, every coordinate confirmed to exist, 2026-10-21). That template is the catalog projects actually copy; this table mirrors it. **"verify before use"** means the version is intentionally not pinned here — look it up (`android docs`, Context7, Maven Central) when the dependency is first added. Never guess a version.
+
+**Toolchain facts verified by that build:**
+
+- **Gradle daemon on JDK 21**: detekt 1.23.8 fails on JDK 25, so `gradle/gradle-daemon-jvm.properties` pins `toolchainVersion=21` and `settings.gradle.kts` applies the `org.gradle.toolchains.foojay-resolver-convention` plugin to provision it. detekt tasks set `jvmTarget = "17"`.
+- **Screenshot tests** need `android.experimental.enableScreenshotTest=true` (in `gradle.properties` / the Compose convention plugin).
+- **Robolectric 4.17** needs `--add-exports=java.base/jdk.internal.access=ALL-UNNAMED` on the unit-test JVM (`testOptions.unitTests.all { it.jvmArgs(...) }`).
+- **Compose 1.12 test rules**: `createComposeRule` / `createAndroidComposeRule` from `androidx.compose.ui.test.junit4` are deprecated — use the `androidx.compose.ui.test.junit4.v2` variants.
 
 ### Catalog Template
 
@@ -173,7 +182,7 @@ agp = "9.4.0"
 ksp = "2.3.12"
 
 # SDK
-compileSdk = "36"
+compileSdk = "36"                   # pending: compileSdk 37 required by Compose 1.12 stack
 targetSdk = "36"
 minSdk = "26"
 
@@ -181,8 +190,8 @@ minSdk = "26"
 compose-bom = "2026.09.00"
 material3 = "1.5.0-beta01"          # M3 Expressive — explicit pin overrides the BOM
 material3-adaptive = "1.3.0"
-activity-compose = "VERIFY"         # verify before use
-core-ktx = "VERIFY"                 # verify before use
+activity-compose = "1.13.0"
+core-ktx = "1.19.1"
 
 # Navigation & Lifecycle
 nav3 = "1.2.0"
@@ -190,7 +199,7 @@ lifecycle = "2.11.0"
 
 # DI
 hilt = "2.60.1"
-androidx-hilt = "VERIFY"            # hilt-lifecycle-viewmodel-compose — verify before use
+androidx-hilt = "1.4.0"             # hilt-lifecycle-viewmodel-compose
 
 # Persistence
 room3 = "3.0.3"
@@ -205,23 +214,25 @@ coil = "3.6.3"
 
 # Firebase, identity, payments, maps
 firebase-bom = "35.0.2"
-google-services = "VERIFY"          # com.google.gms.google-services plugin — verify before use
+google-services = "4.5.0"           # com.google.gms.google-services plugin
 credentials = "1.6.0"
-googleid = "VERIFY"                 # verify before use
+googleid = "1.2.1"
 revenuecat = "10.28.1"
 maps-compose = "9.0.1"
 
 # Testing
 junit5-plugin = "2.0.2"             # mannodermaus Android JUnit 5 Gradle plugin
-junit-bom = "VERIFY"                # JUnit Jupiter version supported by the plugin — verify before use
-turbine = "VERIFY"                  # verify before use
-robolectric = "VERIFY"              # verify before use
-screenshot = "0.0.1-alpha16"        # Compose Preview Screenshot Testing (minimum supported)
+junit-bom = "5.14.4"                # JUnit Jupiter
+junit4 = "4.13.2"                   # Compose rule-based UI tests (vintage engine)
+turbine = "1.2.1"
+robolectric = "4.17"                # needs --add-exports=java.base/jdk.internal.access=ALL-UNNAMED
+screenshot = "0.0.1-alpha16"        # Compose Preview Screenshot Testing; needs android.experimental.enableScreenshotTest=true
 
 # Static analysis
-detekt = "1.23.8"
+detekt = "1.23.8"                   # runs with jvmTarget 17; fails on JDK 25 (daemon pinned to 21)
+compose-rules-detekt = "0.4.28"     # last compose-rules line built for detekt 1.23.x
 ktlint = "1.8.0"                    # ktlint engine
-ktlint-gradle = "VERIFY"            # org.jlleitschuh.gradle.ktlint plugin — verify before use
+ktlint-gradle = "14.2.0"            # org.jlleitschuh.gradle.ktlint plugin
 
 [libraries]
 # ──────────────────────────────────────────────
@@ -315,9 +326,12 @@ junit-bom = { group = "org.junit", name = "junit-bom", version.ref = "junit-bom"
 junit-jupiter = { group = "org.junit.jupiter", name = "junit-jupiter" }
 junit-jupiter-params = { group = "org.junit.jupiter", name = "junit-jupiter-params" }
 junit-platform-launcher = { group = "org.junit.platform", name = "junit-platform-launcher" }
+junit-vintage-engine = { group = "org.junit.vintage", name = "junit-vintage-engine" }
+junit4 = { group = "junit", name = "junit", version.ref = "junit4" }
 turbine = { group = "app.cash.turbine", name = "turbine", version.ref = "turbine" }
 robolectric = { group = "org.robolectric", name = "robolectric", version.ref = "robolectric" }
 screenshot-validation-api = { group = "com.android.tools.screenshot", name = "screenshot-validation-api", version.ref = "screenshot" }
+compose-rules-detekt = { group = "io.nlopez.compose.rules", name = "detekt", version.ref = "compose-rules-detekt" }
 
 [bundles]
 compose = [
@@ -356,7 +370,7 @@ hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 room3 = { id = "androidx.room3", version.ref = "room3" }
 google-services = { id = "com.google.gms.google-services", version.ref = "google-services" }
-junit5 = { id = "de.mannodermaus.android-junit5", version.ref = "junit5-plugin" }  # verify plugin id for 2.x
+junit5 = { id = "de.mannodermaus.android-junit", version.ref = "junit5-plugin" }
 screenshot = { id = "com.android.compose.screenshot", version.ref = "screenshot" }
 detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
 ktlint = { id = "org.jlleitschuh.gradle.ktlint", version.ref = "ktlint-gradle" }
@@ -760,7 +774,7 @@ android {
 
 // Required by the Room Gradle plugin; commit the generated schemas
 room3 {
-    schemaDirectory("$projectDir/schemas")
+    schemaDirectory(layout.projectDirectory.dir("schemas").asFile.path)
 }
 
 dependencies {
@@ -780,7 +794,7 @@ dependencies {
 }
 ```
 
-> The `room3 { schemaDirectory(...) }` call mirrors the official Room 3 Groovy example (`schemaDirectory "$projectDir/schemas"`); verify the Kotlin DSL form when implementing.
+> Plugin id `androidx.room3`, extension `room3` (type `RoomExtension`); this `schemaDirectory(...)` form is the one used by the Gradle-verified ARCDevTools-Android 0.2.0 `arc.android.room` convention plugin.
 
 ### Pure Kotlin Module Example (core/domain)
 

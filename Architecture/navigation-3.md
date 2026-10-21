@@ -40,7 +40,7 @@ The mental model is now almost identical on both platforms: a typed, value-based
 
 ### Requirements
 
-- `compileSdk` **36** or later (ARC Labs uses 36).
+- `compileSdk` **36** or later (ARC Labs uses 36; pending: compileSdk 37 required by Compose 1.12 stack — Nav3 1.2.0 declares `minCompileSdk` 37).
 - Kotlin Serialization plugin applied to every module that declares keys.
 - Compose-only destinations (Navigation 3 has no Fragment/View destinations).
 
@@ -491,7 +491,7 @@ Match in `onCreate` and `onNewIntent` with `DeepLinkRequest(intent = intent)` an
 Because the back stack is plain state, most navigation logic is testable without a device.
 
 - **Navigator logic** — unit-test the `Navigator` against a real `NavigationState` (no mocks): navigate to a top-level key switches tabs; navigate to a child key pushes on the current stack; `goBack()` at a tab root returns to the start tab.
-- **Shell behaviour** — Compose UI tests (`createComposeRule`, JUnit 4 runner) executed on the JVM with **Robolectric**: click a tab item, assert the destination content is displayed.
+- **Shell behaviour** — Compose UI tests (`createComposeRule` from `androidx.compose.ui.test.junit4.v2` — the non-v2 rules are deprecated in Compose 1.12; JUnit 4 runner) executed on the JVM with **Robolectric**: click a tab item, assert the destination content is displayed.
 - **Layout** — Compose Preview Screenshot Testing (`@PreviewTest`) of the shell at compact / medium / expanded widths to prove the bar ↔ rail switch.
 
 ```kotlin

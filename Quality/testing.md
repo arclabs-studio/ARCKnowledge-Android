@@ -102,7 +102,7 @@ Android modules run JUnit 5 through the **mannodermaus Android JUnit 5 Gradle pl
 ```kotlin
 // build.gradle.kts (Android module — normally done by the convention plugin)
 plugins {
-    alias(libs.plugins.junit5)   // de.mannodermaus — verify the plugin id for 2.x
+    alias(libs.plugins.junit5)   // id de.mannodermaus.android-junit (2.0.2)
 }
 
 dependencies {
@@ -111,6 +111,7 @@ dependencies {
     testImplementation(libs.junit.jupiter)
     testImplementation(libs.junit.jupiter.params)
     testRuntimeOnly(libs.junit.platform.launcher)
+    testRuntimeOnly(libs.junit.vintage.engine)   // JUnit 4 Compose rule tests
 
     // Coroutines Test + Turbine (Flow testing)
     testImplementation(libs.kotlinx.coroutines.test)
@@ -125,7 +126,7 @@ dependencies {
 }
 ```
 
-> Compose UI tests (`createComposeRule`) use the JUnit 4 rule API; run them with Robolectric in `src/test` (or instrumented in `src/androidTest`). How JUnit 4 rule-based tests and JUnit 5 tests coexist in one module (e.g. a vintage engine) depends on the plugin version — verify against the mannodermaus 2.0.2 documentation before wiring it.
+> Compose UI tests use the JUnit 4 rule API — `createComposeRule` / `createAndroidComposeRule` from **`androidx.compose.ui.test.junit4.v2`** (the `junit4` package versions are deprecated in Compose 1.12). Run them with Robolectric in `src/test` (or instrumented in `src/androidTest`). JUnit 4 (4.13.2) runs alongside JUnit 5 through the `junit-vintage-engine` (BOM 5.14.4). **Robolectric 4.17** needs `--add-exports=java.base/jdk.internal.access=ALL-UNNAMED` on the test JVM (set in the Compose convention plugin).
 
 ### Basic Structure
 
@@ -1012,7 +1013,7 @@ Compose UI tests verify that composables render correctly and respond to user in
 ```kotlin
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertDoesNotExist
-import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.junit4.v2.createComposeRule   // non-v2 rules deprecated in Compose 1.12
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText

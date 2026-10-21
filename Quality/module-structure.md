@@ -532,7 +532,7 @@ class AndroidFeatureConventionPlugin : Plugin<Project> {
             }
 
             extensions.configure<com.android.build.api.dsl.LibraryExtension> {
-                compileSdk = 36
+                compileSdk = 36   // pending: compileSdk 37 required by Compose 1.12 stack
 
                 defaultConfig {
                     minSdk = 26

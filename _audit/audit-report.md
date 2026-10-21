@@ -42,20 +42,22 @@ v0.1.0 was well structured but pinned a 2024 stack (Kotlin 2.0.21, AGP 8.7, Comp
 
 ## Open Items ("verify before use")
 
-These are deliberately not pinned or not asserted; each is marked "verify" where it appears.
+ARCDevTools-Android 0.2.0 resolved the stack with a successful Gradle build (`templates/gradle/libs.versions.toml`, every coordinate confirmed to exist, 2026-10-21). Backfilled from it: core-ktx 1.19.1, activity-compose 1.13.0, hilt-lifecycle-viewmodel-compose 1.4.0, google-services 4.5.0, googleid 1.2.1, JUnit Jupiter BOM 5.14.4 (+ JUnit 4 4.13.2 via vintage engine), Turbine 1.2.1, Robolectric 4.17, ktlint Gradle plugin 14.2.0, compose-rules 0.4.28, kotlinx.serialization 1.12.0, coroutines 1.11.0; plugin ids `de.mannodermaus.android-junit` and `androidx.room3` (extension `room3`); screenshot flag, Robolectric `--add-exports`, JDK 21 daemon for detekt, `junit4.v2` Compose test rules.
+
+Still open (each marked "verify" where it appears):
 
 | Item | Where |
 |------|-------|
-| Versions not in the 2026 stack table: activity-compose, core-ktx, hilt-lifecycle-viewmodel-compose, google-services plugin, googleid, JUnit Jupiter BOM, Turbine, Robolectric, ktlint Gradle plugin, Dokka, kotlinx-datetime, kotlinx-collections-immutable, baselineprofile plugin, Retrofit 3 / OkHttp 5 | `Tools/gradle.md` and the documents using them |
-| Patch levels for kotlinx.serialization 1.12 and coroutines 1.11 (catalog uses `.0`) | `Tools/gradle.md` |
-| mannodermaus 2.x plugin id and JUnit 4/5 coexistence | `Tools/gradle.md`, `Quality/testing.md` |
-| `NavigationSuiteScaffold` overload in material3 1.5.0-beta01; `rememberViewModelStoreNavEntryDecorator` generic signature; `adaptive-navigation3` version alignment; window-info entry point | `Architecture/navigation-3.md`, `Quality/ui-guidelines.md` |
+| **compileSdk 37** — Compose BOM 2026.09.00, material3 1.5.0-beta01, Nav3 1.2.0, Lifecycle 2.11.0 and core 1.19.1 declare `minCompileSdk` 37; docs keep 36 with a "pending" note until the user confirms (targetSdk stays 36) | `Tools/gradle.md`, `Tools/android-studio.md`, `Quality/module-structure.md`, `Architecture/navigation-3.md`, `README.md` |
+| Versions not in the verified catalog: Dokka, kotlinx-datetime, kotlinx-collections-immutable, baselineprofile plugin, Retrofit 3 / OkHttp 5 | `Quality/documentation.md`, `Layers/domain.md`, `Quality/compose-performance.md`, `Tools/gradle.md` |
+| `NavigationSuiteScaffold` overload in material3 1.5.0-beta01; `rememberViewModelStoreNavEntryDecorator` generic signature; window-info entry point | `Architecture/navigation-3.md`, `Quality/ui-guidelines.md` |
 | `MaterialExpressiveTheme` parameters and opt-in status | `Quality/ui-guidelines.md`, `Layers/presentation.md`, `Projects/apps.md` |
-| Room 3: builder overloads, `Migration(SQLiteConnection)`, `AndroidSQLiteDriver` artifact, `room3 { schemaDirectory }` Kotlin DSL | `Layers/data.md`, `Quality/testing.md`, `Tools/gradle.md` |
+| Room 3: builder overloads, `Migration(SQLiteConnection)`, `AndroidSQLiteDriver` artifact | `Layers/data.md`, `Quality/testing.md` |
 | Coil 3 `SingletonImageLoader` / `ImageResult.image` / `toBitmap()` | `Architecture/singletons.md` |
 | Kotlin extension type registered by AGP 9 built-in Kotlin (convention plugins) | `Quality/module-structure.md` |
 | Firestore coroutine helpers without `-ktx` artifacts | `Layers/data.md` |
 | `NavigationBackHandler` (Navigation Event) signature | `Architecture/navigation-3.md` |
+| Convention plugin ids: this KB uses `arclabs.android.*`, ARCDevTools-Android 0.2.0 ships `arc.android.*` — align | `Tools/gradle.md`, `Quality/module-structure.md`, `Architecture/navigation-3.md` |
 
 ## Known Remaining Debt
 

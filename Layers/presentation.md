@@ -1472,7 +1472,7 @@ class HomeContentTest {
 - ✅ Follow Given-When-Then structure
 - ✅ Use Turbine `.test {}` for StateFlow and SharedFlow assertions
 - ✅ Use `MainDispatcherRule` for ViewModel tests
-- ✅ Use `createComposeRule()` for composable tests
+- ✅ Use `createComposeRule()` from `androidx.compose.ui.test.junit4.v2` for composable tests (non-v2 deprecated in Compose 1.12)
 - ✅ Test all UiState branches (Loading, Success, Error)
 - ✅ Test user interactions (clicks, input)
 - ✅ Use `Restaurant.fake()` and similar factory methods for test data
@@ -1686,7 +1686,7 @@ Use this checklist when reviewing or creating Presentation Layer code.
 
 - [ ] ViewModel tests use `MainDispatcherRule`
 - [ ] ViewModel tests use Turbine for Flow assertions
-- [ ] Composable tests use `createComposeRule()`
+- [ ] Composable tests use `createComposeRule()` (`junit4.v2`)
 - [ ] All UiState branches tested
 - [ ] User interactions tested (click, input, scroll)
 - [ ] One-shot events tested

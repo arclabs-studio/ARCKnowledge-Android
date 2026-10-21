@@ -264,7 +264,7 @@ Baseline: the ARC Labs 2026 stack table in Tools/gradle.md (verified 2026-10-21)
 - Room 3: 3.0.3
 - Coil 3: 3.6.3
 - Kotlinx Serialization: 1.12 / Coroutines: 1.11
-- Turbine, Robolectric, JUnit Jupiter: not pinned — verify before use
+- Turbine 1.2.1 · Robolectric 4.17 · JUnit Jupiter 5.14.4 (Gradle-verified by ARCDevTools-Android 0.2.0)
 ```
 
 > Re-verify before bumping; never copy a version from memory into `libs.versions.toml`.
@@ -347,7 +347,7 @@ entry<ProfileKey> { key ->
 # ❌ Mismatched versions that may cause runtime crashes
 [versions]
 compose-bom = "2024.12.01"  # 2024 BOM
-nav3 = "1.2.0"               # Navigation 3 requires compileSdk 36 and a 2026 Compose stack
+nav3 = "1.2.0"               # Navigation 3 needs a 2026 Compose stack (minCompileSdk 37)
 
 # ✅ Compatible version set (ARC Labs 2026 stack, verified 2026-10-21 — see Tools/gradle.md)
 [versions]

@@ -786,7 +786,7 @@ indent_size = 2
 ```kotlin
 // build.gradle.kts (project-level)
 plugins {
-    alias(libs.plugins.ktlint)   // plugin version: see the version catalog (verify before use)
+    alias(libs.plugins.ktlint)   // org.jlleitschuh.gradle.ktlint 14.2.0
 }
 
 // Configure ktlint

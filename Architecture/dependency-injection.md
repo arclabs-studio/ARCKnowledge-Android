@@ -111,7 +111,7 @@ Define Hilt versions in the version catalog:
 ```toml
 [versions]
 hilt = "2.60.1"
-androidxHilt = "VERIFY"   # hilt-lifecycle-viewmodel-compose — verify before use
+androidxHilt = "1.4.0"    # hilt-lifecycle-viewmodel-compose
 ksp = "2.3.12"
 
 [libraries]
@@ -1499,7 +1499,7 @@ class UserFeatureIntegrationTest {
     val hiltRule = HiltAndroidRule(this)
 
     @get:Rule
-    val composeTestRule = createAndroidComposeRule<MainActivity>()
+    val composeTestRule = createAndroidComposeRule<MainActivity>()   // androidx.compose.ui.test.junit4.v2 (Compose 1.12)
 
     @Inject
     lateinit var fakeUserRepository: FakeUserRepository

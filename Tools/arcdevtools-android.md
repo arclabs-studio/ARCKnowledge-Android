@@ -28,10 +28,10 @@ Before integrating ARCDevTools-Android, ensure your environment meets the follow
 |-------------|----------------|-------|
 | **Kotlin** | 2.4.21 | ARC Labs 2026 stack |
 | **Android Studio** | Optional | `./gradlew` + `android` CLI are the sanctioned tools |
-| **JDK** | JBR bundled with Android Studio (currently 25) locally; CI uses JDK 17 (Temurin) | Bytecode target 17 |
+| **JDK** | JBR bundled with Android Studio (currently 25) for IDE/CLI; Gradle daemon pinned to JDK 21 (`gradle-daemon-jvm.properties` + foojay resolver) | Bytecode target 17 |
 | **Gradle** | 9.8.2 | With Kotlin DSL |
-| **ktlint** | 1.8 | Gradle plugin |
-| **detekt** | 1.23.8 | Gradle plugin, `maxIssues: 0` |
+| **ktlint** | 1.8.0 | jlleitschuh Gradle plugin 14.2.0 |
+| **detekt** | 1.23.8 | Gradle plugin, `maxIssues: 0`, compose-rules 0.4.28, `jvmTarget` 17; fails on JDK 25 → Gradle daemon pinned to JDK 21 |
 | **Git** | 2.30+ | Submodule support required |
 
 ### Recommended Gradle Plugins
@@ -39,7 +39,7 @@ Before integrating ARCDevTools-Android, ensure your environment meets the follow
 ```kotlin
 // build.gradle.kts (project-level)
 plugins {
-    alias(libs.plugins.ktlint)   // org.jlleitschuh.gradle.ktlint — plugin version: verify before use
+    alias(libs.plugins.ktlint)   // org.jlleitschuh.gradle.ktlint 14.2.0 (ktlint engine 1.8.0)
     alias(libs.plugins.detekt)   // io.gitlab.arturbosch.detekt 1.23.8
 }
 ```
@@ -937,7 +937,7 @@ ktlint_standard_filename = enabled  # Re-enable filename rule
 # Ensure ktlint Gradle plugin is applied
 # build.gradle.kts (project-level)
 plugins {
-    alias(libs.plugins.ktlint)   // plugin version: verify before use
+    alias(libs.plugins.ktlint)   // org.jlleitschuh.gradle.ktlint 14.2.0
 }
 
 # Or install CLI
