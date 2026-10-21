@@ -1,143 +1,64 @@
 # ARCKnowledge-Android — Audit Report
 
-**Date**: 2026-02-25
-**Auditor**: Claude Code (Opus 4.6)
-**Branch**: `docs/knowledge-configuration`
-**Total files**: 32 (30 documentation + 2 meta)
-**Total lines**: ~35,500
+**Date**: 2026-10-21
+**Scope**: v0.2.0 "2026 stack refresh" (branch `feature/2026-stack-refresh`)
+**Previous audit**: 2026-02-25 (v0.1.0) — superseded by this report
 
 ---
 
 ## Executive Summary
 
-The repository is **comprehensive and production-ready**. All 30 documentation files are complete with well-structured content, idiomatic Kotlin examples, and consistent formatting. Only 5 issues require fixes, all minor. No documents are placeholders or incomplete.
+v0.1.0 was well structured but pinned a 2024 stack (Kotlin 2.0.21, AGP 8.7, Compose BOM 2024.12, Navigation Compose 2.8, Room 2, Coil 2, Retrofit 2.9) with contradictory versions across documents, listed nine skills that never existed, referenced ARCDevTools scripts that do not exist, and lacked the binding rules of the iOS constitution. v0.2.0 refreshes the knowledge base to the 2026 stack with judgment (no rewrite): structure, tone and language (English) are unchanged.
 
 ---
 
-## Per-Document Status
+## Findings from the 2026-02-25 Audit
 
-### CLAUDE.md (248 lines)
-- **Status**: Completo
-- **Quality**: Alta
-- **Issues**:
-  - Missing: Context7/MCP availability reference
-  - Missing: Ordered reading list for onboarding
-  - Missing: Quick Reference for Gradle commands
-- **Priority**: Alta (entry point — must be enriched)
+| # | Issue | Status |
+|---|-------|--------|
+| 1 | CLAUDE.md missing Context7/MCP reference, reading list, Gradle reference | Resolved in v0.1.0 |
+| 2 | `MoshiConverterFactory` in singletons.md | Resolved; remaining `GsonConverterFactory` usages also replaced by kotlinx.serialization in v0.2.0 |
+| 3 | `kapt` for the Hilt compiler in apps.md | Resolved; v0.2.0 removes `kapt` everywhere (KSP only) |
+| 4 | JUnit 4 alongside JUnit 5 in apps.md | Resolved; JUnit 5 via the mannodermaus plugin, JUnit 4 only for Compose rule-based UI tests |
+| 5 | Broken references in compose-performance.md | Resolved |
 
-### Architecture/
+## Findings Fixed in v0.2.0
 
-| Document | Lines | Status | Quality | Issues | Priority |
-|----------|-------|--------|---------|--------|----------|
-| clean-architecture.md | 1,679 | Completo | Alta | None found | — |
-| mvvm.md | 1,359 | Completo | Alta | None found | — |
-| solid-principles.md | 1,467 | Completo | Alta | None found | — |
-| dependency-injection.md | 1,844 | Completo | Alta | None found | — |
-| navigation-compose.md | 1,478 | Completo | Alta | None found | — |
-| singletons.md | 762 | Completo | Alta | 1 issue (see below) | Media |
-
-**singletons.md issue**: Line 244 uses `MoshiConverterFactory.create()` — inconsistent with tech stack (should use Kotlinx Serialization `Json.asConverterFactory`).
-
-### Layers/
-
-| Document | Lines | Status | Quality | Issues | Priority |
-|----------|-------|--------|---------|--------|----------|
-| presentation.md | 2,017 | Completo | Alta | None found | — |
-| domain.md | 1,805 | Completo | Alta | None found | — |
-| data.md | 1,862 | Completo | Alta | None found | — |
-
-### Projects/
-
-| Document | Lines | Status | Quality | Issues | Priority |
-|----------|-------|--------|---------|--------|----------|
-| apps.md | 1,094 | Completo | Alta | 2 issues (see below) | Media |
-| libraries.md | 1,922 | Completo | Alta | None found | — |
-
-**apps.md issues**:
-1. Line 199: Uses `kapt` for Hilt compiler instead of `ksp` — `kapt` is legacy for Kotlin 2.0+
-2. Line 206: References `junit:junit:4.13.2` (JUnit 4) alongside JUnit 5 — may cause confusion
-
-### Quality/
-
-| Document | Lines | Status | Quality | Issues | Priority |
-|----------|-------|--------|---------|--------|----------|
-| testing.md | 2,529 | Completo | Alta | None found | — |
-| code-style.md | 1,570 | Completo | Alta | None found | — |
-| code-review.md | 1,364 | Completo | Alta | None found | — |
-| compose-performance.md | 1,257 | Completo | Alta | 1 issue (see below) | Baja |
-| documentation.md | 1,339 | Completo | Alta | None found | — |
-| module-structure.md | 1,406 | Completo | Alta | None found | — |
-| readme-standards.md | 830 | Completo | Alta | None found | — |
-| ui-guidelines.md | 1,357 | Completo | Alta | None found | — |
-
-**compose-performance.md issue**: Lines 1256-1257 reference non-existent paths:
-- `Architecture/presentation-layer.md` → should be `../Layers/presentation.md`
-- `Quality/testing-standards.md` → should be `testing.md`
-
-### Tools/
-
-| Document | Lines | Status | Quality | Issues | Priority |
-|----------|-------|--------|---------|--------|----------|
-| gradle.md | 1,357 | Completo | Alta | None found | — |
-| android-studio.md | 1,483 | Completo | Alta | None found | — |
-| arcdevtools-android.md | 1,115 | Completo | Alta | None found | — |
-
-### Workflow/
-
-| Document | Lines | Status | Quality | Issues | Priority |
-|----------|-------|--------|---------|--------|----------|
-| git-commits.md | 643 | Completo | Alta | None found | — |
-| git-branches.md | 594 | Completo | Alta | None found | — |
-| plan-mode.md | 532 | Completo | Alta | None found | — |
-
-### Skills/
-
-| Document | Lines | Status | Quality | Issues | Priority |
-|----------|-------|--------|---------|--------|----------|
-| skills-index.md | 442 | Completo | Alta | None found | — |
+| Area | Finding | Fix |
+|------|---------|-----|
+| Versions | 2024 pins, contradictory across 10+ documents | Canonical 2026 table + catalog template in `Tools/gradle.md`; other documents point to it |
+| Build | `kotlin-android` plugin and `kotlinOptions` (incompatible with AGP 9 built-in Kotlin); `buildSrc` vs `build-logic` | AGP 9 snippets; `build-logic/` convention plugins as the single mechanism |
+| Navigation | Navigation Compose 2.8 | `Architecture/navigation-3.md` (Navigation 3) replaces `navigation-compose.md`; all examples and links updated |
+| Data | Room 2, Coil 2, Retrofit as default | Room 3, Coil 3, networking policy (v1: no HTTP client) |
+| UI | Plain M3 with dynamic color | M3 Expressive, brand color scheme, dynamic color off |
+| Testing | MockK as default, coverage thresholds 60/80/100 | Fakes over mocks, unified 80% gate, tautological-test rule, previews + screenshot tests |
+| Rules | No zero-warnings, allowlist, modern-API, secrets or tooling policy | "Binding Rules" section in `CLAUDE.md` |
+| Skills | Nine non-existent `/arc-*` skills | Real ARC Android skills + official `android/skills` plugin |
+| Tooling | `arcdevtools-setup`, `setup-skills.sh` do not exist | Real `arc-setup`, repository layout and Makefile targets |
+| Projects | FavRes-Android "Planned"; non-existent ARC*-Android libraries | FavRes-Android "In progress"; libraries "planned — extracted from FavRes-Android `:core:*`" |
+| Changelog | Entry labelled 1.0.0 while the released tag is v0.1.0 | Entry relabelled 0.1.0 |
 
 ---
 
-## Issues Summary
+## Open Items ("verify before use")
 
-| # | File | Line(s) | Issue | Severity | Priority |
-|---|------|---------|-------|----------|----------|
-| 1 | CLAUDE.md | — | Missing Context7/MCP reference, reading list, Gradle reference | Enhancement | Alta |
-| 2 | Architecture/singletons.md | 244 | `MoshiConverterFactory` instead of Kotlinx Serialization | Bug | Media |
-| 3 | Projects/apps.md | 199 | `kapt` instead of `ksp` for Hilt compiler | Bug | Media |
-| 4 | Projects/apps.md | 206 | JUnit 4 reference alongside JUnit 5 | Warning | Baja |
-| 5 | Quality/compose-performance.md | 1256-1257 | Broken internal references | Bug | Baja |
+These are deliberately not pinned or not asserted; each is marked "verify" where it appears.
 
----
+| Item | Where |
+|------|-------|
+| Versions not in the 2026 stack table: activity-compose, core-ktx, hilt-lifecycle-viewmodel-compose, google-services plugin, googleid, JUnit Jupiter BOM, Turbine, Robolectric, ktlint Gradle plugin, Dokka, kotlinx-datetime, kotlinx-collections-immutable, baselineprofile plugin, Retrofit 3 / OkHttp 5 | `Tools/gradle.md` and the documents using them |
+| Patch levels for kotlinx.serialization 1.12 and coroutines 1.11 (catalog uses `.0`) | `Tools/gradle.md` |
+| mannodermaus 2.x plugin id and JUnit 4/5 coexistence | `Tools/gradle.md`, `Quality/testing.md` |
+| `NavigationSuiteScaffold` overload in material3 1.5.0-beta01; `rememberViewModelStoreNavEntryDecorator` generic signature; `adaptive-navigation3` version alignment; window-info entry point | `Architecture/navigation-3.md`, `Quality/ui-guidelines.md` |
+| `MaterialExpressiveTheme` parameters and opt-in status | `Quality/ui-guidelines.md`, `Layers/presentation.md`, `Projects/apps.md` |
+| Room 3: builder overloads, `Migration(SQLiteConnection)`, `AndroidSQLiteDriver` artifact, `room3 { schemaDirectory }` Kotlin DSL | `Layers/data.md`, `Quality/testing.md`, `Tools/gradle.md` |
+| Coil 3 `SingletonImageLoader` / `ImageResult.image` / `toBitmap()` | `Architecture/singletons.md` |
+| Kotlin extension type registered by AGP 9 built-in Kotlin (convention plugins) | `Quality/module-structure.md` |
+| Firestore coroutine helpers without `-ktx` artifacts | `Layers/data.md` |
+| `NavigationBackHandler` (Navigation Event) signature | `Architecture/navigation-3.md` |
 
-## Missing Documents (To Create)
+## Known Remaining Debt
 
-| Document | Purpose | Priority |
-|----------|---------|----------|
-| Tools/mcp-setup.md | MCP server configuration for ARC Labs Android projects | Alta |
-| Tools/context7-usage.md | Context7 usage patterns for Android documentation | Alta |
-
----
-
-## Improvement Priority
-
-### Alta (Fix Now)
-- Update CLAUDE.md with Context7 reference, ordered reading list, Gradle quick reference
-- Create Tools/mcp-setup.md
-- Create Tools/context7-usage.md
-
-### Media (Fix Today)
-- Fix `MoshiConverterFactory` → Kotlinx Serialization in singletons.md
-- Fix `kapt` → `ksp` in apps.md
-
-### Baja (Fix When Convenient)
-- Fix broken references in compose-performance.md
-- Clarify JUnit 4 dependency in apps.md
-
----
-
-## Overall Assessment
-
-**Grade: A**
-
-The knowledge base is exceptionally comprehensive for a first iteration. All 30 documents follow the standard format (emoji title, bold description, horizontal rules, ✅/❌ patterns, Kotlin code blocks, checklists, common mistakes, further reading). Code examples are idiomatic Kotlin — no Java patterns detected. The only issues are 3 minor bugs and 2 missing documents that were planned as part of this audit.
+- Many long-form examples (testing, solid-principles, mvvm, clean-architecture, domain, libraries) still illustrate test doubles with MockK. The binding rules and `Quality/testing.md` mark these as legacy; rewriting every example with fakes is a follow-up work unit.
+- Retrofit/OkHttp examples remain as Vapor-phase reference and were written against Retrofit 2 / OkHttp 4 APIs.
+- `Tools/arcdevtools-android.md` workflow YAML and custom ktlint/detekt rule sections describe intended behaviour; reconcile with ARCDevTools-Android v0.2.0 when it ships.
