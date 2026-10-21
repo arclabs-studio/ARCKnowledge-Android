@@ -24,8 +24,7 @@ These agents exist (definitions in ARCAgentStack `config/agents/`, symlinked int
 
 - **Minimum privilege**: read-only agents (`arc-verify-android`, `arc-audit-material`) have no Edit/Write tools
 - **Dynamic skill invocation**: agents invoke skills relevant to the task, not all skills by default
-- **Environment first**: `arc-kotlin-debugger` always checks Gradle daemon and cache before touching code
-- **Model selection**: Haiku for deterministic tasks (Gradle, exploration, scaffolding); Sonnet for complex reasoning (TDD, review, debugging, releases, migrations)
+- **Model selection**: the agent's frontmatter pins its model; both active agents run on Sonnet
 - **No commit/push**: all agents with write access are constrained from committing or pushing
 
 ---
