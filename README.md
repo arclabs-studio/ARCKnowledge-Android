@@ -4,7 +4,7 @@
 
 ARCKnowledge-Android guides AI agents (primarily Claude Code) in building high-quality Android applications using Kotlin, Jetpack Compose, and Clean Architecture. It is the Android counterpart to [ARCKnowledge](https://github.com/arclabs-studio/ARCKnowledge) (iOS/Swift).
 
-**Version:** 0.2.0 — 2026 stack refresh (see [CHANGELOG](CHANGELOG.md)).
+**Version:** 0.3.0 — 2026 stack refresh (see [CHANGELOG](CHANGELOG.md)).
 
 ---
 

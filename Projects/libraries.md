@@ -186,7 +186,7 @@ interface SearchRestaurantsUseCase {
 | Library | Type | Purpose | Status |
 |---------|------|---------|--------|
 | ARCDevTools-Android | Utility | Tooling, linting (ktlint/detekt), hooks, CI/CD workflows | Active (v0.1.0) |
-| ARCKnowledge-Android | Knowledge | This knowledge base | Active (v0.2.0) |
+| ARCKnowledge-Android | Knowledge | This knowledge base | Active (v0.3.0) |
 | ARCDesignSystem-Android | UI Component | Material 3 Expressive theme, shared composables, design tokens | Planned — extracted from FavRes-Android `:core:designsystem` / `:core:ui` with the second app |
 | ARCLogger-Android | Utility | Structured logging with tag-based filtering | Planned — extracted from FavRes-Android `:core:common` with the second app |
 | ARCNetworking-Android | Data | Retrofit 3 / OkHttp 5 wrappers, interceptors, error handling (Vapor phase) | Planned — extracted from FavRes-Android `:core:network` once it exists |

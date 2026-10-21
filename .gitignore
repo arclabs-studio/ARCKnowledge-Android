@@ -31,8 +31,10 @@ captures/
 .DS_Store
 Thumbs.db
 
-# ARCDevTools (symlinked skills)
+# ARCDevTools (symlinked skills and agents)
 .claude/commands/
+.claude/agents/arc-*.md
+.claude/skills/arc-*/
 
 # Logs
 *.log

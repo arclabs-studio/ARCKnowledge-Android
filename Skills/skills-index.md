@@ -1,6 +1,6 @@
-# 🧩 Skills Index
+# Skills Index
 
-**Skills are AI agent context files that provide specialized knowledge for specific tasks. ARC Labs Android work uses two families: the official Google `android/skills` plugin for API detail, and four ARC Labs skills (plus two agents) for house rules and verification. This index helps you find the right one.**
+**Skills are AI agent context files that provide specialized knowledge for specific tasks. ARC Labs Android work uses two families: the official Google `android/skills` plugin for API detail, and four ARC Labs skills (plus two agents) for house rules and verification. Skills are knowledge containers that load guidance; agents are autonomous executors that use tools to complete a workflow. This index helps you find the right one.**
 
 ---
 
@@ -14,7 +14,7 @@
 
 **Precedence:** Google's skills win on *how an API behaves*; ARC skills win on *house rules* (architecture, allowlist, zero warnings, testing doctrine). If they contradict each other, say so instead of silently picking one.
 
-> The nine `/arc-android-*`, `/arc-*-layer`, `/arc-tdd-patterns`, … commands listed in v0.1.0 of this index never existed and have been removed.
+> The `/arc-android-*`, `/arc-*-layer`, `/arc-tdd-patterns`, … skills and the 13 agents (`arc-kotlin-tdd`, `arc-gradle-manager`, `arc-room-migration`, …) listed in earlier versions of this index (1.0.0 and 0.2.0) have no definition files in ARCAgentStack, `~/.claude` or this repository, and have been removed from the routing (see [AGENTS.md](../AGENTS.md)).
 
 ---
 
@@ -78,6 +78,8 @@ Thin skills that encode ARC Labs house rules; API detail is delegated to the Goo
 | `arc-verify-android` | Runs the `android-verify` loop and reports pass/fail | After any change; iterate until it returns green |
 | `arc-audit-material` | Audits UI work against Material 3 / platform rules / TalkBack | Before closing any UI-affecting work unit — one blocker and the unit does not close |
 
+See [AGENTS.md](../AGENTS.md) for agent documentation.
+
 ---
 
 ## Google Skills (`android/skills` plugin)
@@ -129,6 +131,21 @@ Official, AI-optimized instructions from developer.android.com. Install once per
 
 ---
 
+## MCP Servers
+
+| Server | Purpose | Config |
+|--------|---------|--------|
+| **Context7** | Library docs (Compose, Nav3, Hilt, Room 3, etc.) | See Tools/mcp-setup.md |
+| **Linear** | Issue tracking | See Tools/mcp-setup.md |
+| **GitHub** | Branch/PR management | See Tools/mcp-setup.md |
+| **Android Source Explorer** | AOSP + Jetpack source exploration | See Tools/mcp-setup.md |
+| **Android Docs MCP** | developer.android.com access | See Tools/mcp-setup.md |
+| **Mobile MCP** | ADB emulator automation (only when the `android` CLI cannot do it, after asking) | See Tools/mcp-setup.md |
+| **Play Store MCP** | Google Play Console (optional) | See Tools/mcp-setup.md |
+| **Android Skills (Google)** | The 33 official skills above (`android/skills` plugin) | See Tools/mcp-setup.md and Tools/android-cli.md |
+
+---
+
 ## Common Scenarios
 
 ### 1. "I need to build a new feature"
@@ -142,7 +159,6 @@ arc-audit-material          --> Close the UI work unit
 ```
 
 ### 2. "I need to fix a bug"
-
 ```
 android-testing-doctrine    --> Failing test that reproduces the bug
 android-doctrine            --> Fix in the right layer
@@ -168,7 +184,22 @@ android-verify              --> Zero-warning build + tests
 
 ---
 
-## Coverage Gaps
+## Priority Order
+
+1. **Architecture first** — get structure right before writing code
+2. **Tests second** (TDD) — write tests before production code
+3. **Implementation third** — build on solid foundations
+4. **Quality last** — polish, document, review
+
+---
+
+## Creating Custom Skills
+
+ARC skills and agents are authored in **ARCAgentStack** (`skills/android/`, `config/agents/`) with the `arc-agent-authoring` skill, then added to this index and to the CLAUDE.md skills table. This repository does not host skill definitions.
+
+---
+
+## Coverage Matrix
 
 | Gap | Description | Suggested Source |
 |-----|-------------|------------------|
@@ -176,6 +207,8 @@ android-verify              --> Zero-warning build + tests
 | RevenueCat on Android | Purchases, Paywall Compose, Customer Center | `arc-mcp-revenuecat` + RevenueCat docs |
 | Room 3 | Migrations, drivers, testing | Context7 / `android docs` (no dedicated skill yet) |
 | Material 3 Expressive | Expressive components and motion | Context7 / `android docs`; audited by `arc-audit-material` |
+| Kotlin Multiplatform | Not covered | — |
+| Macrobenchmark | Not covered | — |
 
 If you identify a repeated workflow that is not covered, open a Linear issue with the label `skill-request`.
 
@@ -187,7 +220,7 @@ If you identify a repeated workflow that is not covered, open a Linear issue wit
 |-----------|---------|-------------|
 | Google `android/skills` plugin | 1.0.16 (33 skills) | 2026-10-21 |
 | ARC Android skills (ARCAgentStack) | 4 skills + 2 agents | 2026-10-21 |
-| ARCKnowledge-Android | 0.2.0 | 2026-10-21 |
+| ARCKnowledge-Android | 0.3.0 | 2026-10-21 |
 
 ---
 

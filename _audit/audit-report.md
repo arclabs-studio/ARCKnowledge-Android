@@ -1,14 +1,14 @@
 # ARCKnowledge-Android — Audit Report
 
 **Date**: 2026-10-21
-**Scope**: v0.2.0 "2026 stack refresh" (branch `feature/2026-stack-refresh`)
+**Scope**: v0.3.0 "2026 stack refresh" (branch `feature/2026-stack-refresh`)
 **Previous audit**: 2026-02-25 (v0.1.0) — superseded by this report
 
 ---
 
 ## Executive Summary
 
-v0.1.0 was well structured but pinned a 2024 stack (Kotlin 2.0.21, AGP 8.7, Compose BOM 2024.12, Navigation Compose 2.8, Room 2, Coil 2, Retrofit 2.9) with contradictory versions across documents, listed nine skills that never existed, referenced ARCDevTools scripts that do not exist, and lacked the binding rules of the iOS constitution. v0.2.0 refreshes the knowledge base to the 2026 stack with judgment (no rewrite): structure, tone and language (English) are unchanged.
+v0.1.0 was well structured but pinned a 2024 stack (Kotlin 2.0.21, AGP 8.7, Compose BOM 2024.12, Navigation Compose 2.8, Room 2, Coil 2, Retrofit 2.9) with contradictory versions across documents, listed nine skills that never existed, referenced ARCDevTools scripts that do not exist, and lacked the binding rules of the iOS constitution. v0.3.0 refreshes the knowledge base to the 2026 stack with judgment (no rewrite): structure, tone and language (English) are unchanged.
 
 ---
 
@@ -17,12 +17,12 @@ v0.1.0 was well structured but pinned a 2024 stack (Kotlin 2.0.21, AGP 8.7, Comp
 | # | Issue | Status |
 |---|-------|--------|
 | 1 | CLAUDE.md missing Context7/MCP reference, reading list, Gradle reference | Resolved in v0.1.0 |
-| 2 | `MoshiConverterFactory` in singletons.md | Resolved; remaining `GsonConverterFactory` usages also replaced by kotlinx.serialization in v0.2.0 |
-| 3 | `kapt` for the Hilt compiler in apps.md | Resolved; v0.2.0 removes `kapt` everywhere (KSP only) |
+| 2 | `MoshiConverterFactory` in singletons.md | Resolved; remaining `GsonConverterFactory` usages also replaced by kotlinx.serialization in v0.3.0 |
+| 3 | `kapt` for the Hilt compiler in apps.md | Resolved; v0.3.0 removes `kapt` everywhere (KSP only) |
 | 4 | JUnit 4 alongside JUnit 5 in apps.md | Resolved; JUnit 5 via the mannodermaus plugin, JUnit 4 only for Compose rule-based UI tests |
 | 5 | Broken references in compose-performance.md | Resolved |
 
-## Findings Fixed in v0.2.0
+## Findings Fixed in v0.3.0
 
 | Area | Finding | Fix |
 |------|---------|-----|
@@ -36,7 +36,6 @@ v0.1.0 was well structured but pinned a 2024 stack (Kotlin 2.0.21, AGP 8.7, Comp
 | Skills | Nine non-existent `/arc-*` skills | Real ARC Android skills + official `android/skills` plugin |
 | Tooling | `arcdevtools-setup`, `setup-skills.sh` do not exist | Real `arc-setup`, repository layout and Makefile targets |
 | Projects | FavRes-Android "Planned"; non-existent ARC*-Android libraries | FavRes-Android "In progress"; libraries "planned — extracted from FavRes-Android `:core:*`" |
-| Changelog | Entry labelled 1.0.0 while the released tag is v0.1.0 | Entry relabelled 0.1.0 |
 | SDK | compileSdk 36 while Compose BOM 2026.09.00, material3 1.5.0-beta01, Nav3 1.2.0, Lifecycle 2.11.0 and core 1.19.1 declare `minCompileSdk` 37 | compileSdk 37 / targetSdk 36 (confirmed 2026-10-21; same pair as Google's Now in Android) across `Tools/gradle.md`, `Tools/android-studio.md`, `Quality/module-structure.md`, `Architecture/navigation-3.md`, `README.md` |
 
 ---

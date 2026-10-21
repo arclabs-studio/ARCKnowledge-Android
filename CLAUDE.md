@@ -1,6 +1,6 @@
 # ARC Labs Studio – Android Agent Guide (CLAUDE.md)
 
-**ARCKnowledge-Android v0.2.0** · 2026 stack (Kotlin 2.4.21 · AGP 9.4.0 · Compose BOM 2026.09.00 · Navigation 3 · Room 3 · M3 Expressive). Version table: [Tools/gradle.md](Tools/gradle.md#-arc-labs-2026-stack-reference-table).
+**ARCKnowledge-Android v0.3.0** · 2026 stack (Kotlin 2.4.21 · AGP 9.4.0 · Compose BOM 2026.09.00 · Navigation 3 · Room 3 · M3 Expressive). Version table: [Tools/gradle.md](Tools/gradle.md#-arc-labs-2026-stack-reference-table).
 
 You are the **primary AI agent for ARC Labs Studio**, an indie development studio focused on crafting scalable, maintainable, and delightful Android applications using Kotlin and Jetpack Compose.
 
@@ -33,9 +33,13 @@ Before implementing library-specific code, **query Context7 for current document
 | **Context7** | Library docs (Compose, Nav3, Hilt, Room 3, Coroutines) — `/websites/developer_android_develop_ui_compose` | Before calling any library API |
 | **Linear** | Issue tracking, sprint management | Creating/updating issues, checking sprint |
 | **GitHub** | Branch/PR management | Creating branches, opening PRs |
+| **Android Source Explorer** | AOSP + Jetpack source code exploration | Debugging internals, understanding framework behavior |
+| **Android Docs MCP** | developer.android.com access | Official API reference always up-to-date |
+| **Mobile MCP** | ADB automation for testing | Only when the `android` CLI cannot do it, and only after asking (see Tooling Policy) |
+| **Android Skills (Google)** | 33 official skills (`android/skills` plugin) — e.g. AGP 9, XML→Compose, Nav3, R8, Play Billing, edge-to-edge | API detail, migrations — see [Skills/skills-index.md](Skills/skills-index.md) |
 
-> **Setup**: See [Tools/mcp-setup.md](Tools/mcp-setup.md) for installation.
-> **Usage**: See [Tools/context7-usage.md](Tools/context7-usage.md) for query patterns.
+> **Setup**: See [Tools/mcp-setup.md](Tools/mcp-setup.md) for installation of all servers.
+> **Usage**: See [Tools/context7-usage.md](Tools/context7-usage.md) for Context7 query patterns.
 
 ---
 
@@ -46,15 +50,16 @@ Read in this order when joining a new ARC Labs Android project:
 | # | Document | What You'll Learn |
 |---|----------|--------------------|
 | 1 | **This file (CLAUDE.md)** | Philosophy, rules, quick references |
-| 2 | [Architecture/clean-architecture.md](Architecture/clean-architecture.md) | Layer boundaries, dependency rules |
-| 3 | [Architecture/mvvm.md](Architecture/mvvm.md) | ViewModel + StateFlow + UiState pattern |
-| 4 | [Architecture/dependency-injection.md](Architecture/dependency-injection.md) | Hilt setup, modules, scopes |
-| 5 | [Layers/presentation.md](Layers/presentation.md) | Composables, ViewModels, navigation |
-| 6 | [Layers/domain.md](Layers/domain.md) | Entities, Use Cases, Repository interfaces |
-| 7 | [Layers/data.md](Layers/data.md) | Room 3, DataStore, Firebase data sources, DTOs, networking policy |
-| 8 | [Quality/testing.md](Quality/testing.md) | JUnit 5, fakes, Turbine, screenshot tests, coverage |
-| 9 | [Tools/gradle.md](Tools/gradle.md) | 2026 version table, catalog, build-logic, tasks |
-| 10 | [Architecture/navigation-3.md](Architecture/navigation-3.md) | Navigation 3, tabs, modals, adaptive scenes |
+| 2 | [AGENTS.md](AGENTS.md) | Available subagents, when to trigger each |
+| 3 | [Architecture/clean-architecture.md](Architecture/clean-architecture.md) | Layer boundaries, dependency rules |
+| 4 | [Architecture/mvvm.md](Architecture/mvvm.md) | ViewModel + StateFlow + UiState pattern |
+| 5 | [Architecture/dependency-injection.md](Architecture/dependency-injection.md) | Hilt setup, modules, scopes |
+| 6 | [Layers/presentation.md](Layers/presentation.md) | Composables, ViewModels, navigation |
+| 7 | [Layers/domain.md](Layers/domain.md) | Entities, Use Cases, Repository interfaces |
+| 8 | [Layers/data.md](Layers/data.md) | Room 3, DataStore, Firebase data sources, DTOs, networking policy |
+| 9 | [Quality/testing.md](Quality/testing.md) | JUnit 5, fakes, Turbine, screenshot tests, coverage |
+| 10 | [Tools/gradle.md](Tools/gradle.md) | 2026 version table, catalog, build-logic, tasks |
+| 11 | [Architecture/navigation-3.md](Architecture/navigation-3.md) | Navigation 3, tabs, modals, adaptive scenes |
 
 **Load on demand** (when the task requires it):
 - [Architecture/solid-principles.md](Architecture/solid-principles.md) — SOLID with Kotlin examples
@@ -62,6 +67,8 @@ Read in this order when joining a new ARC Labs Android project:
 - [Quality/code-style.md](Quality/code-style.md) — ktlint + detekt configuration
 - [Quality/compose-performance.md](Quality/compose-performance.md) — Recomposition, stability, optimization
 - [Quality/code-review.md](Quality/code-review.md) — Review checklist
+- [Quality/security.md](Quality/security.md) — OWASP Mobile security audit reference
+- [Tools/android-cli.md](Tools/android-cli.md) — Google Android CLI (agent-first tooling, preview)
 - [Quality/documentation.md](Quality/documentation.md) — KDoc + Dokka
 - [Quality/module-structure.md](Quality/module-structure.md) — Gradle multi-module organization
 - [Quality/ui-guidelines.md](Quality/ui-guidelines.md) — Material 3 Expressive, accessibility
@@ -117,6 +124,17 @@ Making commits or creating PRs           → Workflow/git-commits.md, Workflow/g
 - ARC skills and agents come from **ARCAgentStack** (`skills/android/`), symlinked into `~/.claude/skills` — nothing to install per project.
 - Google's skills: `/plugin marketplace add android/skills` then `/plugin install android-skills@android-skills` (or `android skills add --all` with the Android CLI).
 - ARCDevTools-Android's `arc-setup` installs configs, hooks, Makefile and workflows; it does **not** install skills.
+
+## Available Agents
+
+ARC Labs agents are **autonomous executors** that handle complete workflows. They invoke skills dynamically as needed.
+
+| Agent | Triggers | Role |
+|-------|----------|------|
+| `arc-verify-android` | "Verify the Android change", "run the Android tests", "does it look right on the emulator" | External verifier — zero-warning build, tests, screenshots, emulator walk; iterate until green |
+| `arc-audit-material` | "Material review", "audit the Compose UI", "TalkBack", "close this screen" | Read-only Material 3 Expressive / platform / TalkBack audit; one blocker and the UI work unit does not close |
+
+> See [AGENTS.md](AGENTS.md) for agent documentation, including the agents proposed in 0.2.0 that do not exist yet.
 
 ---
 
