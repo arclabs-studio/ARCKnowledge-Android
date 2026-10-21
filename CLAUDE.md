@@ -68,7 +68,7 @@ Read in this order when joining a new ARC Labs Android project:
 - [Quality/compose-performance.md](Quality/compose-performance.md) — Recomposition, stability, optimization
 - [Quality/code-review.md](Quality/code-review.md) — Review checklist
 - [Quality/security.md](Quality/security.md) — OWASP Mobile security audit reference
-- [Tools/android-cli.md](Tools/android-cli.md) — Google Android CLI (agent-first tooling, preview)
+- [Tools/android-cli.md](Tools/android-cli.md) — Google Android CLI (sanctioned tooling, see `arc-cli-android`)
 - [Quality/documentation.md](Quality/documentation.md) — KDoc + Dokka
 - [Quality/module-structure.md](Quality/module-structure.md) — Gradle multi-module organization
 - [Quality/ui-guidelines.md](Quality/ui-guidelines.md) — Material 3 Expressive, accessibility

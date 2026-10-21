@@ -26,8 +26,8 @@ AI agents work best when they have access to **current, authoritative informatio
 | **GitHub** | Repository management, PR creation, branch operations | Required |
 | **Android Source Explorer** | AOSP + Jetpack source code exploration (API level 36) | Recommended |
 | **Android Docs MCP** | developer.android.com real-time access | Recommended |
-| **Mobile MCP** | ADB-based emulator automation and UI testing | Recommended |
-| **Android Skills (Google)** | 6 official Google skills on-demand (AGP 9, XML→Compose, Nav3, R8, Play Billing, edge-to-edge) | Recommended |
+| **Mobile MCP** | ADB-based emulator automation and UI testing | Optional — only when the `android` CLI cannot do it, after asking |
+| **Android Skills (Google)** | Google's official `android/skills` (33 skills — see [Skills Index](../Skills/skills-index.md)); canonical install is the Claude plugin, the MCP below is an alternative | Recommended |
 | **Play Store MCP** | Google Play Console releases and track management | Optional |
 
 ---
@@ -268,13 +268,15 @@ npx -y @mobilenext/mobile-mcp@latest
 
 ### When to Use
 
-Use for visual UI verification, automated testing flows, screenshot capture to validate layout changes, and testing push notifications.
+Use for visual UI verification, automated testing flows, screenshot capture to validate layout changes, and testing push notifications — **only when the `android` CLI cannot do it, and only after asking** (CLAUDE.md Tooling Policy; `arc-cli-android`).
 
 ---
 
-## 🚀 Android Skills MCP Setup (Recommended)
+## 🚀 Android Skills MCP Setup (Optional)
 
-Exposes Google's 6 official Android skills to Claude Code agents on-demand, without copying files. Uses BM25 search and loads in <200ms.
+> **ARC default:** install Google's skills with the `android/skills` Claude plugin (`/plugin marketplace add android/skills`, then `/plugin install android-skills@android-skills`) — 33 skills, listed in the [Skills Index](../Skills/skills-index.md). This MCP wrapper is an optional alternative; it was documented in 0.2.0 when Google shipped the 6 launch skills below.
+
+Exposes Google's official Android skills to Claude Code agents on-demand, without copying files. Uses BM25 search and loads in <200ms.
 
 ### Installation
 
@@ -295,7 +297,7 @@ claude mcp add android-skills -- npx -y android-skills-mcp
 }
 ```
 
-### Available Skills
+### Launch Skills (6 of the 33)
 
 | Skill | Use When |
 |-------|---------|
@@ -431,15 +433,15 @@ Then reference them in the MCP config:
 
 ### Recommended
 - [ ] Android Source Explorer installed and synced (API 36 + AndroidX)
-- [ ] Mobile MCP installed and device/emulator accessible via ADB
+- [ ] Mobile MCP installed and device/emulator accessible via ADB (only if approved — `android` CLI first, see CLAUDE.md Tooling Policy)
 - [ ] Android Docs MCP installed (if Context7 coverage is insufficient)
-- [ ] Android Skills MCP configured (`claude mcp add android-skills -- npx -y android-skills-mcp`)
+- [ ] Google `android/skills` plugin installed (or Android Skills MCP: `claude mcp add android-skills -- npx -y android-skills-mcp`)
 
 ### Verification
 - [ ] Agent verified: can fetch Compose docs via Context7
 - [ ] Agent verified: can list Linear issues
 - [ ] Agent verified: can list GitHub branches
-- [ ] Agent verified: can take emulator screenshot via Mobile MCP
+- [ ] Agent verified: can take emulator screenshot via `android screen capture` (or Mobile MCP, if approved)
 
 ---
 

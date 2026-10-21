@@ -16,7 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Networking policy: v1 apps have no HTTP client (Firebase SDKs only); Retrofit 3 + OkHttp 5 + kotlinx.serialization converter in the Vapor phase
 
 ### Changed
-- Stack: Kotlin 2.4.21, AGP 9.4.0 (built-in Kotlin), Gradle 9.8.2, JBR bundled with Android Studio + jvmTarget 17, compileSdk/targetSdk 36, minSdk 26, Compose BOM 2026.09.00, material3 1.5.0-beta01, Hilt 2.60.1 + KSP 2.3.12, Room 3 3.0.3, DataStore 1.2.1, Coil 3.6.3, Firebase BoM 35.0.2, detekt 1.23.8, ktlint 1.8
+- Stack: Kotlin 2.4.21, AGP 9.4.0 (built-in Kotlin), Gradle 9.8.2, JBR bundled with Android Studio + jvmTarget 17, compileSdk 37, targetSdk 36, minSdk 26, Compose BOM 2026.09.00, material3 1.5.0-beta01, Hilt 2.60.1 + KSP 2.3.12, Room 3 3.0.3, DataStore 1.2.1, Coil 3.6.3, Firebase BoM 35.0.2, detekt 1.23.8, ktlint 1.8
 - Room 2 → Room 3 (`androidx.room3`, KSP-only, suspend + Flow DAOs, driver-based)
 - Material 3 → Material 3 Expressive with brand colors (dynamic color off)
 - Coil 2 → Coil 3

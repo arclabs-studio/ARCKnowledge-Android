@@ -1,8 +1,10 @@
 # Android Security Reference
 
-**Comprehensive security guidance for ARC Labs Android projects.** Covers OWASP Mobile Top 10 with Kotlin 2.0 + Compose + Hilt + Room examples. Companion to `Quality/code-review.md` domain 8.
+**Comprehensive security guidance for ARC Labs Android projects.** Covers OWASP Mobile Top 10 with Kotlin + Compose + Hilt + Room examples. Companion to `Quality/code-review.md` domain 8.
 
-> For automated scanning, use `/arc-android-security-audit` skill or `arc-kotlin-security-auditor` agent.
+> For targeted audits, use Google's `android-permissions-security` and `android-intent-security` skills (see [Skills Index](../Skills/skills-index.md)). There is no ARC Android security skill or agent yet.
+
+> **Binding Rules win.** This reference predates the 2026 Binding Rules in [CLAUDE.md](../CLAUDE.md). Where it conflicts with them: (1) Jetpack Security `security-crypto` (`EncryptedSharedPreferences`, `MasterKey`, `EncryptedFile`) is deprecated — persist secrets encrypted with an Android Keystore-held key; (2) Timber is not on the third-party allowlist and needs approval; (3) OkHttp/Retrofit (including certificate pinning) apply only in the Vapor phase — v1 apps have no HTTP client. Code samples below that use these are pending a rewrite.
 
 ---
 
@@ -533,7 +535,7 @@ Before adding a new SDK, verify:
 | Classification | Examples | Storage | Logging |
 |----------------|---------|---------|---------|
 | **Critical** | Passwords, PINs, biometric data, encryption keys | Android Keystore only | Never |
-| **Sensitive** | Auth tokens, session IDs, payment card tokens | `EncryptedSharedPreferences` | Never |
+| **Sensitive** | Auth tokens, session IDs, payment card tokens | Encrypted with an Android Keystore-held key before writing | Never |
 | **Personal** | Name, email, phone, address | Encrypted Room / DataStore | Never full value |
 | **Internal** | User preferences, app state | `DataStore` / Room | Identifiers only |
 | **Public** | App version, theme, language | `DataStore` / Room | OK |
@@ -552,7 +554,7 @@ Before adding a new SDK, verify:
 - [ ] No plaintext sensitive data in SharedPreferences
 - [ ] No PII in Room entities (use encrypted fields or separate secure storage)
 - [ ] No secrets in `res/values/strings.xml` or bundled assets
-- [ ] `EncryptedSharedPreferences` or Keystore used for tokens
+- [ ] Tokens encrypted with an Android Keystore-held key (not `EncryptedSharedPreferences` — deprecated)
 
 ### Network
 - [ ] HTTPS enforced for all production endpoints
@@ -567,7 +569,7 @@ Before adding a new SDK, verify:
 - [ ] `SHA-256` minimum for hashing
 
 ### Code
-- [ ] No sensitive data in `Log.d()` / `Log.v()` (use Timber with release no-op tree)
+- [ ] No sensitive data in `Log.d()` / `Log.v()`; logging stripped in release (Timber only with approval)
 - [ ] `minifyEnabled = true` in release buildType
 - [ ] No debug endpoints or backdoor code in production build
 - [ ] `FLAG_SECURE` on payment/credential screens
