@@ -28,7 +28,7 @@ ARCKnowledge-Android guides AI agents (primarily Claude Code) in building high-q
 | Linting | ktlint + detekt |
 | Build | Gradle with Kotlin DSL + Version Catalogs |
 | Concurrency | Kotlin Coroutines + Flow |
-| Navigation | Navigation Compose (type-safe) |
+| Navigation | Navigation 3 (`NavDisplay` + `@Serializable` `NavKey`s) |
 | Images | Coil |
 | CI/CD | GitHub Actions |
 
@@ -48,7 +48,7 @@ ARCKnowledge-Android/
 │   ├── mvvm.md                    MVVM pattern (ViewModel + StateFlow)
 │   ├── solid-principles.md        SOLID with Kotlin examples
 │   ├── dependency-injection.md    Hilt DI patterns
-│   ├── navigation-compose.md      Type-safe Navigation Compose
+│   ├── navigation-3.md            Navigation 3 (NavDisplay, NavKey, scenes)
 │   └── singletons.md              When & how to use singletons
 │
 ├── Layers/
@@ -133,7 +133,7 @@ Browse the documentation by category:
 | UI Framework | SwiftUI | Jetpack Compose |
 | State Management | @Observable | ViewModel + StateFlow |
 | DI | Manual (init params) | Hilt (@Inject) |
-| Navigation | ARCNavigation (Router) | Navigation Compose (type-safe) |
+| Navigation | `NavigationStack` + `navigationDestination` | Navigation 3 (`NavDisplay` + `NavKey`) |
 | Testing | Swift Testing | JUnit 5 + MockK + Turbine |
 | Linting | SwiftLint + SwiftFormat | ktlint + detekt |
 | Build System | SPM (Package.swift) | Gradle (build.gradle.kts) |

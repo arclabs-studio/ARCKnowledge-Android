@@ -120,19 +120,21 @@ Use for: suspend functions, Flow operators, StateFlow, SharedFlow,
 - "Coroutine exception handling with SupervisorJob"
 - "Testing coroutines with runTest and advanceUntilIdle"
 
-### Navigation Compose
+### Navigation 3
 
 ```
-Query: "Jetpack Navigation Compose"
-Use for: NavHost, NavController, type-safe arguments,
-         deep links, nested graphs, bottom navigation
+Query: "Jetpack Navigation 3"
+Use for: NavDisplay, NavBackStack, NavKey, entryProvider,
+         scene strategies (dialog, bottom sheet, list-detail), deep links
 ```
+
+> The official `navigation-3` skill (android/skills plugin) is the primary source; use Context7 to confirm signatures.
 
 **Example queries:**
-- "Type-safe navigation with Kotlin Serialization routes"
-- "Nested navigation graphs in Compose"
-- "Deep link handling in Navigation Compose"
-- "Bottom navigation with Navigation Compose"
+- "Navigation 3 NavDisplay entryProvider with NavKey"
+- "Navigation 3 DialogSceneStrategy and bottom sheet scenes"
+- "Navigation 3 deep links with UriDeepLinkMatcher"
+- "NavigationSuiteScaffold with Navigation 3 multiple back stacks"
 
 ### Coil
 
@@ -322,19 +324,18 @@ fun SearchBar(
 ### 2. Using Outdated API Signatures
 
 ```kotlin
-// ❌ Old Navigation Compose API (pre-2.8.0)
-composable("profile/{userId}") { backStackEntry ->
-    val userId = backStackEntry.arguments?.getString("userId")
-    ProfileScreen(userId = userId ?: "")
-}
-
-// ✅ Current type-safe Navigation Compose API (2.8.0+)
-@Serializable
-data class ProfileRoute(val userId: String)
-
+// ❌ Navigation 2 API (string or type-safe NavHost) — not used in new ARC Labs code
 composable<ProfileRoute> { backStackEntry ->
     val route = backStackEntry.toRoute<ProfileRoute>()
     ProfileScreen(userId = route.userId)
+}
+
+// ✅ Navigation 3: the key is passed straight to the entry
+@Serializable
+data class ProfileKey(val userId: String) : NavKey
+
+entry<ProfileKey> { key ->
+    ProfileScreen(userId = key.userId)
 }
 ```
 

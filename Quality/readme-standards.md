@@ -787,7 +787,7 @@ Template sections that were never filled in ship to production.
 
 - **Type-safe routes** — Define navigation routes as Kotlin data classes
 - **Deep link support** — Automatic deep link registration and handling
-- **Compose integration** — Seamless integration with NavHost and NavController
+- **Compose integration** — Seamless integration with Navigation 3 `NavDisplay` and `NavBackStack`
 ```
 
 **Fix:** Search for "TODO", "TBD", "Feature 1", and other placeholder text before merging.

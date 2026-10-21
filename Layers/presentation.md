@@ -65,9 +65,9 @@ presentation/
 │       ├── SettingsViewModel.kt
 │       └── SettingsUiState.kt
 ├── navigation/
-│   ├── AppNavHost.kt
-│   ├── Routes.kt
-│   └── NavigationExtensions.kt
+│   ├── AppNavDisplay.kt
+│   ├── Keys.kt
+│   └── Navigator.kt
 ├── theme/
 │   ├── Color.kt
 │   ├── Theme.kt
@@ -644,7 +644,7 @@ class DashboardViewModel @Inject constructor(
 - ❌ **No** Android framework references (`Context`, `Activity`, `Fragment`, `View`)
 - ❌ **No** business logic (validation, transformation, calculation)
 - ❌ **No** direct repository access -- always go through Use Cases
-- ❌ **No** `NavController` reference -- emit events instead
+- ❌ **No** `Navigator` / back stack reference -- emit events instead
 - ❌ **No** `MutableStateFlow` exposed publicly
 - ❌ **No** `LiveData` -- use `StateFlow` exclusively
 - ❌ **No** `GlobalScope` or manual `CoroutineScope` creation
@@ -775,172 +775,66 @@ fun HomeScreen(
 
 ---
 
-## 🧭 Navigation (Jetpack Navigation Compose)
+## 🧭 Navigation (Navigation 3)
 
-### Route Definitions with Type-Safe Navigation
+ARC Labs apps use **Jetpack Navigation 3**. Full guide: [Navigation 3](../Architecture/navigation-3.md). The essentials for the presentation layer:
 
-Define routes as serializable data objects and data classes:
+### Keys
 
 ```kotlin
-// Routes.kt
+// Keys.kt (owned by the feature module)
 @Serializable
-data object HomeRoute
+data object HomeKey : NavKey
 
 @Serializable
-data object SearchRoute
+data object SearchKey : NavKey
 
 @Serializable
-data class RestaurantDetailRoute(val restaurantId: String)
+data class RestaurantDetailKey(val restaurantId: String) : NavKey
 
 @Serializable
-data class UserProfileRoute(val userId: String)
+data class UserProfileKey(val userId: String) : NavKey
 
 @Serializable
-data object SettingsRoute
-
-@Serializable
-data object OnboardingRoute
+data object SettingsKey : NavKey
 ```
 
-### Navigation Host
+### Entries
+
+Each feature contributes entries to the app's `entryProvider`; the Screen composables only receive lambdas.
 
 ```kotlin
-// AppNavHost.kt
-@Composable
-fun AppNavHost(
-    navController: NavHostController,
-    modifier: Modifier = Modifier,
-) {
-    NavHost(
-        navController = navController,
-        startDestination = HomeRoute,
-        modifier = modifier,
-    ) {
-        composable<HomeRoute> {
-            HomeScreen(
-                onNavigateToDetail = { restaurantId ->
-                    navController.navigate(RestaurantDetailRoute(restaurantId))
-                },
-                onNavigateToSearch = {
-                    navController.navigate(SearchRoute)
-                },
-                onNavigateToProfile = { userId ->
-                    navController.navigate(UserProfileRoute(userId))
-                },
-            )
-        }
-
-        composable<RestaurantDetailRoute> {
-            RestaurantDetailScreen(
-                onNavigateBack = { navController.popBackStack() },
-            )
-        }
-
-        composable<SearchRoute> {
-            SearchScreen(
-                onNavigateBack = { navController.popBackStack() },
-                onNavigateToDetail = { restaurantId ->
-                    navController.navigate(RestaurantDetailRoute(restaurantId))
-                },
-            )
-        }
-
-        composable<UserProfileRoute> {
-            UserProfileScreen(
-                onNavigateBack = { navController.popBackStack() },
-                onNavigateToSettings = {
-                    navController.navigate(SettingsRoute)
-                },
-            )
-        }
-
-        composable<SettingsRoute> {
-            SettingsScreen(
-                onNavigateBack = { navController.popBackStack() },
-            )
-        }
-    }
-}
-```
-
-### Navigation with Bottom Navigation Bar
-
-```kotlin
-@Composable
-fun MainScreen() {
-    val navController = rememberNavController()
-
-    Scaffold(
-        bottomBar = {
-            NavigationBar {
-                val navBackStackEntry by navController.currentBackStackEntryAsState()
-                val currentDestination = navBackStackEntry?.destination
-
-                TopLevelDestination.entries.forEach { destination ->
-                    NavigationBarItem(
-                        icon = {
-                            Icon(
-                                imageVector = destination.icon,
-                                contentDescription = stringResource(destination.labelResId),
-                            )
-                        },
-                        label = { Text(stringResource(destination.labelResId)) },
-                        selected = currentDestination?.hierarchy?.any {
-                            it.hasRoute(destination.route::class)
-                        } == true,
-                        onClick = {
-                            navController.navigate(destination.route) {
-                                popUpTo(navController.graph.findStartDestination().id) {
-                                    saveState = true
-                                }
-                                launchSingleTop = true
-                                restoreState = true
-                            }
-                        },
-                    )
-                }
-            }
-        },
-    ) { padding ->
-        AppNavHost(
-            navController = navController,
-            modifier = Modifier.padding(padding),
+// LibraryEntries.kt
+fun EntryProviderScope<NavKey>.libraryEntries(navigator: Navigator) {
+    entry<HomeKey> {
+        HomeRoute(
+            onNavigateToDetail = { restaurantId -> navigator.navigate(RestaurantDetailKey(restaurantId)) },
+            onNavigateToSearch = { navigator.navigate(SearchKey) },
+            onNavigateToProfile = { userId -> navigator.navigate(UserProfileKey(userId)) },
         )
     }
-}
-
-enum class TopLevelDestination(
-    val route: Any,
-    val icon: ImageVector,
-    @StringRes val labelResId: Int,
-) {
-    HOME(
-        route = HomeRoute,
-        icon = Icons.Filled.Home,
-        labelResId = R.string.nav_home,
-    ),
-    SEARCH(
-        route = SearchRoute,
-        icon = Icons.Filled.Search,
-        labelResId = R.string.nav_search,
-    ),
-    PROFILE(
-        route = UserProfileRoute("me"),
-        icon = Icons.Filled.Person,
-        labelResId = R.string.nav_profile,
-    ),
+    entry<RestaurantDetailKey> { key ->
+        val viewModel = hiltViewModel<RestaurantDetailViewModel, RestaurantDetailViewModel.Factory>(
+            creationCallback = { factory -> factory.create(key) },
+        )
+        RestaurantDetailRoute(viewModel = viewModel, onNavigateBack = navigator::goBack)
+    }
 }
 ```
+
+### Top-Level Navigation
+
+Tabs use `NavigationSuiteScaffold` (bottom bar on compact windows, navigation rail on larger ones) with one back stack per top-level key. See [Navigation 3 → Top-Level Tabs](../Architecture/navigation-3.md#-top-level-tabs-with-navigationsuitescaffold) for the `NavigationState` / `Navigator` holder and the shell.
 
 ### Navigation Rules
 
-- ✅ Use type-safe navigation with `@Serializable` route classes
+- ✅ Keys are `@Serializable` and implement `NavKey`; they carry ids only
 - ✅ Pass navigation callbacks as lambdas to Screen composables
-- ✅ Use `popUpTo` with `saveState` for bottom navigation
-- ✅ Use `launchSingleTop = true` to avoid duplicate destinations
-- ❌ **Never** pass `NavController` into a ViewModel
-- ❌ **Never** pass `NavController` deeper than the Screen composable
-- ❌ **Never** use string-based route definitions
+- ✅ Dialogs and bottom sheets are keys rendered by scene strategies
+- ✅ One `ViewModel` per entry (`rememberViewModelStoreNavEntryDecorator`), key injected with Hilt assisted injection
+- ❌ **Never** pass the `Navigator`, `NavBackStack` or `NavigationState` into a ViewModel
+- ❌ **Never** pass navigation objects deeper than the Route composable
+- ❌ **Never** use Navigation 2 (`NavHost`, `NavController`) or string routes
 
 ---
 
@@ -1785,14 +1679,14 @@ Use this checklist when reviewing or creating Presentation Layer code.
 - [ ] All business logic delegated to Use Cases
 - [ ] No Android framework imports (`android.content`, `android.app`, etc.)
 - [ ] No direct repository access
-- [ ] Navigation handled via events, not `NavController`
+- [ ] Navigation handled via events or lambdas, never navigation objects
 
 ### Navigation
 
-- [ ] Routes defined as `@Serializable` data objects/classes
+- [ ] Keys defined as `@Serializable` data objects/classes implementing `NavKey`
 - [ ] Navigation callbacks passed as lambdas
-- [ ] `NavController` never passed beyond Screen composables
-- [ ] Bottom navigation uses `popUpTo` with `saveState`
+- [ ] `Navigator` / back stack never passed beyond Route composables
+- [ ] Top-level tabs use `NavigationSuiteScaffold` with one back stack per tab
 - [ ] Deep links configured where needed
 
 ### Testing
@@ -1930,16 +1824,16 @@ IconButton(onClick = onDeleteClicked) {
 }
 ```
 
-### 6. NavController Passed into ViewModel
+### 6. Navigation Objects Passed into ViewModel
 
 ```kotlin
-// ❌ Wrong -- ViewModel holds NavController reference
+// ❌ Wrong -- ViewModel holds the navigation back stack
 @HiltViewModel
 class HomeViewModel @Inject constructor(
-    private val navController: NavController,  // Android framework dependency!
+    private val backStack: NavBackStack<NavKey>,  // UI navigation state in the ViewModel!
 ) : ViewModel() {
     fun onItemClicked(id: String) {
-        navController.navigate("detail/$id")  // ViewModel should NOT navigate!
+        backStack.add(RestaurantDetailKey(id))  // ViewModel should NOT navigate!
     }
 }
 

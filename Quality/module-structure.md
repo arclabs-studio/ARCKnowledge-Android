@@ -46,9 +46,9 @@ app/
 │   │   │   ├── MyApplication.kt              (@HiltAndroidApp)
 │   │   │   ├── MainActivity.kt               (@AndroidEntryPoint)
 │   │   │   ├── navigation/
-│   │   │   │   ├── AppNavHost.kt              (Top-level NavHost)
-│   │   │   │   ├── AppNavGraph.kt             (Route definitions)
-│   │   │   │   └── TopLevelDestination.kt     (Bottom nav destinations)
+│   │   │   │   ├── AppNavDisplay.kt           (Top-level NavDisplay + entryProvider)
+│   │   │   │   ├── Navigator.kt               (NavigationState + Navigator)
+│   │   │   │   └── TopLevelDestination.kt     (NavigationSuiteScaffold destinations)
 │   │   │   └── di/
 │   │   │       └── AppModule.kt               (App-scoped bindings)
 │   │   ├── res/
@@ -61,7 +61,7 @@ app/
 │   ├── test/
 │   │   └── java/com/arclabs/myapp/
 │   │       └── navigation/
-│   │           └── AppNavHostTest.kt
+│   │           └── NavigatorTest.kt
 │   └── androidTest/
 │       └── java/com/arclabs/myapp/
 │           └── MainActivityTest.kt
@@ -332,7 +332,7 @@ domain/
 
 | Type | Purpose | Example | Depends On | Contains |
 |------|---------|---------|------------|----------|
-| `app` | Entry point, DI root, navigation shell | `:app` | `:feature:*`, `:core:*`, `:domain` | Application, MainActivity, NavHost |
+| `app` | Entry point, DI root, navigation shell | `:app` | `:feature:*`, `:core:*`, `:domain` | Application, MainActivity, NavDisplay |
 | `feature` | Self-contained feature vertical slice | `:feature:home`, `:feature:search` | `:core:*`, `:domain` | Presentation + Domain + Data |
 | `core` | Shared infrastructure and utilities | `:core:network`, `:core:database` | External libraries only | Infrastructure code |
 | `domain` | Shared domain models and contracts | `:domain` | `:core:common` (optional) | Entities, interfaces, shared use cases |
@@ -957,36 +957,33 @@ Any feature that needs `UserRepository` receives it via Hilt injection without k
 
 ### Pattern: Navigation Events for Cross-Feature Communication
 
-Features should never call each other's screens directly. Instead, expose navigation routes.
+Features should never call each other's screens directly. Instead, expose navigation keys and an `EntryProviderScope` extension (see [Navigation 3](../Architecture/navigation-3.md)).
 
 ```kotlin
-// :feature:home/presentation/HomeNavigation.kt
-const val HOME_ROUTE = "home"
+// :feature:home/navigation/HomeEntries.kt
+@Serializable
+data object HomeKey : NavKey
 
-fun NavGraphBuilder.homeScreen(
+fun EntryProviderScope<NavKey>.homeEntries(
     onNavigateToProfile: (userId: String) -> Unit,
-    onNavigateToSearch: () -> Unit
+    onNavigateToSearch: () -> Unit,
 ) {
-    composable(HOME_ROUTE) {
+    entry<HomeKey> {
         HomeRoute(
             onNavigateToProfile = onNavigateToProfile,
-            onNavigateToSearch = onNavigateToSearch
+            onNavigateToSearch = onNavigateToSearch,
         )
     }
 }
 
-// :app/navigation/AppNavHost.kt — wires cross-feature navigation
-NavHost(navController = navController, startDestination = HOME_ROUTE) {
-    homeScreen(
-        onNavigateToProfile = { userId ->
-            navController.navigate("profile/$userId")
-        },
-        onNavigateToSearch = {
-            navController.navigate(SEARCH_ROUTE)
-        }
+// :app/navigation/AppNavDisplay.kt — wires cross-feature navigation
+val entryProvider = entryProvider<NavKey> {
+    homeEntries(
+        onNavigateToProfile = { userId -> navigator.navigate(ProfileKey(userId)) },
+        onNavigateToSearch = { navigator.navigate(SearchKey) },
     )
-    profileScreen(onBack = { navController.popBackStack() })
-    searchScreen(onBack = { navController.popBackStack() })
+    profileEntries(onBack = navigator::goBack)
+    searchEntries(onBack = navigator::goBack)
 }
 ```
 
@@ -1216,7 +1213,7 @@ Once you have three or more feature modules, the build boilerplate justifies con
 // :core:network    — ApiService, interceptors
 // :core:database   — AppDatabase, DAOs
 // :domain          — User, shared entities
-// :app             — Only Application, MainActivity, NavHost
+// :app             — Only Application, MainActivity, NavDisplay shell
 ```
 
 ### 2. Feature-to-Feature Dependency
@@ -1243,9 +1240,10 @@ dependencies {
     // No feature:profile dependency!
 }
 
-// Cross-feature navigation handled in :app/navigation/AppNavHost.kt
-homeScreen(
-    onNavigateToProfile = { userId -> navController.navigate("profile/$userId") }
+// Cross-feature navigation handled in :app/navigation/AppNavDisplay.kt
+homeEntries(
+    onNavigateToProfile = { userId -> navigator.navigate(ProfileKey(userId)) },
+    onNavigateToSearch = { navigator.navigate(SearchKey) },
 )
 ```
 
@@ -1397,7 +1395,7 @@ dependencies {
 - [Gradle Guide](../Tools/gradle.md)
 - [Clean Architecture](../Architecture/clean-architecture.md)
 - [Dependency Injection](../Architecture/dependency-injection.md)
-- [Navigation Compose](../Architecture/navigation-compose.md)
+- [Navigation 3](../Architecture/navigation-3.md)
 - [Testing](testing.md)
 - [Code Style](code-style.md)
 

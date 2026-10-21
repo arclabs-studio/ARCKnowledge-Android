@@ -54,7 +54,7 @@ Read in this order when joining a new ARC Labs Android project:
 | 9 | [Tools/gradle.md](Tools/gradle.md) | Build system, version catalogs, tasks |
 
 **Load on demand** (when the task requires it):
-- [Architecture/navigation-compose.md](Architecture/navigation-compose.md) — Type-safe Navigation Compose
+- [Architecture/navigation-3.md](Architecture/navigation-3.md) — Navigation 3 (NavDisplay, NavKey back stacks, NavigationSuiteScaffold)
 - [Architecture/solid-principles.md](Architecture/solid-principles.md) — SOLID with Kotlin examples
 - [Architecture/singletons.md](Architecture/singletons.md) — When and how to use singletons
 - [Quality/code-style.md](Quality/code-style.md) — ktlint + detekt configuration

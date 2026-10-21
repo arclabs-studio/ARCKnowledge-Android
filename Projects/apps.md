@@ -49,8 +49,8 @@ app/
 │   │   │   ├── MyApplication.kt
 │   │   │   ├── MainActivity.kt
 │   │   │   ├── navigation/
-│   │   │   │   ├── AppNavHost.kt
-│   │   │   │   ├── Routes.kt
+│   │   │   │   ├── AppNavDisplay.kt
+│   │   │   │   ├── Navigator.kt
 │   │   │   │   └── TopLevelDestination.kt
 │   │   │   ├── di/
 │   │   │   │   ├── AppModule.kt
@@ -316,7 +316,7 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             AppTheme {
-                AppNavHost()
+                AppShell()
             }
         }
     }
@@ -325,48 +325,46 @@ class MainActivity : ComponentActivity() {
 
 ### Navigation Setup
 
+ARC Labs apps use Navigation 3 with one back stack per top-level tab and `NavigationSuiteScaffold` for the bar ↔ rail switch. The full shell (`NavigationState`, `Navigator`, `AppShell`) is in [Navigation 3](../Architecture/navigation-3.md#-top-level-tabs-with-navigationsuitescaffold); `MainActivity` sets `AppShell()` as content.
+
 ```kotlin
 @Composable
-fun AppNavHost(
-    navController: NavHostController = rememberNavController(),
-) {
-    NavHost(
-        navController = navController,
-        startDestination = Routes.Home,
-    ) {
-        composable<Routes.Home> {
+fun AppNavDisplay(navigationState: NavigationState, navigator: Navigator) {
+    val entryProvider = entryProvider<NavKey> {
+        entry<HomeKey> {
             HomeScreen(
-                onRestaurantClick = { id ->
-                    navController.navigate(Routes.RestaurantDetail(id))
-                },
+                onRestaurantClick = { id -> navigator.navigate(RestaurantDetailKey(id)) },
             )
         }
-        composable<Routes.RestaurantDetail> {
+        entry<RestaurantDetailKey> { key ->
             RestaurantDetailScreen(
-                onBackClick = { navController.popBackStack() },
+                restaurantId = key.restaurantId,
+                onBackClick = navigator::goBack,
             )
         }
-        composable<Routes.Settings> {
+        entry<SettingsKey> {
             SettingsScreen()
         }
     }
+
+    NavDisplay(
+        entries = navigationState.toEntries(entryProvider),
+        onBack = { navigator.goBack() },
+    )
 }
 ```
 
-### Route Definitions
+### Key Definitions
 
 ```kotlin
 @Serializable
-sealed interface Routes {
-    @Serializable
-    data object Home : Routes
+data object HomeKey : NavKey
 
-    @Serializable
-    data class RestaurantDetail(val id: String) : Routes
+@Serializable
+data class RestaurantDetailKey(val restaurantId: String) : NavKey
 
-    @Serializable
-    data object Settings : Routes
-}
+@Serializable
+data object SettingsKey : NavKey
 ```
 
 ---

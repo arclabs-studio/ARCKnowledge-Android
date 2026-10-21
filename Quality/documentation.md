@@ -331,13 +331,13 @@ val uiState: StateFlow<HomeUiState>
 
 ```kotlin
 /**
- * The navigation controller for the current navigation graph.
+ * The image loader shared by every screen of this Activity.
  *
- * Initialized in [onCreate] after [setContentView]. Accessing this
+ * Initialized in [onCreate] before [setContent]. Accessing this
  * property before [onCreate] completes will throw
  * [UninitializedPropertyAccessException].
  */
-lateinit var navController: NavHostController
+lateinit var imageLoader: ImageLoader
 ```
 
 #### Computed Properties

@@ -64,7 +64,7 @@ Our testing approach is built on four pillars:
 
 **Do not test these (for now):**
 
-- **Navigation flows** -- Deferred to integration testing phase; mocking NavController is brittle
+- **Navigation library internals** -- Test our `Navigator` decisions and the app shell (see [Navigation 3](../Architecture/navigation-3.md#-testing-navigation)), not that `NavDisplay` renders a list
 - **Third-party library internals** -- Trust Retrofit, Room, Hilt; test your usage of them
 - **Android framework classes** -- Activities, Fragments, Services (test ViewModels instead)
 - **Generated code** -- Hilt modules, Room generated DAOs, Kotlin Serialization adapters
