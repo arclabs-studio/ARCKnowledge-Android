@@ -800,9 +800,9 @@ jobs:
 
 ## 🤖 Claude Code Skills
 
-ARCDevTools-Android does **not** install AI skills (v0.1.0 never shipped `setup-skills.sh` or a `skills/` folder). Skills come from two places, both installed once per machine:
+Skills come from two places:
 
-- **ARC Labs Android skills** (`android-doctrine`, `android-testing-doctrine`, `android-verify`, `arc-cli-android`) and agents (`arc-verify-android`, `arc-audit-material`) from **ARCAgentStack**.
+- **ARC Labs Android skills** (`android-doctrine`, `android-testing-doctrine`, `android-verify`, `arc-cli-android`) ship in ARCKnowledge-Android's `.claude/skills/`; `arc-setup` (via `scripts/setup-skills.sh`) symlinks them into the project's `.claude/skills/` — the same mechanism as ARCKnowledge/ARCDevTools on iOS. The checkpoint agents (`arc-verify-android`, `arc-audit-material`) come from **ARCAgentStack**, installed once per machine.
 - **Google's official `android/skills` plugin** (33 skills): `/plugin marketplace add android/skills` → `/plugin install android-skills@android-skills`.
 
 See the [Skills Index](../Skills/skills-index.md) for routing.

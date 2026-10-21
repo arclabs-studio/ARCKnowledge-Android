@@ -90,7 +90,7 @@ Read in this order when joining a new ARC Labs Android project:
 
 Skills load detailed, task-specific context. Full routing: [Skills/skills-index.md](Skills/skills-index.md).
 
-### ARC Labs (house rules — ARCAgentStack)
+### ARC Labs (house rules — `.claude/skills/` + ARCAgentStack agents)
 | Skill / Agent | Use When |
 |-------|----------|
 | `android-doctrine` | **Before writing or modifying any Android code** — architecture, modules, UiState, Nav3, M3, DI, data, platform rules |
@@ -121,9 +121,9 @@ Making commits or creating PRs           → Workflow/git-commits.md, Workflow/g
 
 ### Skills Setup
 
-- ARC skills and agents come from **ARCAgentStack** (`skills/android/`), symlinked into `~/.claude/skills` — nothing to install per project.
+- ARC Android skills ship in this repository's `.claude/skills/`; ARCDevTools-Android's `arc-setup` (`scripts/setup-skills.sh`) symlinks them into the project's `.claude/skills/`. ARC agents come from **ARCAgentStack** (`config/agents/`), symlinked into `~/.claude/agents` once per machine.
 - Google's skills: `/plugin marketplace add android/skills` then `/plugin install android-skills@android-skills` (or `android skills add --all` with the Android CLI).
-- ARCDevTools-Android's `arc-setup` installs configs, hooks, Makefile and workflows; it does **not** install skills.
+- ARCDevTools-Android's `arc-setup` installs configs, hooks, Gradle scaffolding, Makefile, workflows and the skill symlinks above.
 
 ## Available Agents
 

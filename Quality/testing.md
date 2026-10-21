@@ -26,7 +26,7 @@ These mirror the ARC Labs iOS constitution and are not optional:
 - **Fakes over mocks.** Test doubles are hand-written fakes at seams designed into production code (repository interfaces, data sources, `Clock`, dispatchers), shared from `:core:testing`. MockK is **not** a default dependency: it is outside the third-party allowlist and needs explicit approval, justified by a seam that cannot be faked. Existing MockK examples in this knowledge base are legacy illustrations — write new tests with fakes.
 - **Never modify a test to make it pass** — fix the implementation. A change that breaks a previously green test is invalid.
 - **Every composable ships a `@Preview` fed from centralized sample data** (`:core:ui` sample-data objects / `PreviewParameterProvider`), never inline invented literals. Those previews are the oracle for **Compose Preview Screenshot Testing** (`@PreviewTest`, `validateDebugScreenshotTest`).
-- Detailed doctrine: `android-testing-doctrine` skill (ARCAgentStack).
+- Detailed doctrine: `android-testing-doctrine` skill (`.claude/skills/`).
 
 ### The Testing Pyramid
 

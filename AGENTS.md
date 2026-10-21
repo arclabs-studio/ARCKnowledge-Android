@@ -31,7 +31,7 @@ These agents exist (definitions in ARCAgentStack `config/agents/`, symlinked int
 
 ## Installation
 
-ARC agents and skills come from **ARCAgentStack** (`config/agents/`, `skills/android/`), symlinked into `~/.claude` — nothing to install per project. ARCDevTools-Android's `arc-setup` does **not** install agents or skills.
+ARC agents come from **ARCAgentStack** (`config/agents/`), symlinked into `~/.claude/agents` — nothing to install per project. ARC Android skills live in this repository's `.claude/skills/` and are symlinked into each project by ARCDevTools-Android's `arc-setup` (`scripts/setup-skills.sh`).
 
 ---
 

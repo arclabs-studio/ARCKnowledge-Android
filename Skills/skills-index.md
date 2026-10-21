@@ -8,7 +8,7 @@
 
 | Source | Type | Focus | Count |
 |--------|------|-------|-------|
-| **ARC Labs** (ARCAgentStack `skills/android/`, `config/agents/`) | Internal standards | House rules, testing doctrine, verification loop, CLI policy | 4 skills + 2 agents |
+| **ARC Labs** (this repo's `.claude/skills/`; agents in ARCAgentStack `config/agents/`) | Internal standards | House rules, testing doctrine, verification loop, CLI policy | 4 skills + 2 agents |
 | **Google** (`android/skills` Claude plugin, v1.0.16) | Official | API detail and migrations across the Android platform | 33 skills |
 | **MCP / docs** | Documentation | Context7 (`/websites/developer_android_develop_ui_compose`), `android docs` | — |
 
@@ -43,9 +43,9 @@ Commits, branches, PRs                          Workflow/git-commits.md, Workflo
 
 ---
 
-## ARC Labs Skills (ARCAgentStack)
+## ARC Labs Skills (`.claude/skills/`)
 
-Thin skills that encode ARC Labs house rules; API detail is delegated to the Google plugin. They live in `ARCAgentStack/skills/android/` and are symlinked into `~/.claude/skills`.
+Thin skills that encode ARC Labs house rules; API detail is delegated to the Google plugin. They live in this repository's `.claude/skills/` and are symlinked into each project's `.claude/skills/` by ARCDevTools-Android's `arc-setup` (`scripts/setup-skills.sh`), like ARCKnowledge on iOS.
 
 ### `android-doctrine`
 
@@ -195,7 +195,7 @@ android-verify              --> Zero-warning build + tests
 
 ## Creating Custom Skills
 
-ARC skills and agents are authored in **ARCAgentStack** (`skills/android/`, `config/agents/`) with the `arc-agent-authoring` skill, then added to this index and to the CLAUDE.md skills table. This repository does not host skill definitions.
+ARC Android skills are authored in this repository under `.claude/skills/<name>/SKILL.md` (frontmatter `name` + `description` with triggers; see the `arc-agent-authoring` skill for the format), then added to this index and to the CLAUDE.md skills table. Agents are authored in **ARCAgentStack** (`config/agents/`).
 
 ---
 
@@ -219,7 +219,7 @@ If you identify a repeated workflow that is not covered, open a Linear issue wit
 | Component | Version | Last Updated |
 |-----------|---------|-------------|
 | Google `android/skills` plugin | 1.0.16 (33 skills) | 2026-10-21 |
-| ARC Android skills (ARCAgentStack) | 4 skills + 2 agents | 2026-10-21 |
+| ARC Android skills (`.claude/skills/`) + agents (ARCAgentStack) | 4 skills + 2 agents | 2026-10-21 |
 | ARCKnowledge-Android | 0.3.0 | 2026-10-21 |
 
 ---
