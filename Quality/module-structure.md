@@ -498,7 +498,9 @@ project-root/
 │   │   │   ├── AndroidFeatureConventionPlugin.kt
 │   │   │   ├── AndroidComposeConventionPlugin.kt
 │   │   │   ├── AndroidHiltConventionPlugin.kt
-│   │   │   └── AndroidTestConventionPlugin.kt
+│   │   │   ├── AndroidRoomConventionPlugin.kt
+│   │   │   ├── AndroidLintConventionPlugin.kt
+│   │   │   └── JvmLibraryConventionPlugin.kt
 │   │   └── build.gradle.kts
 │   ├── settings.gradle.kts
 │   └── gradle.properties
@@ -606,28 +608,36 @@ dependencies {
 gradlePlugin {
     plugins {
         register("androidApplication") {
-            id = "arclabs.android.application"
+            id = "arc.android.application"
             implementationClass = "AndroidApplicationConventionPlugin"
         }
         register("androidLibrary") {
-            id = "arclabs.android.library"
+            id = "arc.android.library"
             implementationClass = "AndroidLibraryConventionPlugin"
         }
         register("androidFeature") {
-            id = "arclabs.android.feature"
+            id = "arc.android.feature"
             implementationClass = "AndroidFeatureConventionPlugin"
         }
         register("androidCompose") {
-            id = "arclabs.android.compose"
+            id = "arc.android.compose"
             implementationClass = "AndroidComposeConventionPlugin"
         }
         register("androidHilt") {
-            id = "arclabs.android.hilt"
+            id = "arc.android.hilt"
             implementationClass = "AndroidHiltConventionPlugin"
         }
-        register("androidTest") {
-            id = "arclabs.android.test"
-            implementationClass = "AndroidTestConventionPlugin"
+        register("androidRoom") {
+            id = "arc.android.room"
+            implementationClass = "AndroidRoomConventionPlugin"
+        }
+        register("androidLint") {
+            id = "arc.android.lint"
+            implementationClass = "AndroidLintConventionPlugin"
+        }
+        register("jvmLibrary") {
+            id = "arc.jvm.library"
+            implementationClass = "JvmLibraryConventionPlugin"
         }
     }
 }
@@ -640,7 +650,7 @@ With convention plugins, a feature module's `build.gradle.kts` becomes minimal:
 ```kotlin
 // feature/home/build.gradle.kts
 plugins {
-    id("arclabs.android.feature")
+    id("arc.android.feature")
 }
 
 android {
@@ -897,7 +907,7 @@ The `:core:testing` module provides shared test infrastructure. All feature modu
 ```kotlin
 // core/testing/build.gradle.kts
 plugins {
-    id("arclabs.android.library")
+    id("arc.android.library")
 }
 
 android {

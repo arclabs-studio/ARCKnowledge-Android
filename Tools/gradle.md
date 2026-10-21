@@ -542,7 +542,7 @@ repositories {
 
 **The app module is the entry point of the application. It applies the `android.application` plugin and depends on all feature modules.**
 
-> In ARC Labs projects the shared parts of these blocks (SDK levels, Java target, Compose, Hilt, zero-warnings, test setup) live in `build-logic/` convention plugins (`arclabs.android.application`, `arclabs.android.library`, `arclabs.android.feature`, `arclabs.android.compose`, `arclabs.android.hilt`, `arclabs.android.room`, `arclabs.jvm.library`, `arclabs.android.lint`). The expanded form below shows what those plugins configure. See [Module Structure](../Quality/module-structure.md#convention-plugins-pattern).
+> In ARC Labs projects the shared parts of these blocks (SDK levels, Java target, Compose, Hilt, zero-warnings, test setup) live in `build-logic/` convention plugins (`arc.android.application`, `arc.android.library`, `arc.android.feature`, `arc.android.compose`, `arc.android.hilt`, `arc.android.room`, `arc.jvm.library`, `arc.android.lint`). The expanded form below shows what those plugins configure. See [Module Structure](../Quality/module-structure.md#convention-plugins-pattern).
 
 ```kotlin
 plugins {
@@ -670,7 +670,7 @@ With convention plugins (the ARC Labs default), a feature module is a few lines:
 
 ```kotlin
 plugins {
-    id("arclabs.android.feature")   // library + compose + hilt + nav3 + test setup + zero-warnings
+    id("arc.android.feature")   // library + compose + hilt + nav3 + test setup + zero-warnings
 }
 
 android {

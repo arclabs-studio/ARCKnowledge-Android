@@ -57,7 +57,10 @@ Still open (each marked "verify" where it appears):
 | Kotlin extension type registered by AGP 9 built-in Kotlin (convention plugins) | `Quality/module-structure.md` |
 | Firestore coroutine helpers without `-ktx` artifacts | `Layers/data.md` |
 | `NavigationBackHandler` (Navigation Event) signature | `Architecture/navigation-3.md` |
-| Convention plugin ids: this KB uses `arclabs.android.*`, ARCDevTools-Android 0.2.0 ships `arc.android.*` — align | `Tools/gradle.md`, `Quality/module-structure.md`, `Architecture/navigation-3.md` |
+
+## Renames
+
+- **Convention plugin ids** (2026-10-21): `arclabs.android.*` → `arc.android.*` / `arc.jvm.library`, matching what ARCDevTools-Android 0.2.0 ships and the Gradle verifier built (`arc.android.application`, `.library`, `.feature`, `.compose`, `.hilt`, `.room`, `.lint`, `arc.jvm.library`). The illustrative `arclabs.android.test` plugin was dropped (not shipped; test setup lives in the Android convention plugins). Updated in `Tools/gradle.md`, `Quality/module-structure.md`, `Quality/testing.md`, `Architecture/navigation-3.md`.
 
 ## Known Remaining Debt
 

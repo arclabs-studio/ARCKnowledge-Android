@@ -97,7 +97,7 @@ JUnit 5 (Jupiter) is the modern standard for JVM testing. It provides significan
 
 ### Gradle Setup
 
-Android modules run JUnit 5 through the **mannodermaus Android JUnit 5 Gradle plugin (2.0.2)**, applied by the `arclabs.android.*` convention plugins. Pure Kotlin modules (`:domain`) use `tasks.test { useJUnitPlatform() }`. Versions come from the [2026 stack table](../Tools/gradle.md#-arc-labs-2026-stack-reference-table).
+Android modules run JUnit 5 through the **mannodermaus Android JUnit 5 Gradle plugin (2.0.2)**, applied by the `arc.android.*` convention plugins. Pure Kotlin modules (`:domain`) use `tasks.test { useJUnitPlatform() }`. Versions come from the [2026 stack table](../Tools/gradle.md#-arc-labs-2026-stack-reference-table).
 
 ```kotlin
 // build.gradle.kts (Android module — normally done by the convention plugin)

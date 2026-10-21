@@ -66,7 +66,7 @@ kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serializa
 
 ### Module `build.gradle.kts`
 
-In ARC Labs projects these lines live in the `arclabs.android.feature` / `arclabs.android.compose` convention plugins in `build-logic/` (see [Gradle](../Tools/gradle.md)); feature modules never repeat them.
+In ARC Labs projects these lines live in the `arc.android.feature` / `arc.android.compose` convention plugins in `build-logic/` (see [Gradle](../Tools/gradle.md)); feature modules never repeat them.
 
 ```kotlin
 plugins {
