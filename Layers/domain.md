@@ -1095,14 +1095,14 @@ and **Entity business rules**.
 | Target | What to Test | Mocking |
 |--------|-------------|---------|
 | Entities | Computed properties, validation, business rules | None needed |
-| Use Cases | Input validation, orchestration, error handling | Mock repositories |
+| Use Cases | Input validation, orchestration, error handling | Fake repositories |
 | Repository Interfaces | N/A (interfaces, not implementations) | N/A |
 | Domain Exceptions | Construction, message formatting | None needed |
 
 ### Testing Tools
 
 - **JUnit 5** — test framework
-- **MockK** — mocking library (Kotlin-first)
+- **Fakes** — hand-written test doubles from `:core:testing` (MockK only with approval)
 - **kotlinx-coroutines-test** — `runTest` for coroutine testing
 - **Turbine** — `Flow` testing
 
@@ -1583,10 +1583,10 @@ Use this checklist to verify your Domain layer follows all conventions:
 - [ ] Covers all known business rule violations
 
 ### Testing
-- [ ] All Use Cases have tests (100% coverage target)
+- [ ] All Use Cases have behavioral tests (80% line-coverage gate; aim higher for the domain)
 - [ ] All Entity business rules have tests
 - [ ] Given-When-Then pattern used consistently
-- [ ] MockK used for repository mocking
+- [ ] Fake repositories from `:core:testing` used (no mocking library by default)
 - [ ] Turbine used for Flow testing
 - [ ] Test fakes provided as companion object extensions
 - [ ] Edge cases and error paths tested

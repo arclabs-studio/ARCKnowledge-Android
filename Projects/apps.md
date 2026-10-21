@@ -12,7 +12,7 @@
 2. **Offline Capable** - Core features work without a network connection
 3. **Performant** - 60fps scrolling, fast startup, smooth animations
 4. **Accessible** - TalkBack support, content descriptions, dynamic text sizing
-5. **Testable** - 80%+ code coverage for apps
+5. **Testable** - 80% line coverage gate (unified across ARC Labs)
 
 ### App Goals
 
@@ -715,15 +715,14 @@ fun AppTheme(
 
 ### Coverage Requirements
 
-- **App modules**: 80%+ code coverage
-- **Library modules**: 100% code coverage
+- **All modules**: 80% line coverage gate (unified across ARC Labs; libraries aim for 100%)
 - Focus on ViewModel and Use Case testing
 
 ### What to Test
 
 | Layer | What | How | Priority |
 |-------|------|-----|----------|
-| Domain | Use Cases | Unit test with MockK | High |
+| Domain | Use Cases | Unit test with fakes | High |
 | Domain | Entities | Unit test (if logic exists) | Medium |
 | Presentation | ViewModels | Unit test with Turbine | High |
 | Presentation | UI State mapping | Unit test | Medium |
@@ -953,9 +952,10 @@ object DaoModule {
 
 ### Testing
 
-- [ ] 80%+ code coverage
+- [ ] ≥ 80% line coverage
 - [ ] ViewModel tests with Turbine
-- [ ] Use Case tests with MockK
+- [ ] Use Case tests with fakes (no mocking library by default)
+- [ ] `@Preview` for every composable fed from centralized sample data; screenshot tests green
 - [ ] Given-When-Then structure in all tests
 - [ ] `makeSUT()` factory method used
 - [ ] Edge cases covered

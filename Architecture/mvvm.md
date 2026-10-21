@@ -886,7 +886,7 @@ ViewModel is created by:
 
 ## 🧪 Testing MVVM
 
-Every layer of the MVVM architecture is independently testable. At ARC Labs, we target 100% coverage for packages and 80%+ for apps.
+Every layer of the MVVM architecture is independently testable. At ARC Labs, the coverage gate is a unified 80% line coverage (libraries aim for 100%), and test doubles are fakes rather than mocks.
 
 ### ViewModel Testing
 

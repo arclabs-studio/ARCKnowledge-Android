@@ -18,6 +18,16 @@ Our testing approach is built on four pillars:
 
 4. **Tests Drive Design** -- Code that is hard to test is poorly designed. If you cannot test a class in isolation, its dependencies are too tightly coupled. Testing drives you toward better architecture.
 
+### Binding Rules
+
+These mirror the ARC Labs iOS constitution and are not optional:
+
+- **A test verifies observable behavior of production code against an oracle independent of that code.** A test that would pass whenever the code compiles (asserting a constructor sets a field, that a data class equals itself, that a library call returns what the library returns) **is deleted**.
+- **Fakes over mocks.** Test doubles are hand-written fakes at seams designed into production code (repository interfaces, data sources, `Clock`, dispatchers), shared from `:core:testing`. MockK is **not** a default dependency: it is outside the third-party allowlist and needs explicit approval, justified by a seam that cannot be faked. Existing MockK examples in this knowledge base are legacy illustrations — write new tests with fakes.
+- **Never modify a test to make it pass** — fix the implementation. A change that breaks a previously green test is invalid.
+- **Every composable ships a `@Preview` fed from centralized sample data** (`:core:ui` sample-data objects / `PreviewParameterProvider`), never inline invented literals. Those previews are the oracle for **Compose Preview Screenshot Testing** (`@PreviewTest`, `validateDebugScreenshotTest`).
+- Detailed doctrine: `android-testing-doctrine` skill (ARCAgentStack).
+
 ### The Testing Pyramid
 
 ```
@@ -33,14 +43,13 @@ Our testing approach is built on four pillars:
 
 ### Coverage Requirements
 
-| Project Type | Minimum Coverage | Target Coverage | Enforced |
+| Project Type | Minimum Coverage (CI gate) | Target Coverage | Enforced |
 |---|---|---|---|
+| **Android Apps** | 80% | 80%+ | Yes (CI gate) |
 | **Android Libraries** | 80% | 100% | Yes (CI gate) |
-| **Android Apps** | 60% | 80% | Yes (CI gate) |
-| **Shared Modules (KMP)** | 80% | 100% | Yes (CI gate) |
-| **Demo Apps** | 40% | 60% | No |
+| **Demo Apps** | — | — | No |
 
-> **Note:** Coverage is measured by JaCoCo. Line coverage and branch coverage are both tracked. The minimum threshold applies to line coverage. Branch coverage should be within 10% of line coverage.
+> **Note:** The coverage gate is **unified at 80% line coverage** for every ARC Labs Android project. Coverage is measured with AGP's built-in JaCoCo integration (`enableUnitTestCoverage = true`, `createDebugUnitTestCoverageReport`). Coverage is a floor, not the goal: tautological tests that inflate it are deleted.
 
 ### What to Test
 
@@ -88,35 +97,35 @@ JUnit 5 (Jupiter) is the modern standard for JVM testing. It provides significan
 
 ### Gradle Setup
 
+Android modules run JUnit 5 through the **mannodermaus Android JUnit 5 Gradle plugin (2.0.2)**, applied by the `arclabs.android.*` convention plugins. Pure Kotlin modules (`:domain`) use `tasks.test { useJUnitPlatform() }`. Versions come from the [2026 stack table](../Tools/gradle.md#-arc-labs-2026-stack-reference-table).
+
 ```kotlin
-// build.gradle.kts (module)
-android {
-    testOptions {
-        unitTests.all {
-            it.useJUnitPlatform()
-        }
-    }
+// build.gradle.kts (Android module — normally done by the convention plugin)
+plugins {
+    alias(libs.plugins.junit5)   // de.mannodermaus — verify the plugin id for 2.x
 }
 
 dependencies {
     // JUnit 5
-    testImplementation("org.junit.jupiter:junit-jupiter-api:5.10.2")
-    testImplementation("org.junit.jupiter:junit-jupiter-params:5.10.2")
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.10.2")
+    testImplementation(platform(libs.junit.bom))
+    testImplementation(libs.junit.jupiter)
+    testImplementation(libs.junit.jupiter.params)
+    testRuntimeOnly(libs.junit.platform.launcher)
 
-    // MockK
-    testImplementation("io.mockk:mockk:1.13.10")
+    // Coroutines Test + Turbine (Flow testing)
+    testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.turbine)
 
-    // Coroutines Test
-    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.8.1")
+    // Fakes shared across modules
+    testImplementation(project(":core:testing"))
 
-    // Turbine (Flow testing)
-    testImplementation("app.cash.turbine:turbine:1.1.0")
-
-    // Truth (optional, for fluent assertions)
-    testImplementation("com.google.truth:truth:1.4.2")
+    // Compose UI tests on the JVM (JUnit 4 rule API) via Robolectric
+    testImplementation(libs.robolectric)
+    testImplementation(libs.compose.ui.test.junit4)
 }
 ```
+
+> Compose UI tests (`createComposeRule`) use the JUnit 4 rule API; run them with Robolectric in `src/test` (or instrumented in `src/androidTest`). How JUnit 4 rule-based tests and JUnit 5 tests coexist in one module (e.g. a vintage engine) depends on the plugin version — verify against the mannodermaus 2.0.2 documentation before wiring it.
 
 ### Basic Structure
 
@@ -1208,9 +1217,9 @@ class SearchBarTest {
 
 ---
 
-## 🎭 MockK Patterns
+## 🎭 MockK Patterns (Legacy — Requires Approval)
 
-MockK is the standard mocking library for Kotlin. It provides first-class support for coroutines, extension functions, and Kotlin-specific constructs.
+> **Fakes over mocks.** MockK is not part of the ARC Labs default stack and is outside the third-party allowlist. Use the [Fake Repository Pattern](#fake-repository-pattern) instead. This section is kept as reference for the rare, approved cases where a seam cannot be faked.
 
 ### Basic Mocking
 
@@ -2155,8 +2164,7 @@ Use this checklist before marking any task as complete.
 - [ ] Happy path is tested for every use case
 - [ ] Error/failure paths are tested
 - [ ] Edge cases are identified and tested (empty lists, null values, boundary conditions)
-- [ ] Coverage meets or exceeds the minimum threshold for the project type
-- [ ] Branch coverage is within 10% of line coverage
+- [ ] Line coverage ≥ 80% (unified CI gate)
 - [ ] No untested branches in critical business logic
 
 ### Quality
@@ -2171,14 +2179,18 @@ Use this checklist before marking any task as complete.
 - [ ] No logic in tests (no if/else, loops, or complex setup)
 - [ ] Each test verifies one specific behavior
 
-### Mocks & Fakes
+### Fakes
 
 - [ ] Dependencies are injected via constructor (not created internally)
-- [ ] Mocks are used for interfaces, not concrete classes
-- [ ] Fakes are preferred over mocks for data layer dependencies
-- [ ] `coEvery`/`coVerify` used for suspend functions (not `every`/`verify`)
-- [ ] Argument matchers are specific (prefer `match {}` over `any()` for verification)
-- [ ] Relaxed mocks are justified and documented
+- [ ] Test doubles are hand-written fakes from `:core:testing` at designed seams
+- [ ] No mocking library unless explicitly approved (and then only for interfaces)
+- [ ] No test that would pass whenever the code compiles
+
+### Previews & Screenshots
+
+- [ ] Every composable has a `@Preview` fed from centralized sample data
+- [ ] Screen previews annotated with `@PreviewTest`; `validateDebugScreenshotTest` green
+- [ ] Reference images updated deliberately (`updateDebugScreenshotTest`) and reviewed
 
 ### Coroutines
 
@@ -2484,8 +2496,8 @@ tasks.register<JacocoReport>("jacocoTestReport") {
       grep -o 'INSTRUCTION.*missed="[0-9]*".*covered="[0-9]*"' | head -1 | \
       awk -F'"' '{missed=$2; covered=$4; printf "%.1f", covered/(missed+covered)*100}')
     echo "Coverage: ${COVERAGE}%"
-    if (( $(echo "$COVERAGE < 60" | bc -l) )); then
-      echo "Coverage ${COVERAGE}% is below 60% threshold"
+    if (( $(echo "$COVERAGE < 80" | bc -l) )); then
+      echo "Coverage ${COVERAGE}% is below 80% threshold"
       exit 1
     fi
 ```
@@ -2497,7 +2509,6 @@ tasks.register<JacocoReport>("jacocoTestReport") {
 ### Official Documentation
 
 - [JUnit 5 User Guide](https://junit.org/junit5/docs/current/user-guide/)
-- [MockK Documentation](https://mockk.io/)
 - [Turbine GitHub](https://github.com/cashapp/turbine)
 - [Kotlinx Coroutines Test](https://kotlinlang.org/api/kotlinx.coroutines/kotlinx-coroutines-test/)
 - [Jetpack Compose Testing](https://developer.android.com/develop/ui/compose/testing)

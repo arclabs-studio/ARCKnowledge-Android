@@ -455,9 +455,10 @@ fun UserScreen(viewModel: UserViewModel) {
 - [ ] All Use Cases have unit tests
 - [ ] All ViewModels have unit tests
 - [ ] Tests follow Given-When-Then pattern
-- [ ] MockK used for interfaces, fakes for simple types
+- [ ] Fakes used for test doubles (MockK only with documented approval)
+- [ ] No tautological tests (a test that passes whenever the code compiles is deleted)
 - [ ] Turbine used for Flow testing
-- [ ] Coverage meets requirements (80% apps, 100% libraries)
+- [ ] Coverage meets the unified 80% line-coverage gate
 - [ ] Edge cases tested (empty lists, null values, error states)
 - [ ] Test names describe behavior, not implementation
 - [ ] No flaky tests (no `delay`, no real network calls)
