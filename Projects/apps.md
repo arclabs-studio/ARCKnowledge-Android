@@ -17,7 +17,7 @@
 ### App Goals
 
 - Simple, intuitive interfaces that feel native to Android
-- Material Design 3 with dynamic color (Material You)
+- Material 3 Expressive with the brand color scheme (dynamic color off)
 - Full dark and light theme support
 - Localized for multiple languages
 - Edge-to-edge design with proper inset handling
@@ -689,26 +689,19 @@ val DarkColorScheme = darkColorScheme(
 
 ### Theme Composable
 
+One `AppTheme` in `:core:designsystem`, Material 3 Expressive, brand colors only (dynamic color off). See [UI Guidelines → Material 3 Expressive](../Quality/ui-guidelines.md#material-3-expressive).
+
 ```kotlin
-// theme/Theme.kt
+// core/designsystem/.../Theme.kt — verify MaterialExpressiveTheme parameters/opt-in for material3 1.5.0-beta01
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun AppTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    dynamicColor: Boolean = true,
     content: @Composable () -> Unit,
 ) {
-    val colorScheme = when {
-        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-            val context = LocalContext.current
-            if (darkTheme) dynamicDarkColorScheme(context)
-            else dynamicLightColorScheme(context)
-        }
-        darkTheme -> DarkColorScheme
-        else -> LightColorScheme
-    }
-
-    MaterialTheme(
-        colorScheme = colorScheme,
+    MaterialExpressiveTheme(
+        colorScheme = if (darkTheme) DarkColorScheme else LightColorScheme,
+        motionScheme = MotionScheme.expressive(),
         typography = AppTypography,
         shapes = AppShapes,
         content = content,
@@ -940,7 +933,7 @@ object DaoModule {
 
 - [ ] Dark theme tested and working
 - [ ] Light theme tested and working
-- [ ] Dynamic color supported (API 31+)
+- [ ] Brand color scheme in light and dark (dynamic color off)
 - [ ] TalkBack accessible
 - [ ] Content descriptions on all interactive elements
 - [ ] Loading states shown for async operations

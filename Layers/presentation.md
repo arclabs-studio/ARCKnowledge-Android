@@ -838,7 +838,7 @@ Tabs use `NavigationSuiteScaffold` (bottom bar on compact windows, navigation ra
 
 ---
 
-## 🎨 Theming (Material Design 3)
+## 🎨 Theming (Material 3 Expressive)
 
 ### Color Scheme
 
@@ -986,26 +986,19 @@ val AppShapes = Shapes(
 
 ### Theme Composable
 
+ARC Labs uses **Material 3 Expressive** with the brand color scheme — **dynamic color off**. Full guidance: [UI Guidelines → Material 3 Expressive](../Quality/ui-guidelines.md#material-3-expressive).
+
 ```kotlin
-// Theme.kt
+// Theme.kt (:core:designsystem) — verify MaterialExpressiveTheme parameters/opt-in for material3 1.5.0-beta01
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun AppTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    dynamicColor: Boolean = true,
     content: @Composable () -> Unit,
 ) {
-    val colorScheme = when {
-        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-            val context = LocalContext.current
-            if (darkTheme) dynamicDarkColorScheme(context)
-            else dynamicLightColorScheme(context)
-        }
-        darkTheme -> DarkColorScheme
-        else -> LightColorScheme
-    }
-
-    MaterialTheme(
-        colorScheme = colorScheme,
+    MaterialExpressiveTheme(
+        colorScheme = if (darkTheme) DarkColorScheme else LightColorScheme,
+        motionScheme = MotionScheme.expressive(),
         typography = AppTypography,
         shapes = AppShapes,
         content = content,
@@ -1018,9 +1011,9 @@ fun AppTheme(
 - ✅ Always use `MaterialTheme.colorScheme` for colors
 - ✅ Always use `MaterialTheme.typography` for text styles
 - ✅ Always use `MaterialTheme.shapes` for shapes
-- ✅ Support dynamic color on Android 12+
-- ✅ Support both dark and light themes
-- ❌ **Never** hardcode colors directly in composables
+- ✅ Brand light and dark color schemes; dynamic color is off
+- ✅ Prefer Material 3 Expressive components and motion over custom implementations
+- ❌ **Never** hardcode colors directly in composables (literals live only in `:core:designsystem`)
 - ❌ **Never** hardcode text sizes directly
 - ❌ **Never** use deprecated `MaterialTheme.colors` (Material 2)
 
