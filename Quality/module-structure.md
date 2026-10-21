@@ -154,6 +154,8 @@ Core modules provide shared infrastructure. Each core module has a focused respo
 
 #### core:network
 
+> **Networking policy:** v1 ARC Labs apps have **no HTTP client** — remote data goes through Firebase SDKs only, so `:core:network` does not exist yet. It is created when a Vapor backend arrives, with Retrofit 3 + OkHttp 5 + the kotlinx.serialization converter. The structure below is the target for that phase.
+
 ```
 core/network/
 ├── src/main/java/com/arclabs/myapp/core/network/
@@ -522,15 +524,15 @@ class AndroidFeatureConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) {
         with(target) {
             with(pluginManager) {
-                apply("com.android.library")
-                apply("org.jetbrains.kotlin.android")
+                apply("com.android.library")          // AGP 9: Kotlin is built in, no kotlin-android plugin
                 apply("org.jetbrains.kotlin.plugin.compose")
+                apply("org.jetbrains.kotlin.plugin.serialization")
                 apply("com.google.devtools.ksp")
                 apply("com.google.dagger.hilt.android")
             }
 
-            extensions.configure<com.android.build.gradle.LibraryExtension> {
-                compileSdk = 35
+            extensions.configure<com.android.build.api.dsl.LibraryExtension> {
+                compileSdk = 36
 
                 defaultConfig {
                     minSdk = 26
@@ -545,6 +547,19 @@ class AndroidFeatureConventionPlugin : Plugin<Project> {
                     sourceCompatibility = JavaVersion.VERSION_17
                     targetCompatibility = JavaVersion.VERSION_17
                 }
+
+                lint {
+                    warningsAsErrors = true
+                    abortOnError = true
+                }
+            }
+
+            // Zero warnings (jvmTarget defaults to targetCompatibility with built-in Kotlin)
+            // Verify the `kotlin` extension type registered by AGP 9 built-in Kotlin when implementing
+            extensions.configure<org.jetbrains.kotlin.gradle.dsl.KotlinAndroidProjectExtension> {
+                compilerOptions {
+                    allWarningsAsErrors.set(true)
+                }
             }
 
             val libs = extensions.getByType<VersionCatalogsExtension>().named("libs")
@@ -556,14 +571,15 @@ class AndroidFeatureConventionPlugin : Plugin<Project> {
 
                 add("implementation", libs.findLibrary("hilt.android").get())
                 add("ksp", libs.findLibrary("hilt.compiler").get())
-                add("implementation", libs.findLibrary("hilt.navigation.compose").get())
+                add("implementation", libs.findLibrary("hilt.lifecycle.viewmodel.compose").get())
 
-                add("implementation", libs.findLibrary("androidx.lifecycle.viewmodel.compose").get())
-                add("implementation", libs.findLibrary("androidx.navigation.compose").get())
+                add("implementation", libs.findLibrary("lifecycle.viewmodel.compose").get())
+                add("implementation", libs.findLibrary("navigation3.runtime").get())
+                add("implementation", libs.findLibrary("navigation3.ui").get())
+                add("implementation", libs.findLibrary("lifecycle.viewmodel.navigation3").get())
 
-                add("testImplementation", project(":core:testing"))
-                add("testImplementation", libs.findLibrary("junit5").get())
-                add("testImplementation", libs.findLibrary("mockk").get())
+                add("testImplementation", project(":core:testing"))   // fakes live here
+                add("testImplementation", libs.findLibrary("junit.jupiter").get())
                 add("testImplementation", libs.findLibrary("turbine").get())
                 add("testImplementation", libs.findLibrary("kotlinx.coroutines.test").get())
             }
@@ -643,7 +659,6 @@ Compare this to the non-convention-plugin version:
 // feature/home/build.gradle.kts (WITHOUT convention plugins — verbose)
 plugins {
     id("com.android.library")
-    id("org.jetbrains.kotlin.android")
     id("org.jetbrains.kotlin.plugin.compose")
     id("com.google.devtools.ksp")
     id("com.google.dagger.hilt.android")
@@ -672,11 +687,10 @@ dependencies {
 
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
-    implementation(libs.hilt.navigation.compose)
+    implementation(libs.hilt.lifecycle.viewmodel.compose)
 
     testImplementation(project(":core:testing"))
-    testImplementation(libs.junit5)
-    testImplementation(libs.mockk)
+    testImplementation(libs.junit.jupiter)
     testImplementation(libs.turbine)
     testImplementation(libs.kotlinx.coroutines.test)
 }
@@ -732,155 +746,17 @@ include(":domain")
 
 ARC Labs standardizes all dependency versions in a single `gradle/libs.versions.toml` file. No version strings should appear in any `build.gradle.kts` file.
 
+The canonical catalog template and the **2026 stack version table** live in [Gradle → Version Catalogs](../Tools/gradle.md#-version-catalogs-libsversionstoml). Do not duplicate version pins here or in other documents.
+
+The only entries specific to multi-module builds are the plugin artifacts that `build-logic/convention` compiles against:
+
 ```toml
-[versions]
-# Kotlin & Core
-kotlin = "2.0.21"
-kotlinx-coroutines = "1.9.0"
-kotlinx-serialization = "1.7.3"
-ksp = "2.0.21-1.0.28"
-
-# Android
-compileSdk = "35"
-minSdk = "26"
-targetSdk = "35"
-agp = "8.7.3"
-
-# Compose
-compose-bom = "2024.12.01"
-compose-compiler = "1.5.15"
-navigation-compose = "2.8.5"
-lifecycle = "2.8.7"
-activity-compose = "1.9.3"
-
-# Dependency Injection
-hilt = "2.51.1"
-hilt-navigation-compose = "1.2.0"
-
-# Networking
-retrofit = "2.9.0"
-okhttp = "4.12.0"
-gson = "2.11.0"
-
-# Database
-room = "2.6.1"
-
-# DataStore
-datastore = "1.1.1"
-protobuf = "4.28.3"
-protobuf-plugin = "0.9.4"
-
-# Image Loading
-coil = "2.7.0"
-
-# Testing
-junit5 = "5.11.3"
-mockk = "1.13.13"
-turbine = "1.2.0"
-truth = "1.4.4"
-androidx-test = "1.6.1"
-compose-test = "1.7.6"
-espresso = "3.6.1"
-robolectric = "4.14.1"
-
-# Tooling
-detekt = "1.23.7"
-ktlint = "12.1.2"
-leakcanary = "2.14"
-timber = "5.0.1"
-
 [libraries]
-# Kotlin
-kotlinx-coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "kotlinx-coroutines" }
-kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "kotlinx-coroutines" }
-kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "kotlinx-coroutines" }
-kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinx-serialization" }
-
-# Compose
-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "compose-bom" }
-compose-ui = { group = "androidx.compose.ui", name = "ui" }
-compose-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
-compose-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
-compose-material3 = { group = "androidx.compose.material3", name = "material3" }
-compose-runtime = { group = "androidx.compose.runtime", name = "runtime" }
-compose-foundation = { group = "androidx.compose.foundation", name = "foundation" }
-compose-animation = { group = "androidx.compose.animation", name = "animation" }
-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activity-compose" }
-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigation-compose" }
-
-# Lifecycle
-androidx-lifecycle-viewmodel-compose = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-compose", version.ref = "lifecycle" }
-androidx-lifecycle-runtime-compose = { group = "androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "lifecycle" }
-
-# Hilt
-hilt-android = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt" }
-hilt-compiler = { group = "com.google.dagger", name = "hilt-compiler", version.ref = "hilt" }
-hilt-navigation-compose = { group = "androidx.hilt", name = "hilt-navigation-compose", version.ref = "hilt-navigation-compose" }
-hilt-android-testing = { group = "com.google.dagger", name = "hilt-android-testing", version.ref = "hilt" }
-
-# Networking
-retrofit = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit" }
-retrofit-converter-gson = { group = "com.squareup.retrofit2", name = "converter-gson", version.ref = "retrofit" }
-okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhttp" }
-okhttp-logging = { group = "com.squareup.okhttp3", name = "logging-interceptor", version.ref = "okhttp" }
-gson = { group = "com.google.code.gson", name = "gson", version.ref = "gson" }
-
-# Database
-room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
-room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
-room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
-room-testing = { group = "androidx.room", name = "room-testing", version.ref = "room" }
-
-# DataStore
-datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastore" }
-datastore-proto = { group = "androidx.datastore", name = "datastore", version.ref = "datastore" }
-
-# Image Loading
-coil-compose = { group = "io.coil-kt", name = "coil-compose", version.ref = "coil" }
-
-# Testing
-junit5 = { group = "org.junit.jupiter", name = "junit-jupiter", version.ref = "junit5" }
-junit5-api = { group = "org.junit.jupiter", name = "junit-jupiter-api", version.ref = "junit5" }
-junit5-params = { group = "org.junit.jupiter", name = "junit-jupiter-params", version.ref = "junit5" }
-mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
-mockk-android = { group = "io.mockk", name = "mockk-android", version.ref = "mockk" }
-turbine = { group = "app.cash.turbine", name = "turbine", version.ref = "turbine" }
-truth = { group = "com.google.truth", name = "truth", version.ref = "truth" }
-robolectric = { group = "org.robolectric", name = "robolectric", version.ref = "robolectric" }
-androidx-test-core = { group = "androidx.test", name = "core", version.ref = "androidx-test" }
-androidx-test-runner = { group = "androidx.test", name = "runner", version.ref = "androidx-test" }
-compose-ui-test = { group = "androidx.compose.ui", name = "ui-test-junit4" }
-compose-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
-espresso = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espresso" }
-
-# Tooling
-timber = { group = "com.jakewharton.timber", name = "timber", version.ref = "timber" }
-leakcanary = { group = "com.squareup.leakcanary", name = "leakcanary-android", version.ref = "leakcanary" }
-
 # Build Logic Dependencies (used in build-logic/convention)
 android-gradlePlugin = { group = "com.android.tools.build", name = "gradle", version.ref = "agp" }
 kotlin-gradlePlugin = { group = "org.jetbrains.kotlin", name = "kotlin-gradle-plugin", version.ref = "kotlin" }
 compose-gradlePlugin = { group = "org.jetbrains.kotlin", name = "compose-compiler-gradle-plugin", version.ref = "kotlin" }
 ksp-gradlePlugin = { group = "com.google.devtools.ksp", name = "com.google.devtools.ksp.gradle.plugin", version.ref = "ksp" }
-
-[bundles]
-compose = ["compose-ui", "compose-ui-tooling-preview", "compose-material3", "compose-runtime", "compose-foundation", "compose-animation"]
-compose-debug = ["compose-ui-tooling", "compose-ui-test-manifest"]
-networking = ["retrofit", "retrofit-converter-gson", "okhttp", "okhttp-logging"]
-room = ["room-runtime", "room-ktx"]
-testing = ["junit5", "mockk", "turbine", "truth", "kotlinx-coroutines-test"]
-android-testing = ["mockk-android", "androidx-test-core", "androidx-test-runner", "compose-ui-test", "espresso"]
-
-[plugins]
-android-application = { id = "com.android.application", version.ref = "agp" }
-android-library = { id = "com.android.library", version.ref = "agp" }
-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
-kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
-kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
-hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
-ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
-room = { id = "androidx.room", version.ref = "room" }
-protobuf = { id = "com.google.protobuf", version.ref = "protobuf-plugin" }
 ```
 
 ---

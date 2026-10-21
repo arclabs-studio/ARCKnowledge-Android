@@ -724,7 +724,7 @@ fun startLoading() {
 ```kotlin
 // build.gradle.kts (module-level)
 plugins {
-    id("org.jetbrains.dokka") version "1.9.20"
+    alias(libs.plugins.dokka)   // version: verify before use (not pinned in the 2026 stack)
 }
 
 tasks.dokkaHtml {
@@ -765,7 +765,7 @@ For projects with multiple Gradle modules, configure the root project to aggrega
 ```kotlin
 // build.gradle.kts (root project)
 plugins {
-    id("org.jetbrains.dokka") version "1.9.20"
+    alias(libs.plugins.dokka)   // version: verify before use (not pinned in the 2026 stack)
 }
 
 tasks.dokkaHtmlMultiModule {

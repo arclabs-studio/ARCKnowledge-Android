@@ -18,22 +18,24 @@ Android Studio is the official IDE for Android development, provided and maintai
 - **Profiling Tools:** CPU, Memory, Network, and Energy profilers built directly into the IDE
 - **Version Control:** Native Git integration with visual diff, merge conflict resolution, and branch management
 
+> **ARC Labs tooling policy:** the Android Studio GUI is **optional**. The sanctioned tools for building, testing, running and inspecting apps (including by AI agents) are `./gradlew` and the official `android` CLI — the Android equivalent of the Xcode MCP on iOS. See [CLAUDE.md → Tooling Policy](../CLAUDE.md#tooling-policy). Studio remains useful for debugging, profiling and interactive previews.
+
 ### Version Recommendations
 
 | Component | Recommended Version |
 |-----------|-------------------|
-| Android Studio | Latest Stable (Meerkat 2024.3.1+) |
-| Gradle | 8.9+ |
-| Android Gradle Plugin (AGP) | 8.8+ |
-| JDK | 17 (bundled with Android Studio) |
-| Kotlin | 2.1+ |
+| Android Studio | Latest stable (2026.2.x or newer) |
+| Gradle | 9.8.2 |
+| Android Gradle Plugin (AGP) | 9.4.0 |
+| JDK | JBR bundled with Android Studio (currently 25); bytecode target `jvmTarget` 17 |
+| Kotlin | 2.4.21 |
 | Compose Compiler | Kotlin compiler plugin (integrated since Kotlin 2.0) |
 
 ### Installation
 
 ✅ **DO:**
 - Download from the official site: https://developer.android.com/studio
-- Use the bundled JDK (JBR 17) for Gradle builds
+- Use the JDK bundled with Android Studio (JBR) for Gradle builds, and point `JAVA_HOME` at it for the CLI (`./gradlew`, `android`)
 - Keep Android Studio updated to the latest stable release
 - Install required SDK platforms and build tools via SDK Manager
 
@@ -187,23 +189,25 @@ include(":feature-profile")
 
 | Setting | Value | Notes |
 |---------|-------|-------|
-| `compileSdk` | 35 | Android 15 (VanillaIceCream) |
-| `minSdk` | 26 | Android 8.0 - covers 97%+ of active devices |
-| `targetSdk` | 35 | Must match compileSdk for Play Store compliance |
+| `compileSdk` | 36 | Android 16 |
+| `minSdk` | 26 | Android 8.0 |
+| `targetSdk` | 36 | Google Play requires targetSdk ≥ 36 for updates since 2026-08-31 |
+
+> Full version table: [Gradle → 2026 Stack](gradle.md#-arc-labs-2026-stack-reference-table).
 
 ### Kotlin Version
 
 ```kotlin
 // gradle/libs.versions.toml
 [versions]
-kotlin = "2.1.0"
-agp = "8.8.0"
-composeBom = "2024.12.01"
+kotlin = "2.4.21"
+agp = "9.4.0"
+compose-bom = "2026.09.00"
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
-kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+# No kotlin-android plugin: AGP 9 has built-in Kotlin support
 ```
 
 ### Compose Compiler Configuration
@@ -214,18 +218,17 @@ Since Kotlin 2.0, the Compose compiler is integrated as a Kotlin compiler plugin
 // app/build.gradle.kts
 plugins {
     alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin.android)
-    alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.compose.compiler)
 }
 
 android {
     namespace = "com.example.myapp"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.example.myapp"
         minSdk = 26
-        targetSdk = 35
+        targetSdk = 36
         versionCode = 1
         versionName = "1.0.0"
 
@@ -237,13 +240,16 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
 
-    kotlinOptions {
-        jvmTarget = "17"
-    }
-
     buildFeatures {
         compose = true
         buildConfig = true
+    }
+}
+
+// AGP 9 built-in Kotlin: jvmTarget follows targetCompatibility (17)
+kotlin {
+    compilerOptions {
+        allWarningsAsErrors = true
     }
 }
 
@@ -271,13 +277,13 @@ composeCompiler {
 
 ✅ **DO:**
 - Use version catalog (`libs.versions.toml`) for all dependency versions
-- Set `jvmTarget = "17"` to match the bundled JDK
+- Keep `compileOptions` at Java 17 (Kotlin `jvmTarget` follows it); the JBR running Gradle can be newer
 - Enable `buildConfig = true` only if you need `BuildConfig` fields
 - Use the Compose BOM for consistent Compose library versions
 
 ❌ **DON'T:**
 - Set `minSdk` below 26 unless there is a clear business requirement
-- Use a `jvmTarget` different from the project's JDK version
+- Set a Kotlin `jvmTarget` different from `compileOptions.targetCompatibility`
 - Mix Compose BOM versions with manually specified Compose library versions
 
 ---
@@ -1212,7 +1218,7 @@ tasks.withType<Test> {
 ```kotlin
 // build.gradle.kts
 plugins {
-    id("io.gitlab.arturbosch.detekt") version "1.23.7"
+    alias(libs.plugins.detekt)   // 1.23.8 via the version catalog
 }
 
 detekt {
@@ -1241,18 +1247,18 @@ Use this checklist when setting up a new project or onboarding to an existing on
 ### Initial Setup
 
 - [ ] Android Studio is updated to the latest stable version
-- [ ] Required SDK platforms are installed (API 35)
-- [ ] Build tools are installed (35.0.0+)
-- [ ] JDK 17 is configured (use bundled JBR)
+- [ ] Required SDK platforms are installed (API 36)
+- [ ] Build tools for API 36 are installed
+- [ ] Gradle JDK is the bundled JBR; `JAVA_HOME` points to it for the CLI
 - [ ] Android Emulator is installed with a target device image
 - [ ] Hardware acceleration (HAXM or Hypervisor) is enabled
 
 ### Project Configuration
 
-- [ ] `compileSdk` is set to 35
+- [ ] `compileSdk` is set to 36
 - [ ] `minSdk` is set to 26
-- [ ] `targetSdk` is set to 35
-- [ ] Kotlin version is 2.1+
+- [ ] `targetSdk` is set to 36
+- [ ] Kotlin version is 2.4.21 (AGP 9 built-in Kotlin)
 - [ ] Compose compiler plugin is applied
 - [ ] Version catalog (`libs.versions.toml`) is configured
 - [ ] `.gitignore` excludes `local.properties`, `.idea/`, `build/`, `*.iml`
@@ -1375,7 +1381,7 @@ android.nonTransitiveRClass=true
 
 **Additional Build Speed Tips:**
 - Use modularization to limit incremental build scope
-- Avoid using `kapt`; migrate to KSP where possible
+- Never use `kapt` (incompatible with AGP 9 built-in Kotlin; Room 3 is KSP-only) — KSP for every processor
 - Keep annotation processors up to date
 - Use `--build-cache` and remote build caching for CI
 - Avoid dynamic dependency versions (`implementation("lib:+")`)

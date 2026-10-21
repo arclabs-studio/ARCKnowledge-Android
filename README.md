@@ -18,19 +18,22 @@ ARCKnowledge-Android guides AI agents (primarily Claude Code) in building high-q
 
 | Category | Technology |
 |----------|-----------|
-| Language | Kotlin 2.0+ |
-| UI | Jetpack Compose + Material Design 3 |
+| Language | Kotlin 2.4.21 (K2) |
+| UI | Jetpack Compose (BOM 2026.09.00) + Material 3 Expressive (material3 1.5.0-beta01) |
 | Architecture | Clean Architecture + MVVM |
-| DI | Hilt (Dagger) |
-| Networking | Retrofit + OkHttp + Kotlinx Serialization |
-| Persistence | Room (database), DataStore (key-value) |
-| Testing | JUnit 5 + MockK + Turbine + Compose Testing |
-| Linting | ktlint + detekt |
-| Build | Gradle with Kotlin DSL + Version Catalogs |
+| DI | Hilt 2.60.1 + KSP 2.3.12 (no kapt) |
+| Backend / Networking | Firebase SDKs (BoM 35.0.2) — no HTTP client in v1; Retrofit 3 + OkHttp 5 + kotlinx.serialization when a Vapor backend arrives |
+| Persistence | Room 3 (`androidx.room3` 3.0.3), DataStore 1.2.1 |
+| Testing | JUnit 5 (mannodermaus plugin) + fakes + Turbine + Robolectric + Compose Preview Screenshot Testing |
+| Linting | ktlint 1.8 + detekt 1.23.8 + Android Lint (zero warnings) |
+| Build | Gradle 9.8.2 + AGP 9.4.0, Kotlin DSL, Version Catalogs, `build-logic/` convention plugins |
 | Concurrency | Kotlin Coroutines + Flow |
+| SDK | compileSdk / targetSdk 36, minSdk 26 |
 | Navigation | Navigation 3 (`NavDisplay` + `@Serializable` `NavKey`s) |
-| Images | Coil |
+| Images | Coil 3 |
 | CI/CD | GitHub Actions |
+
+> Full version table: [Tools/gradle.md → ARC Labs 2026 Stack](Tools/gradle.md#-arc-labs-2026-stack-reference-table).
 
 ## Repository Structure
 
@@ -134,7 +137,7 @@ Browse the documentation by category:
 | State Management | @Observable | ViewModel + StateFlow |
 | DI | Manual (init params) | Hilt (@Inject) |
 | Navigation | `NavigationStack` + `navigationDestination` | Navigation 3 (`NavDisplay` + `NavKey`) |
-| Testing | Swift Testing | JUnit 5 + MockK + Turbine |
+| Testing | Swift Testing | JUnit 5 + fakes + Turbine |
 | Linting | SwiftLint + SwiftFormat | ktlint + detekt |
 | Build System | SPM (Package.swift) | Gradle (build.gradle.kts) |
 | Documentation | DocC | Dokka |

@@ -105,21 +105,25 @@ The Domain layer should be a **pure Kotlin** module — not an Android library m
 ```kotlin
 // domain/build.gradle.kts
 plugins {
-    id("org.jetbrains.kotlin.jvm")
-    id("org.jetbrains.kotlin.kapt")
+    alias(libs.plugins.kotlin.jvm)   // no kapt: the domain has no annotation processing at all
 }
 
 dependencies {
-    // Pure Kotlin dependencies only
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
-    implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.5.0")
-    implementation("javax.inject:javax.inject:1")
+    // Pure Kotlin dependencies only (versions: Tools/gradle.md 2026 stack table)
+    implementation(libs.kotlinx.coroutines.core)
+    implementation(libs.javax.inject)
+    // kotlinx-datetime only if needed — not pinned in the 2026 stack, verify before use
 
-    // Testing
-    testImplementation("org.junit.jupiter:junit-jupiter:5.10.1")
-    testImplementation("io.mockk:mockk:1.13.8")
-    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")
-    testImplementation("app.cash.turbine:turbine:1.0.0")
+    // Testing — fakes, not mocks
+    testImplementation(platform(libs.junit.bom))
+    testImplementation(libs.junit.jupiter)
+    testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.turbine)
+    testRuntimeOnly(libs.junit.platform.launcher)
+}
+
+tasks.test {
+    useJUnitPlatform()
 }
 ```
 

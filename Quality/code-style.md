@@ -786,12 +786,12 @@ indent_size = 2
 ```kotlin
 // build.gradle.kts (project-level)
 plugins {
-    id("org.jlleitschuh.gradle.ktlint") version "12.1.2"
+    alias(libs.plugins.ktlint)   // plugin version: see the version catalog (verify before use)
 }
 
 // Configure ktlint
 ktlint {
-    version.set("1.5.0")
+    version.set("1.8.0")         // ktlint engine 1.8 — ARC Labs 2026 stack
     android.set(true)
     verbose.set(true)
     outputToConsole.set(true)
@@ -1002,7 +1002,7 @@ coroutines:
 ```kotlin
 // build.gradle.kts (project-level)
 plugins {
-    id("io.gitlab.arturbosch.detekt") version "1.23.7"
+    alias(libs.plugins.detekt)   // detekt 1.23.8 via the version catalog
 }
 
 detekt {

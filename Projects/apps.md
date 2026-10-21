@@ -147,67 +147,70 @@ feature/home/
 
 ### Required Dependencies
 
+Versions come from the canonical [2026 stack table](../Tools/gradle.md#-arc-labs-2026-stack-reference-table); this table only says *what* every app uses.
+
 | Library | Purpose | Version |
 |---------|---------|---------|
-| Jetpack Compose | Declarative UI framework | BOM 2024.12.01 |
-| Material3 | Material Design 3 components | via Compose BOM |
-| Hilt | Dependency injection | 2.51.1 |
-| Navigation Compose | Type-safe navigation | 2.8.5 |
-| Lifecycle Runtime Compose | Lifecycle-aware Compose state | 2.8.7 |
-| Lifecycle ViewModel Compose | ViewModel integration | 2.8.7 |
-| Kotlinx Coroutines | Asynchronous programming | 1.9.0 |
-| Kotlinx Serialization | JSON and route serialization | 1.7.3 |
+| Jetpack Compose | Declarative UI framework | BOM 2026.09.00 |
+| Material 3 (Expressive) | Material Design 3 components | 1.5.0-beta01 (explicit pin over the BOM) |
+| material3-adaptive / navigation-suite | Adaptive layouts, bar ↔ rail | 1.3.0 / via material3 |
+| Hilt | Dependency injection (KSP) | 2.60.1 |
+| Navigation 3 | Back stack navigation | 1.2.0 |
+| Lifecycle (runtime-compose, viewmodel-compose, viewmodel-navigation3) | Lifecycle-aware state, ViewModel per entry | 2.11.0 |
+| Room 3 | Local database (single source of truth) | 3.0.3 |
+| DataStore | Preferences | 1.2.1 |
+| Kotlinx Coroutines | Asynchronous programming | 1.11 |
+| Kotlinx Serialization | Keys, DTOs | 1.12 |
+| Firebase BoM | Auth, Firestore, Functions, Remote Config, Analytics, App Check, AI | 35.0.2 |
 
 ### Optional Dependencies
 
 | Library | Purpose | When to Use |
 |---------|---------|-------------|
-| Retrofit + OkHttp | HTTP networking | API calls |
-| Room | SQLite database | Local persistence |
-| DataStore | Preferences storage | Settings, simple key-value state |
-| Coil | Image loading and caching | Remote or local images |
-| Paging 3 | Pagination | Large lists from API or DB |
-| WorkManager | Background work | Sync, uploads, scheduled tasks |
-| Accompanist | Compose utilities | Permissions, system UI |
+| Coil 3 | Image loading and caching | Local/content-URI images; remote images need a network artifact (ask first) |
+| Credential Manager + googleid | Sign in with Google | Apps with Google sign-in |
+| RevenueCat (`purchases`, `purchases-ui`) | Subscriptions, paywall | Apps with premium tiers |
+| maps-compose | Maps | Apps with map screens |
+| WorkManager | Background work | Scheduled reminders, deferred tasks |
+| Paging 3 | Pagination | Large lists from DB |
+| Retrofit 3 + OkHttp 5 | HTTP networking | **Only** once a Vapor backend exists (v1 apps have no HTTP client) |
+
+> Anything not in the [third-party allowlist](../CLAUDE.md#third-party-allowlist) (e.g. Accompanist, Timber, MockK, Truth) needs explicit approval before it is added.
 
 ### build.gradle.kts Dependencies Block
 
 ```kotlin
 dependencies {
-    // Compose BOM
-    val composeBom = platform("androidx.compose:compose-bom:2024.12.01")
-    implementation(composeBom)
-    androidTestImplementation(composeBom)
+    // Compose (BOM + explicit material3 pin for M3 Expressive)
+    implementation(platform(libs.compose.bom))
+    androidTestImplementation(platform(libs.compose.bom))
+    implementation(libs.bundles.compose)
+    implementation(libs.compose.material3.navigation.suite)
+    debugImplementation(libs.bundles.compose.debug)
 
-    // Compose
-    implementation("androidx.compose.ui:ui")
-    implementation("androidx.compose.ui:ui-graphics")
-    implementation("androidx.compose.ui:ui-tooling-preview")
-    implementation("androidx.compose.material3:material3")
-    debugImplementation("androidx.compose.ui:ui-tooling")
-    debugImplementation("androidx.compose.ui:ui-test-manifest")
+    // Navigation 3 + Lifecycle
+    implementation(libs.bundles.navigation)
+    implementation(libs.bundles.lifecycle)
 
-    // Navigation
-    implementation("androidx.navigation:navigation-compose:2.8.5")
-
-    // Lifecycle
-    implementation("androidx.lifecycle:lifecycle-runtime-compose:2.8.7")
-    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.7")
-
-    // Hilt
-    implementation("com.google.dagger:hilt-android:2.51.1")
-    ksp("com.google.dagger:hilt-android-compiler:2.51.1")
-    implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
+    // Hilt (KSP — never kapt)
+    implementation(libs.hilt.android)
+    ksp(libs.hilt.compiler)
+    implementation(libs.hilt.lifecycle.viewmodel.compose)
 
     // Kotlinx Serialization
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
+    implementation(libs.kotlinx.serialization.json)
 
-    // Testing
-    testImplementation("org.junit.jupiter:junit-jupiter:5.10.3") // # verify latest
-    testImplementation("io.mockk:mockk:1.13.13")
-    testImplementation("app.cash.turbine:turbine:1.2.0")
-    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.9.0")
-    androidTestImplementation("androidx.compose.ui:ui-test-junit4")
+    // Firebase
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.auth)
+    implementation(libs.firebase.firestore)
+
+    // Testing — fakes from :core:testing, no mocking library by default
+    testImplementation(platform(libs.junit.bom))
+    testImplementation(libs.bundles.testing)
+    testRuntimeOnly(libs.junit.platform.launcher)
+    testImplementation(project(":core:testing"))
+    androidTestImplementation(libs.compose.ui.test.junit4)
 }
 ```
 

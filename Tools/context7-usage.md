@@ -251,21 +251,19 @@ When dependency versions matter (e.g., for libs.versions.toml), use Context7 to 
 ```
 Query: "What is the latest stable version of [library]?"
 
-Libraries to verify:
-- Kotlin: 2.0.21  # verify latest
-- Compose BOM: 2024.12.01  # verify latest
-- Hilt: 2.51.1  # verify latest
-- Room: 2.6.1  # verify latest
-- Retrofit: 2.9.0  # verify latest
-- OkHttp: 4.12.0  # verify latest
-- Coil: 2.7.0  # verify latest
-- Navigation Compose: 2.8.5  # verify latest
-- Kotlinx Serialization: 1.7.3  # verify latest
-- Kotlinx Coroutines: 1.9.0  # verify latest
-- JUnit 5: 5.10.3  # verify latest
-- MockK: 1.13.13  # verify latest
-- Turbine: 1.2.0  # verify latest
+Baseline: the ARC Labs 2026 stack table in Tools/gradle.md (verified 2026-10-21)
+- Kotlin: 2.4.21
+- AGP / Gradle: 9.4.0 / 9.8.2
+- Compose BOM: 2026.09.00 (material3 1.5.0-beta01 pinned explicitly)
+- Navigation 3: 1.2.0
+- Hilt: 2.60.1 (KSP 2.3.12)
+- Room 3: 3.0.3
+- Coil 3: 3.6.3
+- Kotlinx Serialization: 1.12 / Coroutines: 1.11
+- Turbine, Robolectric, JUnit Jupiter: not pinned — verify before use
 ```
+
+> Re-verify before bumping; never copy a version from memory into `libs.versions.toml`.
 
 > **Note**: Versions marked `# verify latest` should be checked against Context7
 > or Maven Central before updating libs.versions.toml.
@@ -344,13 +342,14 @@ entry<ProfileKey> { key ->
 ```toml
 # ❌ Mismatched versions that may cause runtime crashes
 [versions]
-compose-bom = "2024.01.00"  # January 2024
-lifecycle = "2.8.7"          # December 2024 -- may require newer Compose
+compose-bom = "2024.12.01"  # 2024 BOM
+nav3 = "1.2.0"               # Navigation 3 requires compileSdk 36 and a 2026 Compose stack
 
-# ✅ Compatible version set verified via Context7
+# ✅ Compatible version set (ARC Labs 2026 stack, verified 2026-10-21 — see Tools/gradle.md)
 [versions]
-compose-bom = "2024.12.01"  # December 2024 # verify latest
-lifecycle = "2.8.7"          # Compatible with December BOM # verify latest
+compose-bom = "2026.09.00"
+nav3 = "1.2.0"
+lifecycle = "2.11.0"
 ```
 
 ---
