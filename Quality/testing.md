@@ -1936,13 +1936,14 @@ suspend fun <T> Flow<T>.collectAll(scope: TestScope): List<T> {
 
 ## 📱 Room DAO Testing
 
-Room DAOs should be tested with an in-memory database. These are instrumented tests that run on a device or emulator.
+Room 3 DAOs should be tested with an in-memory database against a real SQLite engine — instrumented on a device/emulator, or on the JVM with Robolectric. Room 3 requires a `SQLiteDriver`; verify the `inMemoryDatabaseBuilder` overload for room3 3.0.3 when implementing.
 
 ### Basic DAO Test Setup
 
 ```kotlin
 import android.content.Context
-import androidx.room.Room
+import androidx.room3.Room
+import androidx.sqlite.driver.AndroidSQLiteDriver
 import androidx.test.core.app.ApplicationProvider
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.AfterEach
@@ -1962,10 +1963,9 @@ class UserDaoTest {
     @BeforeEach
     fun setup() {
         val context = ApplicationProvider.getApplicationContext<Context>()
-        database = Room.inMemoryDatabaseBuilder(
-            context,
-            AppDatabase::class.java,
-        ).allowMainThreadQueries().build()
+        database = Room.inMemoryDatabaseBuilder<AppDatabase>(context = context)
+            .setDriver(AndroidSQLiteDriver())
+            .build()
 
         userDao = database.userDao()
     }

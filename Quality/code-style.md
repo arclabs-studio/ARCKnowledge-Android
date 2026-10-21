@@ -1072,7 +1072,6 @@ import androidx.compose.runtime.Composable
 import androidx.lifecycle.ViewModel
 
 // 6. Third-party libraries
-import com.google.gson.Gson
 import dagger.hilt.android.lifecycle.HiltViewModel
 import retrofit2.http.GET
 

@@ -77,10 +77,12 @@ Use for: @HiltViewModel, @AndroidEntryPoint, @Module, @InstallIn,
 - "Custom Hilt scope for feature modules"
 - "Hilt AssistedInject setup"
 
-### Room
+### Room 3
+
+> ARC Labs uses **Room 3** (`androidx.room3`, KSP-only, driver-based, coroutine DAOs). Many answers still describe Room 2 (`androidx.room`, `SupportSQLiteDatabase`, `room-ktx`) — check the package before copying.
 
 ```
-Query: "Android Room Database"
+Query: "Android Room 3 Database (androidx.room3)"
 Use for: @Entity, @Dao, @Database, @Query, migrations,
          TypeConverters, Flow queries, testing
 ```
@@ -136,10 +138,12 @@ Use for: NavDisplay, NavBackStack, NavKey, entryProvider,
 - "Navigation 3 deep links with UriDeepLinkMatcher"
 - "NavigationSuiteScaffold with Navigation 3 multiple back stacks"
 
-### Coil
+### Coil 3
+
+> ARC Labs uses **Coil 3** (`io.coil-kt.coil3`, 3.6.3). Coil 2 answers (`io.coil-kt`, `coil.compose.*`, `result.drawable`) are outdated — make sure the docs you get are for Coil 3. Remote URLs need a separate `coil-network-*` artifact.
 
 ```
-Query: "Coil Image Loading"
+Query: "Coil 3 Image Loading"
 Use for: AsyncImage, ImageRequest, transformations,
          caching, placeholder/error handling
 ```

@@ -272,7 +272,7 @@ If the project CLAUDE.md doesn't mention MCP servers, agents won't know to use t
 // ✅ Agent uses Context7 for current documentation
 "Let me check the Room documentation via Context7..."
 [resolves library ID, fetches current docs]
-"According to the Room 2.6.1 documentation..."
+"According to the Room 3.0.3 documentation..."
 ```
 
 ---
