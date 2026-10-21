@@ -4,6 +4,8 @@
 
 ARCKnowledge-Android guides AI agents (primarily Claude Code) in building high-quality Android applications using Kotlin, Jetpack Compose, and Clean Architecture. It is the Android counterpart to [ARCKnowledge](https://github.com/arclabs-studio/ARCKnowledge) (iOS/Swift).
 
+**Version:** 0.2.0 — 2026 stack refresh (see [CHANGELOG](CHANGELOG.md)).
+
 ---
 
 ## Philosophy
@@ -113,8 +115,8 @@ git clone https://github.com/arclabs-studio/ARCKnowledge-Android.git
 
 The entry point is **CLAUDE.md**. It provides:
 - Core philosophy and values
-- Available skills with slash commands
-- Critical rules (never break)
+- Skill routing (ARC Android skills + the official `android/skills` plugin)
+- Critical rules and binding rules (zero warnings, third-party allowlist, modern APIs, secrets, tooling policy, tests)
 - Quick architecture reference with code examples
 - Code style and testing essentials
 
