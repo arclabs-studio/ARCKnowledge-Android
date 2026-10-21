@@ -37,6 +37,7 @@ v0.1.0 was well structured but pinned a 2024 stack (Kotlin 2.0.21, AGP 8.7, Comp
 | Tooling | `arcdevtools-setup`, `setup-skills.sh` do not exist | Real `arc-setup`, repository layout and Makefile targets |
 | Projects | FavRes-Android "Planned"; non-existent ARC*-Android libraries | FavRes-Android "In progress"; libraries "planned — extracted from FavRes-Android `:core:*`" |
 | Changelog | Entry labelled 1.0.0 while the released tag is v0.1.0 | Entry relabelled 0.1.0 |
+| SDK | compileSdk 36 while Compose BOM 2026.09.00, material3 1.5.0-beta01, Nav3 1.2.0, Lifecycle 2.11.0 and core 1.19.1 declare `minCompileSdk` 37 | compileSdk 37 / targetSdk 36 (confirmed 2026-10-21; same pair as Google's Now in Android) across `Tools/gradle.md`, `Tools/android-studio.md`, `Quality/module-structure.md`, `Architecture/navigation-3.md`, `README.md` |
 
 ---
 
@@ -48,7 +49,6 @@ Still open (each marked "verify" where it appears):
 
 | Item | Where |
 |------|-------|
-| **compileSdk 37** — Compose BOM 2026.09.00, material3 1.5.0-beta01, Nav3 1.2.0, Lifecycle 2.11.0 and core 1.19.1 declare `minCompileSdk` 37; docs keep 36 with a "pending" note until the user confirms (targetSdk stays 36) | `Tools/gradle.md`, `Tools/android-studio.md`, `Quality/module-structure.md`, `Architecture/navigation-3.md`, `README.md` |
 | Versions not in the verified catalog: Dokka, kotlinx-datetime, kotlinx-collections-immutable, baselineprofile plugin, Retrofit 3 / OkHttp 5 | `Quality/documentation.md`, `Layers/domain.md`, `Quality/compose-performance.md`, `Tools/gradle.md` |
 | `NavigationSuiteScaffold` overload in material3 1.5.0-beta01; `rememberViewModelStoreNavEntryDecorator` generic signature; window-info entry point | `Architecture/navigation-3.md`, `Quality/ui-guidelines.md` |
 | `MaterialExpressiveTheme` parameters and opt-in status | `Quality/ui-guidelines.md`, `Layers/presentation.md`, `Projects/apps.md` |

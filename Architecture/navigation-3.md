@@ -40,7 +40,7 @@ The mental model is now almost identical on both platforms: a typed, value-based
 
 ### Requirements
 
-- `compileSdk` **36** or later (ARC Labs uses 36; pending: compileSdk 37 required by Compose 1.12 stack — Nav3 1.2.0 declares `minCompileSdk` 37).
+- `compileSdk` **37** or later (Nav3 1.2.0 declares `minCompileSdk` 37; ARC Labs uses 37).
 - Kotlin Serialization plugin applied to every module that declares keys.
 - Compose-only destinations (Navigation 3 has no Fragment/View destinations).
 

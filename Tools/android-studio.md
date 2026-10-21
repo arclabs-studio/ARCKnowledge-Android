@@ -189,7 +189,7 @@ include(":feature-profile")
 
 | Setting | Value | Notes |
 |---------|-------|-------|
-| `compileSdk` | 36 | Android 16 — pending: compileSdk 37 required by Compose 1.12 stack |
+| `compileSdk` | 37 | required by the Compose 1.12 stack (`minCompileSdk` 37) |
 | `minSdk` | 26 | Android 8.0 |
 | `targetSdk` | 36 | Google Play requires targetSdk ≥ 36 for updates since 2026-08-31 |
 
@@ -223,7 +223,7 @@ plugins {
 
 android {
     namespace = "com.example.myapp"
-    compileSdk = 36   // pending: compileSdk 37 required by Compose 1.12 stack
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "com.example.myapp"
@@ -1255,7 +1255,7 @@ Use this checklist when setting up a new project or onboarding to an existing on
 
 ### Project Configuration
 
-- [ ] `compileSdk` is set to 36 (pending: compileSdk 37 required by Compose 1.12 stack)
+- [ ] `compileSdk` is set to 37
 - [ ] `minSdk` is set to 26
 - [ ] `targetSdk` is set to 36
 - [ ] Kotlin version is 2.4.21 (AGP 9 built-in Kotlin)

@@ -137,8 +137,8 @@ core:domain -> core:model (pure Kotlin, no Android dependencies)
 | Language | Kotlin (K2) | 2.4.21 |
 | Build | Android Gradle Plugin / Gradle | 9.4.0 / 9.8.2 |
 | JDK | JBR bundled with Android Studio (currently 25) for the IDE/CLI; **Gradle daemon pinned to JDK 21** (`gradle/gradle-daemon-jvm.properties` + foojay resolver) because detekt 1.23.8 fails on JDK 25 · bytecode target `jvmTarget` 17 | — / 21 |
-| SDK | `compileSdk` = `targetSdk` | 36 |
-| SDK | ⚠️ pending: compileSdk 37 required by Compose 1.12 stack (BOM 2026.09.00, material3 1.5.0-beta01, Nav3 1.2.0 declare `minCompileSdk` 37) — awaiting confirmation; targetSdk stays 36 | — |
+| SDK | `compileSdk` — Compose BOM 2026.09.00, material3 1.5.0-beta01, Nav3 1.2.0, Lifecycle 2.11.0 and core 1.19.1 declare `minCompileSdk` 37 (confirmed 2026-10-21; Google's Now in Android builds with the same pair) | 37 |
+| SDK | `targetSdk` | 36 |
 | SDK | `minSdk` | 26 |
 | Annotation processing | KSP (KSP2) — **no kapt** | 2.3.12 |
 | UI | Compose BOM | 2026.09.00 |
@@ -182,7 +182,7 @@ agp = "9.4.0"
 ksp = "2.3.12"
 
 # SDK
-compileSdk = "36"                   # pending: compileSdk 37 required by Compose 1.12 stack
+compileSdk = "37"                   # minCompileSdk of the Compose 1.12 stack
 targetSdk = "36"
 minSdk = "26"
 

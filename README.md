@@ -30,7 +30,7 @@ ARCKnowledge-Android guides AI agents (primarily Claude Code) in building high-q
 | Linting | ktlint 1.8 + detekt 1.23.8 + Android Lint (zero warnings) |
 | Build | Gradle 9.8.2 + AGP 9.4.0, Kotlin DSL, Version Catalogs, `build-logic/` convention plugins |
 | Concurrency | Kotlin Coroutines + Flow |
-| SDK | compileSdk / targetSdk 36, minSdk 26 (pending: compileSdk 37 required by Compose 1.12 stack) |
+| SDK | compileSdk 37 / targetSdk 36, minSdk 26 |
 | Navigation | Navigation 3 (`NavDisplay` + `@Serializable` `NavKey`s) |
 | Images | Coil 3 |
 | CI/CD | GitHub Actions |
