@@ -251,7 +251,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.arclabs.app.feature.home.HomeUiState
 import com.arclabs.app.feature.home.HomeViewModel
 
@@ -786,12 +786,12 @@ indent_size = 2
 ```kotlin
 // build.gradle.kts (project-level)
 plugins {
-    id("org.jlleitschuh.gradle.ktlint") version "12.1.2"
+    alias(libs.plugins.ktlint)   // org.jlleitschuh.gradle.ktlint 14.2.0
 }
 
 // Configure ktlint
 ktlint {
-    version.set("1.5.0")
+    version.set("1.8.0")         // ktlint engine 1.8 — ARC Labs 2026 stack
     android.set(true)
     verbose.set(true)
     outputToConsole.set(true)
@@ -1002,7 +1002,7 @@ coroutines:
 ```kotlin
 // build.gradle.kts (project-level)
 plugins {
-    id("io.gitlab.arturbosch.detekt") version "1.23.7"
+    alias(libs.plugins.detekt)   // detekt 1.23.8 via the version catalog
 }
 
 detekt {
@@ -1072,7 +1072,6 @@ import androidx.compose.runtime.Composable
 import androidx.lifecycle.ViewModel
 
 // 6. Third-party libraries
-import com.google.gson.Gson
 import dagger.hilt.android.lifecycle.HiltViewModel
 import retrofit2.http.GET
 

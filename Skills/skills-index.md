@@ -1,267 +1,133 @@
 # Skills Index
 
-**Skills are knowledge containers that provide specialized guidance for specific tasks. Agents are autonomous executors that use tools to complete workflows. This index helps you find the right resource.**
+**Skills are AI agent context files that provide specialized knowledge for specific tasks. ARC Labs Android work uses two families: the official Google `android/skills` plugin for API detail, and four ARC Labs skills (plus two agents) for house rules and verification. Skills are knowledge containers that load guidance; agents are autonomous executors that use tools to complete a workflow. This index helps you find the right one.**
+
+---
+
+## Skill Sources Overview
+
+| Source | Type | Focus | Count |
+|--------|------|-------|-------|
+| **ARC Labs** (this repo's `.claude/skills/`; agents in ARCAgentStack `config/agents/`) | Internal standards | House rules, testing doctrine, verification loop, CLI policy | 4 skills + 2 agents |
+| **Google** (`android/skills` Claude plugin, v1.0.16) | Official | API detail and migrations across the Android platform | 33 skills |
+| **MCP / docs** | Documentation | Context7 (`/websites/developer_android_develop_ui_compose`), `android docs` | — |
+
+**Precedence:** Google's skills win on *how an API behaves*; ARC skills win on *house rules* (architecture, allowlist, zero warnings, testing doctrine). If they contradict each other, say so instead of silently picking one.
+
+> The `/arc-android-*`, `/arc-*-layer`, `/arc-tdd-patterns`, … skills and the 13 agents (`arc-kotlin-tdd`, `arc-gradle-manager`, `arc-room-migration`, …) listed in earlier versions of this index (1.0.0 and 0.2.0) have no definition files in ARCAgentStack, `~/.claude` or this repository, and have been removed from the routing (see [AGENTS.md](../AGENTS.md)).
 
 ---
 
 ## Quick Decision Guide
 
 ```
-Need to...                                 Use
--------------------------------------------------------------------
-Set up a new project/module                /arc-project-setup
-Design architecture for a feature          /arc-android-architecture
-Write Composables or ViewModels            /arc-presentation-layer
-Implement API calls, Room, DataStore       /arc-data-layer
-Write or review tests                      /arc-tdd-patterns
-Review code quality, lint, docs            /arc-quality-standards
-Final review before merge                  /arc-final-review
-Audit entire project quality               /arc-audit
-Make commits, create PRs                   /arc-workflow
-Set up CI/CD workflows                     /arc-github-actions-ci
-Project memory across sessions             /arc-memory
-Parallel feature development               /arc-worktrees-workflow
-
-Implement a feature with TDD (delegated)   → arc-kotlin-tdd agent
-Review code (delegated)                    → arc-kotlin-reviewer agent
-Debug a build/test failure                 → arc-kotlin-debugger agent
-Manage Gradle dependencies                 → arc-gradle-manager agent
-Navigate the codebase                      → arc-project-explorer agent
-Start a Linear ticket                      → arc-linear-bridge agent
-Publish a PR                               → arc-pr-publisher agent
-Prepare a release                          → arc-release-orchestrator agent
+Need to...                                      Use
+-----------------------------------------------------------------------------------------
+Write or change any Android code                android-doctrine (+ the Google skill for the API area)
+Navigation, back stack, dialogs, sheets         navigation-3 · predictive back: navigation-event
+Bar <-> rail, list-detail, window sizes          adaptive
+Insets, edge-to-edge, IME                       edge-to-edge
+Component theming / Styles API                  styles
+Recomposition and performance                   jetpack-compose-performance
+Write or audit tests                            android-testing-doctrine (+ testing-setup)
+Build, install, run, emulator, CLI              arc-cli-android (+ android-cli)
+Verify a change (build/tests/screenshots/app)   android-verify / agent arc-verify-android
+Close a UI work unit                            agent arc-audit-material
+AGP 9 / Gradle migration                        agp-9-upgrade
+R8 keep rules                                   r8-analyzer
+Permissions / intents security                  android-permissions-security / android-intent-security
+Play Billing upgrade (under RevenueCat)         play-billing-library-version-upgrade
+Play policy check before release                play-policy-insights
+Commits, branches, PRs                          Workflow/git-commits.md, Workflow/git-branches.md
 ```
 
 ---
 
-## ARC Labs Skills (Internal Standards)
+## ARC Labs Skills (`.claude/skills/`)
 
-Skills live in `.claude/skills/<name>/SKILL.md` and are symlinked by ARCDevTools-Android.
+Thin skills that encode ARC Labs house rules; API detail is delegated to the Google plugin. They live in this repository's `.claude/skills/` and are symlinked into each project's `.claude/skills/` by ARCDevTools-Android's `arc-setup` (`scripts/setup-skills.sh`), like ARCKnowledge on iOS.
 
-### /arc-android-architecture
-**Purpose**: Clean Architecture, MVVM, Hilt DI, Navigation Compose
+### `android-doctrine`
 
-- Clean Architecture layer rules (Presentation → Domain ← Data)
-- ViewModel + StateFlow + sealed interface UiState
-- Hilt module organization (@HiltViewModel, @Module, @Provides, @Binds)
-- Type-safe Navigation Compose 2.8+ with @Serializable routes
-- SOLID principles with Kotlin examples, dependency rule enforcement
+**Purpose**: ARC's binding Android ruleset — read **before writing or modifying any Android code**.
 
-**References**: Architecture/clean-architecture.md, mvvm.md, solid-principles.md, dependency-injection.md, navigation-compose.md
+**Covers**: layers (UI → Domain ← Data), modules (`app` · `domain` · `core:*` · `feature:*`, no feature → feature), `build-logic/` convention plugins, Navigation 3 rules, Material 3 Expressive theming (dynamic color off), Hilt + KSP (never kapt), zero business logic in composables, previews from centralized sample data, platform rules (edge-to-edge, per-app language, 16 KB pages, accessibility), zero warnings, third-party allowlist, modern APIs only, secrets, concurrency. Includes the routing table to Google skills.
 
----
+### `android-testing-doctrine`
 
-### /arc-presentation-layer
-**Purpose**: Composables, @HiltViewModel, StateFlow, Material Design 3
+**Purpose**: What makes an Android test real, and the gate every test must pass — read **before creating any `*Test.kt`**.
 
-- Screen/Content composable split pattern
-- `collectAsStateWithLifecycle` (not `collectAsState`)
-- Material Design 3 dynamic color + dark theme
-- Compose performance: @Stable/@Immutable, derivedStateOf, remember
-- Accessibility: contentDescription, Modifier.semantics, 48dp touch targets
-- Clarification: `remember{}` for ephemeral UI state; business state in ViewModel
+**Covers**: behavioral tests against an independent oracle, deleting tautological tests, fakes over mocks, JUnit 5, `runTest`, Turbine, Robolectric + Compose UI tests, Compose Preview Screenshot Testing, coverage, TDD, shared golden test vectors with iOS.
 
-**References**: Layers/presentation.md
+### `android-verify`
 
----
+**Purpose**: The verification loop — the external verifier for Kotlin/Compose work.
 
-### /arc-data-layer
-**Purpose**: Repositories, Retrofit, Room, DataStore, DTOs
+**Covers**: zero-warning `./gradlew build`, `testDebugUnitTest`, `validateDebugScreenshotTest`, then install and walk the app on a headless emulator with the `android` CLI (`android run`, `android layout`, `android screen capture`). The main agent iterates until it is green.
 
-- Repository pattern with @Binds Hilt module
-- Retrofit + kotlinx.serialization + OkHttp interceptors
-- Room: @Entity, @Dao, @Database, migrations, exportSchema = true
-- DataStore Preferences + error handling
-- DTO/Entity/mapper separation, network-first vs cache-first caching
-- Sealed DomainError hierarchy
+### `arc-cli-android`
 
-**References**: Layers/data.md
+**Purpose**: ARC's tooling policy and companion for the official `android` CLI — read **before any Android tooling task**.
+
+**Covers**: `./gradlew` + `android` CLI as the sanctioned tools (the Xcode MCP equivalent), Android Studio GUI optional, `mobile-mcp` only when the CLI cannot do it; key commands, recipes and gotchas. Google's `android-cli` skill is the command reference.
+
+### Agents
+
+| Agent | Role | When |
+|---|---|---|
+| `arc-verify-android` | Runs the `android-verify` loop and reports pass/fail | After any change; iterate until it returns green |
+| `arc-audit-material` | Audits UI work against Material 3 / platform rules / TalkBack | Before closing any UI-affecting work unit — one blocker and the unit does not close |
+
+See [AGENTS.md](../AGENTS.md) for agent documentation.
 
 ---
 
-### /arc-tdd-patterns
-**Purpose**: JUnit 5, MockK, Turbine, TDD workflow
+## Google Skills (`android/skills` plugin)
 
-**Stack (mandatory — never substitute)**:
-- JUnit 5: `@Test`, `@Nested`, `@DisplayName` — never JUnit 4
-- MockK: `every {}`, `coEvery {}`, `verify {}`, `coVerify {}`
-- Turbine: `.test { awaitItem() }`, `cancelAndIgnoreRemainingEvents()`
-- `runTest` + `StandardTestDispatcher` / `UnconfinedTestDispatcher`
-- `createSUT()` factory pattern, Given-When-Then structure
+Official, AI-optimized instructions from developer.android.com. Install once per machine:
 
-**References**: Quality/testing.md
+```
+/plugin marketplace add android/skills
+/plugin install android-skills@android-skills
+```
 
----
+(or `android skills add --all` with the Android CLI). Invoke as `android-skills:<name>`.
 
-### /arc-quality-standards
-**Purpose**: 9-domain review checklist, ktlint/detekt, accessibility, M3
-
-- Architecture, Presentation, Domain, Data, Testing, Code Style, Documentation, Accessibility, Concurrency
-- ktlint: `./gradlew ktlintCheck` / `./gradlew ktlintFormat`
-- detekt: `./gradlew detekt`
-- WCAG AA compliance, 48dp touch targets, edge-to-edge with WindowInsets
-- KDoc standards for public APIs
-
-**References**: Quality/code-review.md, code-style.md, documentation.md, readme-standards.md, module-structure.md, ui-guidelines.md, compose-performance.md
-
----
-
-### /arc-workflow
-**Purpose**: Git commits, branches, PRs, Plan Mode
-
-- Conventional Commits: `feat(compose): add restaurant card`
-- Branch naming: `feature/ARC-123-description`
-- PR template with summary, type, testing, checklist
-- Plan Mode: when and how to use
-- Pre-PR gates: `./gradlew ktlintCheck`, `./gradlew test`
-
-**References**: Workflow/git-commits.md, git-branches.md, plan-mode.md
-
----
-
-### /arc-project-setup
-**Purpose**: Version catalog, Gradle templates, multi-module, CI/CD
-
-- Complete `libs.versions.toml` with 2025 versions
-- `settings.gradle.kts` + `build.gradle.kts` templates (app, feature, library)
-- Multi-module structure (`:app`, `:feature:*`, `:core:*`)
-- ARCDevTools-Android git submodule integration
-- Gradle performance: configuration cache, build cache, maxParallelForks
-
-**References**: Tools/gradle.md, arcdevtools-android.md, android-studio.md, Projects/apps.md, libraries.md
-
----
-
-### /arc-final-review
-**Purpose**: Guided pre-merge review (you conduct it with Claude's help)
-
-- 8-step process: diff → categorize → domain checklists → verify
-- Verification gates: `./gradlew test ktlintCheck detekt lint`
-- Output format: 🔴 Critical / 🟡 Important / 🔵 Improvements
-
-> **Distinction**: For fully autonomous review, use the `arc-kotlin-reviewer` agent instead.
-
----
-
-### /arc-audit
-**Purpose**: Full project health check with A-F compliance grading
-
-- 9 domains: Architecture (20pts), Testing (20pts), Presentation (15pts), Data (15pts), Code Style (10pts), Domain (10pts), Documentation (5pts), Accessibility (5pts), Concurrency (flags)
-- Grading: A = 90-100 / B = 75-89 / C = 60-74 / D = 45-59 / F = <45
-- Run quarterly, pre-release, or when onboarding to a project
-
----
-
-### /arc-github-actions-ci
-**Purpose**: GitHub Actions CI/CD for Android builds and releases
-
-- `android-test.yml` — JUnit test runner with Gradle caching
-- `android-lint.yml` — ktlintCheck + detekt + lint
-- `android-release.yml` — signed AAB build from GitHub Secrets
-- `android-distribute.yml` — Firebase App Distribution
-- Versioning strategies, secrets reference table
-
----
-
-### /arc-memory
-**Purpose**: Persistent context across Claude Code sessions
-
-- `/memory` directory structure (README, ARCHITECTURE, DECISIONS, PATTERNS, DEPENDENCIES, features/)
-- Session start/end workflow
-- CLAUDE.md integration
-- Templates in `.claude/skills/arc-memory/templates/`
-
----
-
-### /arc-worktrees-workflow
-**Purpose**: Parallel feature development with git worktrees
-
-- Worktree creation with submodule initialization
-- Shell aliases: `zwn ARC-123`, `zwr ARC-123`, `zwl`
-- Maximum 3 active worktrees
-- Cleanup after PR merge
-
----
-
-### /arc-android-security-audit
-**Purpose**: OWASP Mobile Top 10 vulnerability scanner for Android apps
-
-- Context detection (manifest, deps, permissions → identify risk profile and active verticals)
-- 10 universal categories: Storage, Network/TLS, IPC, Auth, Crypto, WebView, Logging, Binary, UI, Supply Chain
-- 4 vertical checklists: 🏦 Fintech, 🏥 Health/HIPAA, 🏢 Enterprise/MDM, 🛒 E-commerce
-- Reporting: 🔴 Critical / 🟡 High / 🔵 Info (aligned with `/arc-final-review`)
-- Kotlin 2.0 + Compose + Hilt + Room remediation examples
-
-> **Adapted from** `MartinPSDev/skills/security/bug-hunter` (Apache-2.0). Attribution preserved in skill frontmatter.
-
----
-
-### /arc-android-coroutines
-**Purpose**: Kotlin Coroutines structured concurrency — scopes, dispatchers, cancellation, exception handling, Flow, testing
-
-- CoroutineScope hierarchy and structured concurrency rules (never GlobalScope in production)
-- Dispatchers (Main, IO, Default, Unconfined) — correct usage per layer; main-safe suspend functions
-- Cancellation propagation: cooperative loops, NonCancellable cleanup, withTimeout semantics
-- Exception handling: SupervisorJob, CoroutineExceptionHandler, launch vs async exception propagation
-- Channels and Flow (cold vs hot, StateFlow, SharedFlow, collectLatest, produce)
-- Android lifecycle integration (viewModelScope, lifecycleScope, repeatOnLifecycle, flowWithLifecycle)
-- Testing with runTest, StandardTestDispatcher, advanceTimeBy, setMain/resetMain
-- 32-entry triage playbook (topic/error → reference file)
-
-**References**: 32 structured practice files in `references/`
-
-> **Adapted from** `santimattius/structured-coroutines/kotlin-coroutines-skill` (MIT). Attribution preserved in skill frontmatter.
-
----
-
-## ARC Labs Agents
-
-Agents autonomously execute complete workflows. See [AGENTS.md](../AGENTS.md) for full documentation.
-
-| Agent | Purpose | Model | R/O |
-|-------|---------|-------|-----|
-| `arc-kotlin-tdd` | TDD feature implementation | Sonnet | No |
-| `arc-kotlin-reviewer` | 9-domain code review report | Sonnet | Yes |
-| `arc-kotlin-debugger` | Build/test failure diagnosis | Sonnet | No |
-| `arc-gradle-manager` | Gradle dependency management | Haiku | No |
-| `arc-project-explorer` | Codebase navigation | Haiku | Yes |
-| `arc-linear-bridge` | Ticket → branch + test skeleton | Haiku | No |
-| `arc-pr-publisher` | PR creation + Linear update | Sonnet | No |
-| `arc-release-orchestrator` | Version bump + release branch | Sonnet | No |
-| `arc-play-distribution` | Firebase App Distribution | Haiku | No |
-| `arc-play-store-listing` | Play Store ASO | Sonnet | No |
-| `arc-room-migration` | Room schema migrations | Sonnet | No |
-| `arc-dependency-auditor` | Dependency health audit | Haiku | Yes |
-| `arc-kotlin-security-auditor` | OWASP Mobile security audit | Sonnet | Yes |
-
----
-
-## Community Skills Integration (Audited)
-
-These external skills were evaluated and selectively absorbed into ARC Labs skills. **Do not install them wholesale** — the following have been audited for conflicts.
-
-### What We Absorbed
-
-| Source | Content Absorbed | Into |
-|--------|-----------------|------|
-| `compose-skill` (aldefy) | 13 Compose reference guides (recomposition, modifiers, performance, theming) | `arc-android-presentation-layer` |
-| `awesome-android-agent-skills` (new-silvermoon) | compose-navigation, compose-performance-audit, android-coroutines, android-retrofit, coil-compose, android-gradle-logic | Multiple skills |
-| `claude-android-ninja` (Drjacky) | Security patterns, JaCoCo config, M3 Adaptive, convention plugins | `arc-android-quality-standards`, `arc-android-project-setup` |
-| `bug-hunter` (MartinPSDev) | OWASP Mobile Top 10 scanner + vertical checklists (Fintech, Health, Enterprise, E-commerce) | Adapted into `arc-android-security-audit` (Apache-2.0 attribution) |
-| `platform-design-skills` (ehmo) | Unique M3 rules: predictive back, edge-to-edge, gesture zones, notification channels | `arc-android-quality-standards`, `arc-android-presentation-layer` |
-| `kotlin-specialist` (Jeffallan) | Coroutines/Flow advanced patterns, DSL idioms | `arc-android-architecture` |
-| `kotlin-coroutines-skill` (santimattius) | Standalone skill: 32 structured concurrency practices + triage playbook (scopes, dispatchers, cancellation, Flow, testing) | `arc-android-coroutines` (standalone) |
-| `claude-android-skill` (dpconde) | `libs.versions.toml` template, `settings.gradle.kts` template | `arc-android-project-setup` |
-
-### Conflicts Found (Excluded)
-
-| Source | Excluded Content | Reason |
-|--------|-----------------|--------|
-| awesome-skills | `android-testing` skill | JUnit 4 conflicts with ARC Labs' JUnit 5 mandate |
-| claude-android-ninja | Testing philosophy (fakes-only, no MockK) | Conflicts with MockK mandate |
-| claude-android-ninja | Navigation3 patterns | Too bleeding-edge; ARC Labs uses Navigation 2.x |
-| claude-android-skill | Testing, optional domain layer | Multiple conflicts with ARC Labs architecture |
-| compose-skill | 5 source code files (~2.3MB) | Would destroy context windows |
+| Area | Skill | What it covers |
+|---|---|---|
+| Build | `agp-9-upgrade` | Migrating to AGP 9: built-in Kotlin, new DSL, KSP/kapt, BuildConfig |
+| Camera | `camerax` | CameraX guidance |
+| Cars | `android-for-cars-parked-apps` | Video, games and browsers for parked cars |
+| Device AI | `appfunctions` | Exposing app workflows as AppFunctions |
+| Device AI | `litert-lm` | On-device open LLMs with LiteRT-LM |
+| Device AI | `litert-runtime` | LiteRT (`.tflite`) inference |
+| Device AI | `ml-kit-genai-prompt-api` | ML Kit GenAI Prompt API |
+| Dev tools | `android-cli` | Installing and using the `android` CLI |
+| Identity | `restore-credentials` | Restore Credentials (Credential Manager) |
+| Identity | `verified-email` | Verified email retrieval |
+| Compose | `adaptive` | Adaptive UI: `NavigationSuiteScaffold`, Nav3 list-detail/supporting-pane scenes, grids |
+| Compose | `jetpack-compose-performance` | Diagnosing and optimizing Compose performance |
+| Compose | `migrate-xml-views-to-jetpack-compose` | XML → Compose migration workflow |
+| Compose | `styles` | Compose Styles API for component theming |
+| Media | `media3-cast-integration` | Google Cast with Media3 |
+| Navigation | `navigation-3` | Nav3 setup, migration from Nav2, recipes (dialogs, bottom sheets, tabs, Hilt ViewModels, results, deep links) |
+| Navigation | `navigation-event` | Back gestures and predictive back animations |
+| Performance | `anr-audit-and-fix` | ANR risk audit and stack-dump diagnosis |
+| Performance | `r8-analyzer` | R8 keep-rule analysis |
+| Play | `engage-sdk-integration` | Play Engage SDK |
+| Play | `play-billing-library-version-upgrade` | Play Billing Library upgrades |
+| Play | `play-policy-insights` | Google Play policy audit |
+| Profilers | `android-profiler` | Recording and analyzing performance data |
+| Security | `android-intent-security` | Intent security |
+| Security | `android-permissions-security` | Permissions and IPC component audit |
+| System | `edge-to-edge` | Adaptive edge-to-edge and insets |
+| System | `glance-canonical-layouts` | Home screen widgets with Glance |
+| Testing | `testing-setup` | Testing strategy, infrastructure, screenshot tests |
+| TV | `leanback-to-compose-tv-migration` | Leanback → Compose for TV |
+| Wear | `wear-compose-m3` | Wear Compose Material 3 |
+| Wear | `wear-widgets` | Wear OS widgets with Glance Wear |
+| XR | `display-glasses-with-jetpack-compose-glimmer` | Projected XR apps for display glasses |
+| XR | `projected-hardware` | Hardware access for projected XR |
 
 ---
 
@@ -269,59 +135,51 @@ These external skills were evaluated and selectively absorbed into ARC Labs skil
 
 | Server | Purpose | Config |
 |--------|---------|--------|
-| **Context7** | Library docs (Compose, Hilt, Room, etc.) | See Tools/mcp-setup.md |
+| **Context7** | Library docs (Compose, Nav3, Hilt, Room 3, etc.) | See Tools/mcp-setup.md |
 | **Linear** | Issue tracking | See Tools/mcp-setup.md |
 | **GitHub** | Branch/PR management | See Tools/mcp-setup.md |
 | **Android Source Explorer** | AOSP + Jetpack source exploration | See Tools/mcp-setup.md |
 | **Android Docs MCP** | developer.android.com access | See Tools/mcp-setup.md |
-| **Mobile MCP** | ADB emulator automation | See Tools/mcp-setup.md |
+| **Mobile MCP** | ADB emulator automation (only when the `android` CLI cannot do it, after asking) | See Tools/mcp-setup.md |
 | **Play Store MCP** | Google Play Console (optional) | See Tools/mcp-setup.md |
-| **Android Skills (Google)** | 6 official skills on-demand via MCP | See Tools/mcp-setup.md and Tools/android-cli.md |
+| **Android Skills (Google)** | The 33 official skills above (`android/skills` plugin) | See Tools/mcp-setup.md and Tools/android-cli.md |
 
 ---
 
 ## Common Scenarios
 
 ### 1. "I need to build a new feature"
-```
-/arc-android-architecture   → Design layers
-/arc-tdd-patterns           → Write failing tests (RED)
-/arc-data-layer             → Implement data access
-/arc-presentation-layer     → Implement UI
-/arc-quality-standards      → Review before PR
-/arc-workflow               → Commit + PR
 
-Or delegate: arc-kotlin-tdd agent handles the full TDD cycle
+```
+android-doctrine            --> Layers, modules, UiState, rules
+android-testing-doctrine    --> Failing tests first (fakes, Turbine, screenshot previews)
+navigation-3 / adaptive     --> Keys, entries, scenes for the new screens
+android-verify              --> Build (zero warnings) → tests → screenshots → emulator
+arc-audit-material          --> Close the UI work unit
 ```
 
 ### 2. "I need to fix a bug"
 ```
-/arc-tdd-patterns           → Write failing test reproducing bug
-/arc-data-layer or
-  /arc-presentation-layer   → Fix in appropriate layer
-/arc-quality-standards      → Verify fix quality
-/arc-workflow               → Commit (fix type)
+android-testing-doctrine    --> Failing test that reproduces the bug
+android-doctrine            --> Fix in the right layer
+android-verify              --> Green loop
 ```
 
-### 3. "I need to review code"
-```
-/arc-quality-standards      → Domain-by-domain checklist
-/arc-final-review           → Final structured review
+### 3. "I need to set up a new project"
 
-Or delegate: arc-kotlin-reviewer agent produces 9-domain report
 ```
-
-### 4. "I need to set up a new project"
-```
-/arc-project-setup          → Project structure + version catalog
-/arc-android-architecture   → Set up Clean Architecture layers
-/arc-github-actions-ci      → Configure CI/CD workflows
-/arc-workflow               → Git branching + hooks
+arc-cli-android             --> android create, SDK, emulator, JAVA_HOME
+android-doctrine            --> Module layout, build-logic, catalog (Tools/gradle.md)
+testing-setup               --> JUnit 5, Robolectric, screenshot tests
+edge-to-edge                --> Insets from day one
 ```
 
-### 5. "I need to add a Room database column"
+### 4. "I need to upgrade the build"
+
 ```
-Delegate to: arc-room-migration agent (most conservative — confirms before any breaking change)
+agp-9-upgrade               --> AGP / built-in Kotlin / DSL migration
+Tools/gradle.md             --> Canonical 2026 version table
+android-verify              --> Zero-warning build + tests
 ```
 
 ---
@@ -337,49 +195,22 @@ Delegate to: arc-room-migration agent (most conservative — confirms before any
 
 ## Creating Custom Skills
 
-Skills live at `.claude/skills/<name>/SKILL.md` with this frontmatter:
-
-```yaml
----
-name: arc-<name>
-description: |
-  Multi-line description with trigger phrases users might say.
-user-invocable: true
-metadata:
-  author: ARC Labs Studio
-  version: "1.0.0"
----
-```
-
-Body structure: Title → Instructions → References → Common Mistakes → Examples → Related Skills
-
-Reference docs go in `.claude/skills/<name>/references/` (copied from the repo's top-level docs).
-
-To add a new skill:
-1. Create `.claude/skills/arc-<name>/SKILL.md`
-2. Copy relevant reference docs into `references/`
-3. Add to this index and to CLAUDE.md skills table
-4. Commit and update ARCDevTools-Android to symlink it
+ARC Android skills are authored in this repository under `.claude/skills/<name>/SKILL.md` (frontmatter `name` + `description` with triggers; see the `arc-agent-authoring` skill for the format), then added to this index and to the CLAUDE.md skills table. Agents are authored in **ARCAgentStack** (`config/agents/`).
 
 ---
 
 ## Coverage Matrix
 
-| Area | ARC Skills | Status |
-|------|-----------|--------|
-| Architecture (Clean, MVVM, Hilt) | Full | ✅ |
-| UI (Jetpack Compose, M3) | Full | ✅ |
-| Data (Room, Retrofit, DataStore) | Full | ✅ |
-| Testing (JUnit 5, MockK, Turbine) | Full | ✅ |
-| CI/CD (GitHub Actions) | Full | ✅ |
-| Code Style (ktlint, detekt) | Full | ✅ |
-| Accessibility (WCAG 2.2, M3) | Full | ✅ |
-| Performance (Compose, Gradle) | Good | ✅ |
-| Memory / Worktrees | Full | ✅ |
-| Security (OWASP Mobile Top 10 + verticals) | Full | ✅ |
-| Concurrency (Coroutines, Flow, Channels) | Full | ✅ |
-| Kotlin Multiplatform | None | ❌ |
-| Macrobenchmark | None | ❌ |
+| Gap | Description | Suggested Source |
+|-----|-------------|------------------|
+| Firebase on Android | Auth, Firestore, Functions, Remote Config, App Check | `arc-mcp-firebase` + Firebase docs via Context7 |
+| RevenueCat on Android | Purchases, Paywall Compose, Customer Center | `arc-mcp-revenuecat` + RevenueCat docs |
+| Room 3 | Migrations, drivers, testing | Context7 / `android docs` (no dedicated skill yet) |
+| Material 3 Expressive | Expressive components and motion | Context7 / `android docs`; audited by `arc-audit-material` |
+| Kotlin Multiplatform | Not covered | — |
+| Macrobenchmark | Not covered | — |
+
+If you identify a repeated workflow that is not covered, open a Linear issue with the label `skill-request`.
 
 ---
 
@@ -387,6 +218,21 @@ To add a new skill:
 
 | Component | Version | Last Updated |
 |-----------|---------|-------------|
-| ARC Labs Skills | 2.2.0 | 2026-04-18 |
-| ARCKnowledge-Android | 1.2.0 | 2026-04-18 |
-| Skills Index | 2.2.0 | 2026-04-18 |
+| Google `android/skills` plugin | 1.0.16 (33 skills) | 2026-10-21 |
+| ARC Android skills (`.claude/skills/`) + agents (ARCAgentStack) | 4 skills + 2 agents | 2026-10-21 |
+| ARCKnowledge-Android | 0.3.0 | 2026-10-21 |
+
+---
+
+## Further Reading
+
+- [CLAUDE.md](../CLAUDE.md) — binding rules and skill routing
+- [Navigation 3](../Architecture/navigation-3.md)
+- [Testing Standards](../Quality/testing.md)
+- [Gradle — 2026 stack table](../Tools/gradle.md)
+- [Git Commits](../Workflow/git-commits.md) · [Git Branches](../Workflow/git-branches.md) · [Plan Mode](../Workflow/plan-mode.md)
+- [Android skills documentation](https://developer.android.com/tools/agents/android-skills)
+
+---
+
+**Note**: Skills are living documents. When you find gaps or outdated information, flag it for updates.

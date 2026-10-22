@@ -10,8 +10,8 @@ The Data Layer exists to:
 
 - **Implement data access and persistence** -- provide the concrete logic for fetching, storing, updating, and deleting data across all sources (remote APIs, local databases, preference stores).
 - **Fulfill Domain repository contracts** -- implement the repository interfaces declared in the Domain Layer, ensuring the Domain never depends on infrastructure details.
-- **Handle API communication** -- manage all networking concerns including Retrofit service definitions, OkHttp client configuration, request/response serialization, interceptors, and authentication headers.
-- **Manage local database operations** -- configure Room databases, define DAOs for structured queries, handle migrations, and provide reactive data observation via Kotlin Flows.
+- **Handle remote communication** -- in v1 apps, through Firebase SDKs only (Auth, Firestore, Functions, Remote Config); once a Vapor backend exists, through Retrofit 3 + OkHttp 5 + the kotlinx.serialization converter (see the networking policy below).
+- **Manage local database operations** -- configure Room 3 databases (the single source of truth), define DAOs for structured queries, handle migrations, and provide reactive data observation via Kotlin Flows.
 - **Implement caching strategies** -- coordinate between remote and local data sources to provide offline-first behavior, cache invalidation, and optimistic updates.
 - **Map DTOs to Domain entities** -- translate between the external data representations (JSON DTOs, Room Entities) and the clean Domain models, ensuring no serialization annotations or database annotations leak into the Domain.
 
@@ -77,9 +77,33 @@ data/
 
 ---
 
-## 🌐 Remote Data Source (Retrofit + OkHttp)
+## 🌐 Networking Policy
 
-The remote data source manages all communication with backend APIs. We use **Retrofit** for type-safe HTTP client generation and **OkHttp** for the underlying HTTP transport with interceptors.
+| Phase | Remote access | HTTP client |
+|---|---|---|
+| **v1 apps** | Firebase SDKs only (Auth, Firestore, Functions, Remote Config, App Check, Firebase AI) wrapped in data sources | **None** — do not add Retrofit/OkHttp/Ktor |
+| **Vapor backend phase** | ARC Labs Vapor API (Firebase ID token validated server-side) | **Retrofit 3 + OkHttp 5 + kotlinx.serialization converter** in a new `:core:network` module (versions: verify before use) |
+
+Third-party API keys (e.g. Google Places) never ship in the app: call them through a server-side proxy (Cloud Function or Vapor).
+
+### Firebase Remote Data Source (v1)
+
+Remote data sources wrap Firebase SDK calls behind small classes so repositories (and tests, through fakes) never touch Firebase types directly.
+
+```kotlin
+class UserProfileRemoteDataSource @Inject constructor(
+    private val firestore: FirebaseFirestore,
+) {
+    suspend fun fetchProfile(uid: String): UserProfileDto? =
+        firestore.collection("users").document(uid).get().await().toObject<UserProfileDto>()
+}
+```
+
+> Verify the Firestore KTX-free APIs (`await()` from `kotlinx-coroutines-play-services`, `toObject`) against Firebase BoM 35.0.2 when implementing — the `-ktx` artifacts were folded into the main modules.
+
+## 🌐 Remote Data Source (Retrofit + OkHttp) — Vapor Phase Only
+
+The patterns below apply **only once a Vapor backend exists**. We use **Retrofit 3** for type-safe HTTP client generation and **OkHttp 5** for the underlying HTTP transport with interceptors. Code samples were written against Retrofit 2 / OkHttp 4; re-verify signatures against Retrofit 3 / OkHttp 5 before use.
 
 ### API Service Interface
 
@@ -353,9 +377,19 @@ object NetworkModule {
 
 ---
 
-## 💿 Local Data Source (Room)
+## 💿 Local Data Source (Room 3)
 
-Room provides a compile-time verified abstraction over SQLite. We use it for structured data persistence with reactive observation through Kotlin Flows.
+Room provides a compile-time verified abstraction over SQLite. ARC Labs uses **Room 3** (`androidx.room3`, 3.0.3) as the single source of truth for structured data, with reactive observation through Kotlin Flows.
+
+Room 3 vs Room 2 (official release notes):
+
+- New package and Maven group: `androidx.room3:room3-runtime`, `androidx.room3:room3-compiler`; classes live in `androidx.room3.*`.
+- **KSP only** and Kotlin code generation only — no kapt, no Java annotation processor.
+- **All database operations are coroutine APIs**: DAO functions are `suspend` (one-shot) or return `Flow` (observation).
+- **No SupportSQLite APIs**: a `SQLiteDriver` is required to build the database; migrations and callbacks receive a `SQLiteConnection`.
+- Gradle plugin `androidx.room3` with a required `schemaDirectory`; commit the exported schemas.
+
+ARC Labs uses the framework-backed `AndroidSQLiteDriver` (no native `.so`, keeps 16 KB page-size compliance trivial). `BundledSQLiteDriver` ships its own SQLite native library — use it only with approval.
 
 ### Room Entity
 
@@ -364,10 +398,10 @@ Room entities define database tables. Each entity maps to a single table with co
 ```kotlin
 package com.arclabs.app.data.models.entity
 
-import androidx.room.ColumnInfo
-import androidx.room.Entity
-import androidx.room.Index
-import androidx.room.PrimaryKey
+import androidx.room3.ColumnInfo
+import androidx.room3.Entity
+import androidx.room3.Index
+import androidx.room3.PrimaryKey
 
 @Entity(
     tableName = "users",
@@ -403,18 +437,18 @@ data class UserEntity(
 
 ### DAO (Data Access Object)
 
-DAOs define the interface for database operations. Room generates the implementation at compile time.
+DAOs define the interface for database operations. Room generates the implementation at compile time (KSP). Every function is either `suspend` or returns `Flow` — blocking DAO functions do not exist in Room 3.
 
 ```kotlin
 package com.arclabs.app.data.datasources.local.dao
 
-import androidx.room.Dao
-import androidx.room.Delete
-import androidx.room.Insert
-import androidx.room.OnConflictStrategy
-import androidx.room.Query
-import androidx.room.Transaction
-import androidx.room.Update
+import androidx.room3.Dao
+import androidx.room3.Delete
+import androidx.room3.Insert
+import androidx.room3.OnConflictStrategy
+import androidx.room3.Query
+import androidx.room3.Transaction
+import androidx.room3.Update
 import com.arclabs.app.data.models.entity.UserEntity
 import kotlinx.coroutines.flow.Flow
 
@@ -501,8 +535,8 @@ interface UserDao {
 ```kotlin
 package com.arclabs.app.data.datasources.local.database
 
-import androidx.room.Database
-import androidx.room.RoomDatabase
+import androidx.room3.Database
+import androidx.room3.RoomDatabase
 import com.arclabs.app.data.datasources.local.dao.UserDao
 import com.arclabs.app.data.datasources.local.dao.RestaurantDao
 import com.arclabs.app.data.models.entity.UserEntity
@@ -527,16 +561,21 @@ abstract class AppDatabase : RoomDatabase() {
 ```kotlin
 package com.arclabs.app.data.datasources.local.database.migrations
 
-import androidx.room.migration.Migration
-import androidx.sqlite.db.SupportSQLiteDatabase
+import androidx.room3.migration.Migration
+import androidx.sqlite.SQLiteConnection
+import androidx.sqlite.execSQL
 
+// Room 3: migrations receive a SQLiteConnection (no SupportSQLiteDatabase).
+// Verify the exact Migration/execSQL signatures against room3 3.0.3 when implementing.
 val MIGRATION_1_2 = object : Migration(1, 2) {
-    override fun migrate(db: SupportSQLiteDatabase) {
-        db.execSQL("ALTER TABLE users ADD COLUMN updated_at INTEGER NOT NULL DEFAULT 0")
-        db.execSQL("ALTER TABLE users ADD COLUMN cached_at INTEGER NOT NULL DEFAULT 0")
+    override fun migrate(connection: SQLiteConnection) {
+        connection.execSQL("ALTER TABLE users ADD COLUMN updated_at INTEGER NOT NULL DEFAULT 0")
+        connection.execSQL("ALTER TABLE users ADD COLUMN cached_at INTEGER NOT NULL DEFAULT 0")
     }
 }
 ```
+
+Prefer `@AutoMigration` declared on `@Database(autoMigrations = [...])` for additive changes; write manual migrations only when Room cannot infer them, and test every migration before shipping.
 
 ### Database Module (Hilt)
 
@@ -544,7 +583,9 @@ val MIGRATION_1_2 = object : Migration(1, 2) {
 package com.arclabs.app.data.di
 
 import android.content.Context
-import androidx.room.Room
+import androidx.room3.Room
+import androidx.sqlite.driver.AndroidSQLiteDriver
+import kotlinx.coroutines.Dispatchers
 import com.arclabs.app.data.datasources.local.dao.UserDao
 import com.arclabs.app.data.datasources.local.dao.RestaurantDao
 import com.arclabs.app.data.datasources.local.database.AppDatabase
@@ -564,11 +605,12 @@ object DatabaseModule {
     @Provides
     fun provideDatabase(
         @ApplicationContext context: Context,
-    ): AppDatabase = Room.databaseBuilder(
-        context,
-        AppDatabase::class.java,
-        "app_database",
+    ): AppDatabase = Room.databaseBuilder<AppDatabase>(   // verify builder overload + sqlite-framework driver artifact for room3 3.0.3
+        context = context,
+        name = context.getDatabasePath("app_database.db").absolutePath,
     )
+        .setDriver(AndroidSQLiteDriver())          // a driver is required in Room 3
+        .setQueryCoroutineContext(Dispatchers.IO)  // inject the dispatcher from :core:common in real code
         .addMigrations(MIGRATION_1_2)
         .build()
 
@@ -1300,10 +1342,13 @@ class UserMapperTest {
 
 ### Testing DAOs with In-Memory Room Database
 
+DAO tests run against a real SQLite engine: instrumented (`androidTest`) or on the JVM with Robolectric. With Room 3 the in-memory builder also needs a driver; verify the `inMemoryDatabaseBuilder` overload for room3 3.0.3 when implementing.
+
 ```kotlin
 package com.arclabs.app.data.datasources.local.dao
 
-import androidx.room.Room
+import androidx.room3.Room
+import androidx.sqlite.driver.AndroidSQLiteDriver
 import androidx.test.core.app.ApplicationProvider
 import com.arclabs.app.data.datasources.local.database.AppDatabase
 import com.arclabs.app.data.models.entity.UserEntity
@@ -1322,11 +1367,10 @@ class UserDaoTest {
 
     @Before
     fun setup() {
-        database = Room.inMemoryDatabaseBuilder(
-            ApplicationProvider.getApplicationContext(),
-            AppDatabase::class.java,
+        database = Room.inMemoryDatabaseBuilder<AppDatabase>(
+            context = ApplicationProvider.getApplicationContext(),
         )
-            .allowMainThreadQueries()
+            .setDriver(AndroidSQLiteDriver())
             .build()
         sut = database.userDao()
     }
@@ -1590,7 +1634,7 @@ Use this checklist before submitting a pull request that touches the Data Layer:
 - [ ] **Hilt modules are configured** -- `NetworkModule`, `DatabaseModule`, `DataStoreModule`, and `RepositoryModule` are all present and correct.
 - [ ] **Database migrations exist** -- any schema change includes a `Migration` object, not `fallbackToDestructiveMigration()` in production.
 - [ ] **Mapper tests are written** -- every mapper function has at least one test covering the happy path and null/optional fields.
-- [ ] **DAO tests use in-memory database** -- DAO tests create an in-memory Room database and run on `allowMainThreadQueries()`.
+- [ ] **DAO tests use in-memory database** -- DAO tests create an in-memory Room 3 database (with a driver) and exercise the real SQL from `runTest`.
 - [ ] **Repository tests use fakes** -- repository tests inject fake data sources, not mocks, for deterministic behavior.
 - [ ] **No `suspend` on Flow-returning functions** -- functions that return `Flow` should NOT be `suspend` functions.
 - [ ] **DataStore reads handle `IOException`** -- all `dataStore.data` reads include a `.catch` block for `IOException`.

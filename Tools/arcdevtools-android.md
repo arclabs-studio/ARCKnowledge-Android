@@ -1,6 +1,8 @@
 # 🔧 ARCDevTools-Android
 
-**Centralized development tooling, linting configurations, CI/CD workflows, and Claude Code skills for all ARC Labs Studio Android projects. One submodule to enforce consistency across every Kotlin/Android repository.**
+**Centralized development tooling, linting configurations, Git hooks and CI/CD workflows for all ARC Labs Studio Android projects. One submodule to enforce consistency across every Kotlin/Android repository.**
+
+> **Status:** this page describes ARCDevTools-Android **v0.1.0** as it exists in the repository (`arc-setup`, `configs/`, `hooks/`, `scripts/`, `workflows/`, `templates/`). v0.2.0 (in progress) adds `libs.versions.toml` and `build-logic/` templates and an Android CI workflow; sections below that show other file names or extra Makefile targets are illustrative and must be checked against the repository before use. AI skills are **not** shipped by ARCDevTools-Android — see [Skills Index](../Skills/skills-index.md).
 
 ---
 
@@ -13,7 +15,6 @@ ARCDevTools-Android is the **single source of truth** for development tooling ac
 - **detekt configurations** with complexity, style, and custom rule sets
 - **GitHub Actions workflows** for testing, linting, and release automation
 - **Git hooks** (pre-commit, pre-push) to catch issues before they reach CI
-- **Claude Code skills** installation for AI-assisted development
 - **Makefile** with standardized commands across all projects
 - **Branch protection** and GitHub label setup scripts
 
@@ -25,12 +26,12 @@ Before integrating ARCDevTools-Android, ensure your environment meets the follow
 
 | Requirement | Minimum Version | Notes |
 |-------------|----------------|-------|
-| **Kotlin** | 2.0+ | Required for K2 compiler support |
-| **Android Studio** | Latest stable | Hedgehog or newer recommended |
-| **JDK** | 17 | Zulu distribution preferred |
-| **Gradle** | 8.5+ | With Kotlin DSL |
-| **ktlint** | 1.1.0+ | CLI or Gradle plugin |
-| **detekt** | 1.23.0+ | CLI or Gradle plugin |
+| **Kotlin** | 2.4.21 | ARC Labs 2026 stack |
+| **Android Studio** | Optional | `./gradlew` + `android` CLI are the sanctioned tools |
+| **JDK** | JBR bundled with Android Studio (currently 25) for IDE/CLI; Gradle daemon pinned to JDK 21 (`gradle-daemon-jvm.properties` + foojay resolver) | Bytecode target 17 |
+| **Gradle** | 9.8.2 | With Kotlin DSL |
+| **ktlint** | 1.8.0 | jlleitschuh Gradle plugin 14.2.0 |
+| **detekt** | 1.23.8 | Gradle plugin, `maxIssues: 0`, compose-rules 0.4.28, `jvmTarget` 17; fails on JDK 25 → Gradle daemon pinned to JDK 21 |
 | **Git** | 2.30+ | Submodule support required |
 
 ### Recommended Gradle Plugins
@@ -38,8 +39,8 @@ Before integrating ARCDevTools-Android, ensure your environment meets the follow
 ```kotlin
 // build.gradle.kts (project-level)
 plugins {
-    id("org.jlleitschuh.gradle.ktlint") version "12.1.0"
-    id("io.gitlab.arturbosch.detekt") version "1.23.4"
+    alias(libs.plugins.ktlint)   // org.jlleitschuh.gradle.ktlint 14.2.0 (ktlint engine 1.8.0)
+    alias(libs.plugins.detekt)   // io.gitlab.arturbosch.detekt 1.23.8
 }
 ```
 
@@ -64,19 +65,18 @@ git submodule update --init --recursive
 
 ```bash
 # Make setup script executable (if needed)
-chmod +x ./ARCDevTools/arcdevtools-setup
+chmod +x ./ARCDevTools/arc-setup
 
-# Run the automated setup
-./ARCDevTools/arcdevtools-setup
+# Run the automated setup (interactive; or --with-workflows / --no-workflows)
+./ARCDevTools/arc-setup
 ```
 
 The setup script will:
-- ✅ Symlink ktlint configuration (`.editorconfig`)
-- ✅ Symlink detekt configuration (`detekt.yml`)
+- ✅ Copy the ktlint configuration (`.editorconfig`) to the project root
+- ✅ Copy `detekt.yml` and `detekt-compose.yml` to `config/detekt/`
 - ✅ Install Git hooks (pre-commit, pre-push)
-- ✅ Copy Makefile to project root (if not present)
-- ✅ Install Claude Code skills
-- ✅ Verify tool versions
+- ✅ Generate the `Makefile`
+- ✅ Optionally copy GitHub Actions workflows and PR/issue templates to `.github/`
 
 ### Step 3: Commit Integration
 
@@ -91,19 +91,9 @@ git commit -m "chore: integrate ARCDevTools-Android"
 ### Step 4: Verify Installation
 
 ```bash
-# Run the full check suite to verify everything works
-make check
-```
-
-Expected output:
-
-```
-✅ ktlint configuration found
-✅ detekt configuration found
-✅ Git hooks installed
-✅ Makefile commands available
-✅ Claude Code skills installed
-✅ All checks passed
+# Run static analysis and unit tests to verify everything works
+make lint
+make test
 ```
 
 ---
@@ -111,68 +101,62 @@ Expected output:
 ## 📁 Project Structure
 
 ```
-ARCDevTools/
+ARCDevTools/                         # (v0.1.0)
+├── arc-setup                        # Main setup script
 ├── configs/
-│   ├── ktlint/
-│   │   ├── .editorconfig            # ktlint rules via editorconfig
-│   │   └── ktlint-baseline.xml      # Baseline for legacy projects
-│   └── detekt/
-│       ├── detekt.yml               # Main detekt configuration
-│       ├── detekt-baseline.xml      # Baseline for legacy projects
-│       └── custom-rules/
-│           └── arclabs-rules.jar    # ARC Labs custom detekt rules
-├── workflows/
-│   ├── android-test.yml             # Unit & instrumented test workflow
-│   ├── android-lint.yml             # ktlint + detekt + Android Lint
-│   └── android-release.yml          # Release build & distribution
+│   ├── .editorconfig                # ktlint rules via editorconfig
+│   ├── detekt.yml                   # Main detekt configuration (maxIssues: 0)
+│   └── detekt-compose.yml           # Compose-specific detekt rules
 ├── hooks/
+│   ├── install-hooks.sh             # Installs the hooks below
 │   ├── pre-commit                   # Lint staged files before commit
 │   └── pre-push                     # Run tests before push
 ├── scripts/
-│   ├── setup-skills.sh              # Install Claude Code skills
+│   ├── format.sh                    # ktlint format
+│   ├── lint.sh                      # detekt + ktlint
 │   ├── setup-github-labels.sh       # Configure GitHub issue labels
-│   ├── setup-branch-protection.sh   # Set branch protection rules
-│   └── verify-installation.sh       # Verify ARCDevTools setup
-├── skills/
-│   ├── lint-fix.md                  # Skill: auto-fix lint issues
-│   ├── test-generate.md             # Skill: generate test scaffolds
-│   ├── review-pr.md                 # Skill: review pull requests
-│   └── architecture-check.md        # Skill: verify Clean Architecture
-├── Makefile                         # Standardized make commands
-└── arcdevtools-setup                # Main setup script
+│   └── setup-branch-protection.sh   # Set branch protection rules
+├── workflows/
+│   ├── quality.yml                  # detekt + ktlint
+│   ├── tests.yml                    # Unit tests
+│   ├── docs.yml                     # Documentation
+│   ├── enforce-gitflow.yml          # Git Flow branch rules
+│   ├── release-drafter.yml          # Release notes drafts
+│   ├── sync-develop.yml             # Sync develop after release
+│   └── validate-release.yml         # Release validation
+├── templates/
+│   ├── PULL_REQUEST_TEMPLATE.md
+│   └── ISSUE_TEMPLATE/              # bug_report, feature_request, improvement
+└── docs/
 ```
 
 ### Key Files Explained
 
 | File | Purpose |
 |------|---------|
-| `configs/ktlint/.editorconfig` | All ktlint formatting rules |
-| `configs/detekt/detekt.yml` | Static analysis rules and thresholds |
+| `configs/.editorconfig` | All ktlint formatting rules (copied to the project root) |
+| `configs/detekt.yml` | Static analysis rules and thresholds (copied to `config/detekt/`) |
 | `hooks/pre-commit` | Runs ktlint + detekt on staged `.kt` files |
 | `hooks/pre-push` | Runs full test suite before push |
-| `arcdevtools-setup` | One-command project setup |
+| `arc-setup` | One-command project setup |
 
 ---
 
 ## 📖 Usage (Makefile Commands)
 
-ARCDevTools-Android provides a standardized Makefile with commands that work identically across all ARC Labs Android projects.
+ARCDevTools-Android generates a standardized Makefile (`arc-setup`) with commands that work identically across all ARC Labs Android projects.
 
 | Command | Description |
 |---------|-------------|
-| `make lint` | Run ktlint + detekt on entire project |
-| `make format` | Auto-fix ktlint formatting issues |
-| `make test` | Run all unit tests |
-| `make test-coverage` | Run tests with JaCoCo coverage report |
-| `make build` | Build debug APK |
-| `make build-release` | Build release APK (requires signing config) |
-| `make clean` | Clean build directories |
-| `make check` | Run lint + test (full validation) |
-| `make detekt` | Run detekt only |
-| `make ktlint` | Run ktlint only |
+| `make lint` | `./gradlew detekt ktlintCheck` |
+| `make format` | `./gradlew ktlintCheck` (dry run) |
+| `make fix` | `./gradlew ktlintFormat` |
+| `make test` | `./gradlew testDebugUnitTest` |
+| `make setup` | Re-run `arc-setup` (configs + hooks) |
 | `make hooks` | Re-install Git hooks |
+| `make clean` | `./gradlew clean` |
 
-### Makefile Contents
+### Makefile Contents (illustrative — the generated file is the source of truth)
 
 ```makefile
 .PHONY: lint format test test-coverage build build-release clean check detekt ktlint hooks
@@ -290,7 +274,7 @@ echo "✅ ktlint passed"
 
 # Run detekt on staged files
 echo "🔍 Running detekt..."
-echo "$STAGED_KT_FILES" | xargs detekt --config ARCDevTools/configs/detekt/detekt.yml --input
+echo "$STAGED_KT_FILES" | xargs detekt --config config/detekt/detekt.yml --input
 if [ $? -ne 0 ]; then
     echo ""
     echo "❌ detekt found issues. Please fix them before committing."
@@ -342,7 +326,7 @@ ARCDevTools-Android configures ktlint via `.editorconfig`, which is symlinked to
 
 ```editorconfig
 # ARCDevTools-Android ktlint configuration
-# Symlinked from ARCDevTools/configs/ktlint/.editorconfig
+# Copied to the project root from ARCDevTools/configs/.editorconfig by arc-setup
 
 root = true
 
@@ -451,7 +435,7 @@ ARCDevTools-Android provides a comprehensive `detekt.yml` with rules tuned for A
 
 ```yaml
 # ARCDevTools-Android detekt configuration
-# Located at: ARCDevTools/configs/detekt/detekt.yml
+# Source: ARCDevTools/configs/detekt.yml (copied to config/detekt/detekt.yml by arc-setup)
 
 build:
   maxIssues: 0
@@ -640,7 +624,7 @@ fun RestaurantListScreen(viewModel: RestaurantListViewModel) {
 
 ## 🔄 GitHub Actions Workflows
 
-ARCDevTools-Android includes three production-ready GitHub Actions workflows.
+ARCDevTools-Android v0.1.0 ships these workflows in `workflows/`: `quality.yml` (detekt + ktlint), `tests.yml` (unit tests), `docs.yml`, `enforce-gitflow.yml`, `release-drafter.yml`, `sync-develop.yml` and `validate-release.yml`. An Android CI workflow (assemble + Lint + unit + screenshot + detekt/ktlint) is planned for v0.2.0. The YAML below is illustrative of the intended jobs; the files in the repository are the source of truth.
 
 ### Test Workflow (`android-test.yml`)
 
@@ -816,40 +800,12 @@ jobs:
 
 ## 🤖 Claude Code Skills
 
-ARCDevTools-Android includes Claude Code skills that provide AI-assisted development workflows.
+Skills come from two places:
 
-### Installation
+- **ARC Labs Android skills** (`android-doctrine`, `android-testing-doctrine`, `android-verify`, `arc-cli-android`) ship in ARCKnowledge-Android's `.claude/skills/`; `arc-setup` (via `scripts/setup-skills.sh`) symlinks them into the project's `.claude/skills/` — the same mechanism as ARCKnowledge/ARCDevTools on iOS. The checkpoint agents (`arc-verify-android`, `arc-audit-material`) come from **ARCAgentStack**, installed once per machine.
+- **Google's official `android/skills` plugin** (33 skills): `/plugin marketplace add android/skills` → `/plugin install android-skills@android-skills`.
 
-Skills are automatically installed during `./ARCDevTools/arcdevtools-setup`. To manually re-install:
-
-```bash
-# Run skills setup script
-./ARCDevTools/scripts/setup-skills.sh
-```
-
-### Available Skills
-
-| Skill | Command | Description |
-|-------|---------|-------------|
-| **Lint Fix** | `/lint-fix` | Analyze and auto-fix lint violations |
-| **Test Generate** | `/test-generate` | Generate test scaffolds for a class |
-| **PR Review** | `/review-pr` | Review a pull request for ARC Labs standards |
-| **Architecture Check** | `/architecture-check` | Verify Clean Architecture compliance |
-
-### Manual Re-installation
-
-If skills are not working correctly:
-
-```bash
-# Remove existing skills
-rm -rf .claude/skills/
-
-# Re-run setup
-./ARCDevTools/scripts/setup-skills.sh
-
-# Verify installation
-ls -la .claude/skills/
-```
+See the [Skills Index](../Skills/skills-index.md) for routing.
 
 ---
 
@@ -869,7 +825,7 @@ git pull origin main
 cd ..
 
 # Re-run setup to apply any new configurations
-./ARCDevTools/arcdevtools-setup
+./ARCDevTools/arc-setup
 
 # Stage and commit the submodule update
 git add ARCDevTools
@@ -922,7 +878,7 @@ Then configure Gradle to use both:
 detekt {
     config.setFrom(
         files(
-            "ARCDevTools/configs/detekt/detekt.yml",
+            "config/detekt/detekt.yml",
             "detekt-overrides.yml"
         )
     )
@@ -981,7 +937,7 @@ ktlint_standard_filename = enabled  # Re-enable filename rule
 # Ensure ktlint Gradle plugin is applied
 # build.gradle.kts (project-level)
 plugins {
-    id("org.jlleitschuh.gradle.ktlint") version "12.1.0"
+    alias(libs.plugins.ktlint)   // org.jlleitschuh.gradle.ktlint 14.2.0
 }
 
 # Or install CLI
@@ -994,15 +950,15 @@ brew install ktlint
 
 **Solution:**
 ```bash
-# Verify symlink exists
-ls -la detekt.yml
+# Verify the copied config exists
+ls -la config/detekt/detekt.yml
 
 # If missing, re-run setup
-./ARCDevTools/arcdevtools-setup
+./ARCDevTools/arc-setup
 
 # Or manually configure in build.gradle.kts
 detekt {
-    config.setFrom(files("ARCDevTools/configs/detekt/detekt.yml"))
+    config.setFrom(files("config/detekt/detekt.yml"))
 }
 ```
 
@@ -1100,7 +1056,7 @@ Follow these guidelines to get the most out of ARCDevTools-Android:
 #### Android Studio detekt Plugin
 
 1. Install the **Detekt** plugin from JetBrains Marketplace
-2. Point configuration to `ARCDevTools/configs/detekt/detekt.yml`
+2. Point configuration to `config/detekt/detekt.yml`
 3. Enable "Run detekt on the fly" for real-time feedback
 
 ---

@@ -134,8 +134,8 @@ com.arclabs.myapp/
 │   │           └── SettingsViewModel.kt
 │   │
 │   ├── navigation/
-│   │   ├── AppNavHost.kt
-│   │   └── Screen.kt
+│   │   ├── AppNavDisplay.kt
+│   │   └── Keys.kt
 │   │
 │   ├── theme/
 │   │   ├── Theme.kt
@@ -348,7 +348,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arclabs.myapp.presentation.features.userprofile.viewmodel.UserProfileUiState
 import com.arclabs.myapp.presentation.features.userprofile.viewmodel.UserProfileViewModel
@@ -797,9 +797,9 @@ represent the local storage schema.
 ```kotlin
 package com.arclabs.myapp.data.datasources.local.entities
 
-import androidx.room.ColumnInfo
-import androidx.room.Entity
-import androidx.room.PrimaryKey
+import androidx.room3.ColumnInfo
+import androidx.room3.Entity
+import androidx.room3.PrimaryKey
 import com.arclabs.myapp.domain.entities.User
 import kotlinx.datetime.Instant
 
