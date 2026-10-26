@@ -30,7 +30,7 @@
 At ARC Labs Studio, libraries are first-class citizens. Every library we ship must be:
 
 - **Reusable** - designed for consumption across multiple apps and teams.
-- **Well-tested** - 100% code coverage is the baseline, not the goal.
+- **Well-tested** - 80% line coverage is the enforced gate (unified across ARC Labs); libraries aim for 100%.
 - **Documented** - KDoc on every public symbol, a complete README, and a maintained CHANGELOG.
 - **Minimal** - expose only what consumers need; hide everything else.
 - **Stable** - follow Semantic Versioning so consumers can upgrade with confidence.
@@ -185,17 +185,20 @@ interface SearchRestaurantsUseCase {
 
 | Library | Type | Purpose | Status |
 |---------|------|---------|--------|
-| ARCDesignSystem | UI Component | Material3 theme, shared composables, design tokens | Planned |
-| ARCDevTools-Android | Utility | Tooling, linting (ktlint/detekt), CI/CD config | Planned |
-| ARCLogger-Android | Utility | Structured logging with tag-based filtering | Planned |
-| ARCNetworking-Android | Data | Retrofit wrappers, interceptors, error handling | Planned |
-| ARCStorage-Android | Data | Room wrappers, DataStore utilities, cache management | Planned |
-| ARCTesting-Android | Utility | Test utilities, fakes, assertion helpers | Planned |
+| ARCDevTools-Android | Utility | Tooling, linting (ktlint/detekt), hooks, CI/CD workflows | Active (v0.1.0) |
+| ARCKnowledge-Android | Knowledge | This knowledge base | Active (v0.3.0) |
+| ARCDesignSystem-Android | UI Component | Material 3 Expressive theme, shared composables, design tokens | Planned — extracted from FavRes-Android `:core:designsystem` / `:core:ui` with the second app |
+| ARCLogger-Android | Utility | Structured logging with tag-based filtering | Planned — extracted from FavRes-Android `:core:common` with the second app |
+| ARCNetworking-Android | Data | Retrofit 3 / OkHttp 5 wrappers, interceptors, error handling (Vapor phase) | Planned — extracted from FavRes-Android `:core:network` once it exists |
+| ARCStorage-Android | Data | Room 3 / DataStore utilities, cache management | Planned — extracted from FavRes-Android `:core:database` / `:core:datastore` with the second app |
+| ARCTesting-Android | Utility | Test utilities, fakes, assertion helpers | Planned — extracted from FavRes-Android `:core:testing` with the second app |
+
+> **Extraction rule:** no ARC*-Android library is created speculatively. Code lives in FavRes-Android `:core:*` modules first and is extracted into a package when a second app needs it.
 
 ### Library Dependency Graph
 
 ```
-ARCDesignSystem
+ARCDesignSystem-Android
     └── (no ARC dependencies, only Compose)
 
 ARCLogger-Android
@@ -309,7 +312,7 @@ arc-feature/
 | `src/main/kotlin/.../internal/` | Implementation details hidden from consumers via `internal` visibility. |
 | `src/main/kotlin/.../model/` | Public data classes and sealed types. |
 | `src/main/kotlin/.../di/` | Hilt modules for dependency injection. |
-| `src/test/` | Unit tests (JUnit 5 + MockK). Runs on JVM. |
+| `src/test/` | Unit tests (JUnit 5 + fakes + Turbine). Runs on JVM. |
 | `src/androidTest/` | Instrumented tests. Use sparingly; prefer JVM tests. |
 | `src/test/.../fixtures/` | Shared test data factories and builders. |
 | `consumer-proguard-rules.pro` | ProGuard rules shipped to consumers. |
@@ -353,11 +356,11 @@ Every library module uses Gradle Kotlin DSL with version catalogs.
 
 ```kotlin
 plugins {
-    alias(libs.plugins.android.library)
-    alias(libs.plugins.kotlin.android)
-    alias(libs.plugins.kotlin.compose)
-    alias(libs.plugins.hilt.android)  // Only if DI is needed
-    alias(libs.plugins.ksp)           // Only if annotation processing is needed
+    alias(libs.plugins.android.library)   // AGP 9: built-in Kotlin, no kotlin-android plugin
+    alias(libs.plugins.compose.compiler)  // Only for UI libraries
+    alias(libs.plugins.hilt)              // Only if DI is needed
+    alias(libs.plugins.ksp)               // Only if annotation processing is needed (never kapt)
+    alias(libs.plugins.junit5)            // JUnit 5 on Android (mannodermaus)
     `maven-publish`
 }
 
@@ -383,13 +386,6 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
 
-    kotlinOptions {
-        jvmTarget = "17"
-        freeCompilerArgs += listOf(
-            "-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi",
-        )
-    }
-
     buildFeatures {
         compose = true  // Only for UI libraries
     }
@@ -401,28 +397,30 @@ android {
         }
     }
 
-    testOptions {
-        unitTests.all {
-            it.useJUnitPlatform()
-        }
+    lint {
+        warningsAsErrors = true
+        abortOnError = true
     }
 }
 
 kotlin {
     explicitApi()
+    compilerOptions {
+        allWarningsAsErrors = true   // jvmTarget follows compileOptions (17) with built-in Kotlin
+    }
 }
 
 dependencies {
     // Core
-    implementation(libs.androidx.core.ktx)
+    implementation(libs.core.ktx)
     implementation(libs.kotlinx.coroutines.android)
 
     // Compose (UI libraries only)
-    implementation(platform(libs.androidx.compose.bom))
-    implementation(libs.androidx.compose.ui)
-    implementation(libs.androidx.compose.material3)
-    implementation(libs.androidx.compose.ui.tooling.preview)
-    debugImplementation(libs.androidx.compose.ui.tooling)
+    implementation(platform(libs.compose.bom))
+    implementation(libs.compose.ui)
+    implementation(libs.compose.material3)
+    implementation(libs.compose.ui.tooling.preview)
+    debugImplementation(libs.compose.ui.tooling)
 
     // Hilt (only if DI is needed)
     implementation(libs.hilt.android)
@@ -430,72 +428,26 @@ dependencies {
 
     // Testing
     testImplementation(platform(libs.junit.bom))
-    testImplementation(libs.junit.jupiter.api)
+    testImplementation(libs.junit.jupiter)
     testImplementation(libs.junit.jupiter.params)
-    testRuntimeOnly(libs.junit.jupiter.engine)
-    testImplementation(libs.mockk)
+    testRuntimeOnly(libs.junit.platform.launcher)
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.turbine)
-    testImplementation(libs.truth)
+    // Fakes over mocks: MockK is not a default dependency (needs approval)
 }
 ```
 
 ### Version Catalog (libs.versions.toml)
 
-Libraries reference a shared version catalog at the project root.
+Libraries reference a shared version catalog at the project root. Use the canonical template and the **2026 stack version table** in [Gradle → Version Catalogs](../Tools/gradle.md#-version-catalogs-libsversionstoml); do not maintain a second set of pins here.
+
+Library-only additions:
 
 ```toml
 [versions]
-compileSdk = "35"
-minSdk = "26"
-targetSdk = "35"
-kotlin = "2.1.0"
-agp = "8.7.3"
-compose-bom = "2025.01.00"
-coroutines = "1.9.0"
-hilt = "2.53.1"
-junit = "5.11.4"
-mockk = "1.13.14"
-turbine = "1.2.0"
-truth = "1.4.4"
-ktlint = "12.1.2"
-detekt = "1.23.7"
-dokka = "1.9.20"
-
-[libraries]
-androidx-core-ktx = { module = "androidx.core:core-ktx", version = "1.15.0" }
-kotlinx-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "coroutines" }
-kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "coroutines" }
-
-# Compose
-androidx-compose-bom = { module = "androidx.compose:compose-bom", version.ref = "compose-bom" }
-androidx-compose-ui = { module = "androidx.compose.ui:ui" }
-androidx-compose-material3 = { module = "androidx.compose.material3:material3" }
-androidx-compose-ui-tooling = { module = "androidx.compose.ui:ui-tooling" }
-androidx-compose-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview" }
-androidx-compose-ui-test = { module = "androidx.compose.ui:ui-test-junit4" }
-
-# Hilt
-hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hilt" }
-hilt-compiler = { module = "com.google.dagger:hilt-compiler", version.ref = "hilt" }
-
-# Testing
-junit-bom = { module = "org.junit:junit-bom", version.ref = "junit" }
-junit-jupiter-api = { module = "org.junit.jupiter:junit-jupiter-api" }
-junit-jupiter-params = { module = "org.junit.jupiter:junit-jupiter-params" }
-junit-jupiter-engine = { module = "org.junit.jupiter:junit-jupiter-engine" }
-mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
-turbine = { module = "app.cash.turbine:turbine", version.ref = "turbine" }
-truth = { module = "com.google.truth:truth", version.ref = "truth" }
+dokka = "VERIFY"   # verify before use — not pinned in the 2026 stack
 
 [plugins]
-android-library = { id = "com.android.library", version.ref = "agp" }
-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
-kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
-hilt-android = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
-ksp = { id = "com.google.devtools.ksp", version = "2.1.0-1.0.29" }
-ktlint = { id = "org.jlleitschuh.gradle.ktlint", version.ref = "ktlint" }
-detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
 dokka = { id = "org.jetbrains.dokka", version.ref = "dokka" }
 ```
 
@@ -973,8 +925,8 @@ Libraries have the strictest testing requirements at ARC Labs. If it ships as a 
 
 | Metric | Target |
 |---|---|
-| Line coverage | **100%** |
-| Branch coverage | **95%+** |
+| Line coverage | **80% enforced** (CI gate, unified across ARC Labs) · 100% target |
+| Branch coverage | Tracked, not gated |
 | Public API | Every public function and class tested |
 | Edge cases | Empty inputs, null handling, boundary values |
 | Error handling | All error paths tested |
@@ -983,10 +935,9 @@ Libraries have the strictest testing requirements at ARC Labs. If it ships as a 
 
 | Tool | Purpose |
 |---|---|
-| JUnit 5 | Test framework and runner |
-| MockK | Mocking and stubbing |
+| JUnit 5 (mannodermaus plugin) | Test framework and runner |
+| Fakes | Hand-written test doubles at designed seams (default; MockK only with approval) |
 | Turbine | Testing Kotlin Flows |
-| Truth | Fluent assertions |
 | Coroutines Test | `runTest`, `TestDispatcher`, `advanceUntilIdle` |
 | Compose UI Test | Compose component testing |
 | Robolectric | Unit tests that need Android framework |
@@ -1281,8 +1232,8 @@ Link to generated KDoc.
 ## Requirements
 
 - Min SDK: 26
-- Kotlin: 2.0+
-- Compose BOM: 2025.01.00+
+- Kotlin: 2.4.21
+- Compose BOM: 2026.09.00
 
 ## License
 
@@ -1377,8 +1328,7 @@ arc-feature/
 ```kotlin
 plugins {
     alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin.android)
-    alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.compose.compiler)
 }
 
 android {
@@ -1617,8 +1567,8 @@ Use this checklist every time you create a new ARC Labs Android library.
 
 ### Testing
 
-- [ ] 100% line coverage achieved.
-- [ ] 95%+ branch coverage achieved.
+- [ ] ≥ 80% line coverage (CI gate); 100% targeted for public API.
+- [ ] Every public function and error path has a behavioral test.
 - [ ] All tests follow Given-When-Then pattern.
 - [ ] `makeSUT()` factory used in all test classes.
 - [ ] Flows tested with Turbine.

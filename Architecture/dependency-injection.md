@@ -97,7 +97,6 @@ Add the Hilt Gradle plugin to your project-level build file:
 // build.gradle.kts (project root)
 plugins {
     alias(libs.plugins.android.application) apply false
-    alias(libs.plugins.kotlin.android) apply false
     alias(libs.plugins.hilt.android) apply false
     alias(libs.plugins.ksp) apply false
 }
@@ -111,15 +110,15 @@ Define Hilt versions in the version catalog:
 
 ```toml
 [versions]
-hilt = "2.51.1"
-hiltNavigationCompose = "1.2.0"
-ksp = "2.0.21-1.0.27"
+hilt = "2.60.1"
+androidxHilt = "1.4.0"    # hilt-lifecycle-viewmodel-compose
+ksp = "2.3.12"
 
 [libraries]
 hilt-android = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt" }
 hilt-compiler = { group = "com.google.dagger", name = "hilt-compiler", version.ref = "hilt" }
 hilt-android-testing = { group = "com.google.dagger", name = "hilt-android-testing", version.ref = "hilt" }
-hilt-navigation-compose = { group = "androidx.hilt", name = "hilt-navigation-compose", version.ref = "hiltNavigationCompose" }
+hilt-lifecycle-viewmodel-compose = { group = "androidx.hilt", name = "hilt-lifecycle-viewmodel-compose", version.ref = "androidxHilt" }
 
 [plugins]
 hilt-android = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
@@ -135,8 +134,7 @@ Apply the plugins and add dependencies in your app module:
 ```kotlin
 // build.gradle.kts (app module)
 plugins {
-    alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.android.application)   // AGP 9: built-in Kotlin, no kotlin-android plugin
     alias(libs.plugins.hilt.android)
     alias(libs.plugins.ksp)
 }
@@ -150,8 +148,8 @@ dependencies {
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
 
-    // Hilt + Jetpack Compose Navigation
-    implementation(libs.hilt.navigation.compose)
+    // hiltViewModel() for Compose / Navigation 3 entries
+    implementation(libs.hilt.lifecycle.viewmodel.compose)
 
     // Hilt Testing
     androidTestImplementation(libs.hilt.android.testing)
@@ -1501,7 +1499,7 @@ class UserFeatureIntegrationTest {
     val hiltRule = HiltAndroidRule(this)
 
     @get:Rule
-    val composeTestRule = createAndroidComposeRule<MainActivity>()
+    val composeTestRule = createAndroidComposeRule<MainActivity>()   // androidx.compose.ui.test.junit4.v2 (Compose 1.12)
 
     @Inject
     lateinit var fakeUserRepository: FakeUserRepository

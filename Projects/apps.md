@@ -12,12 +12,12 @@
 2. **Offline Capable** - Core features work without a network connection
 3. **Performant** - 60fps scrolling, fast startup, smooth animations
 4. **Accessible** - TalkBack support, content descriptions, dynamic text sizing
-5. **Testable** - 80%+ code coverage for apps
+5. **Testable** - 80% line coverage gate (unified across ARC Labs)
 
 ### App Goals
 
 - Simple, intuitive interfaces that feel native to Android
-- Material Design 3 with dynamic color (Material You)
+- Material 3 Expressive with the brand color scheme (dynamic color off)
 - Full dark and light theme support
 - Localized for multiple languages
 - Edge-to-edge design with proper inset handling
@@ -29,11 +29,11 @@
 
 | App | Status | Description |
 |-----|--------|-------------|
-| FavRes-Android | Planned | Favorite restaurants tracker |
+| FavRes-Android | **In progress** (started 2026-10-21) · repo `arclabs-studio/FavRes-Android` · Linear team `FavRes-Android` (key `FVRSAN`) | Private restaurant journal (port of FavRes iOS) |
 | FavBook-Android | Planned | Book collection manager |
 | TicketMind-Android | Planned | Event ticket organizer |
 
-All apps share common libraries (ARCDesignSystem, ARCLogger-Android, ARCNetworking-Android, ARCStorage-Android) and follow identical architecture patterns.
+All apps follow identical architecture patterns. Shared code starts life as `:core:*` modules inside FavRes-Android; the ARC*-Android libraries (ARCDesignSystem-Android, ARCLogger-Android, ARCNetworking-Android, ARCStorage-Android, ARCTesting-Android) are **planned — extracted from FavRes-Android `:core:*` modules with the second app**. See [Libraries](libraries.md#current-arc-labs-libraries).
 
 ---
 
@@ -49,8 +49,8 @@ app/
 │   │   │   ├── MyApplication.kt
 │   │   │   ├── MainActivity.kt
 │   │   │   ├── navigation/
-│   │   │   │   ├── AppNavHost.kt
-│   │   │   │   ├── Routes.kt
+│   │   │   │   ├── AppNavDisplay.kt
+│   │   │   │   ├── Navigator.kt
 │   │   │   │   └── TopLevelDestination.kt
 │   │   │   ├── di/
 │   │   │   │   ├── AppModule.kt
@@ -147,67 +147,70 @@ feature/home/
 
 ### Required Dependencies
 
+Versions come from the canonical [2026 stack table](../Tools/gradle.md#-arc-labs-2026-stack-reference-table); this table only says *what* every app uses.
+
 | Library | Purpose | Version |
 |---------|---------|---------|
-| Jetpack Compose | Declarative UI framework | BOM 2024.12.01 |
-| Material3 | Material Design 3 components | via Compose BOM |
-| Hilt | Dependency injection | 2.51.1 |
-| Navigation Compose | Type-safe navigation | 2.8.5 |
-| Lifecycle Runtime Compose | Lifecycle-aware Compose state | 2.8.7 |
-| Lifecycle ViewModel Compose | ViewModel integration | 2.8.7 |
-| Kotlinx Coroutines | Asynchronous programming | 1.9.0 |
-| Kotlinx Serialization | JSON and route serialization | 1.7.3 |
+| Jetpack Compose | Declarative UI framework | BOM 2026.09.00 |
+| Material 3 (Expressive) | Material Design 3 components | 1.5.0-beta01 (explicit pin over the BOM) |
+| material3-adaptive / navigation-suite | Adaptive layouts, bar ↔ rail | 1.3.0 / via material3 |
+| Hilt | Dependency injection (KSP) | 2.60.1 |
+| Navigation 3 | Back stack navigation | 1.2.0 |
+| Lifecycle (runtime-compose, viewmodel-compose, viewmodel-navigation3) | Lifecycle-aware state, ViewModel per entry | 2.11.0 |
+| Room 3 | Local database (single source of truth) | 3.0.3 |
+| DataStore | Preferences | 1.2.1 |
+| Kotlinx Coroutines | Asynchronous programming | 1.11 |
+| Kotlinx Serialization | Keys, DTOs | 1.12 |
+| Firebase BoM | Auth, Firestore, Functions, Remote Config, Analytics, App Check, AI | 35.0.2 |
 
 ### Optional Dependencies
 
 | Library | Purpose | When to Use |
 |---------|---------|-------------|
-| Retrofit + OkHttp | HTTP networking | API calls |
-| Room | SQLite database | Local persistence |
-| DataStore | Preferences storage | Settings, simple key-value state |
-| Coil | Image loading and caching | Remote or local images |
-| Paging 3 | Pagination | Large lists from API or DB |
-| WorkManager | Background work | Sync, uploads, scheduled tasks |
-| Accompanist | Compose utilities | Permissions, system UI |
+| Coil 3 | Image loading and caching | Local/content-URI images; remote images need a network artifact (ask first) |
+| Credential Manager + googleid | Sign in with Google | Apps with Google sign-in |
+| RevenueCat (`purchases`, `purchases-ui`) | Subscriptions, paywall | Apps with premium tiers |
+| maps-compose | Maps | Apps with map screens |
+| WorkManager | Background work | Scheduled reminders, deferred tasks |
+| Paging 3 | Pagination | Large lists from DB |
+| Retrofit 3 + OkHttp 5 | HTTP networking | **Only** once a Vapor backend exists (v1 apps have no HTTP client) |
+
+> Anything not in the [third-party allowlist](../CLAUDE.md#third-party-allowlist) (e.g. Accompanist, Timber, MockK, Truth) needs explicit approval before it is added.
 
 ### build.gradle.kts Dependencies Block
 
 ```kotlin
 dependencies {
-    // Compose BOM
-    val composeBom = platform("androidx.compose:compose-bom:2024.12.01")
-    implementation(composeBom)
-    androidTestImplementation(composeBom)
+    // Compose (BOM + explicit material3 pin for M3 Expressive)
+    implementation(platform(libs.compose.bom))
+    androidTestImplementation(platform(libs.compose.bom))
+    implementation(libs.bundles.compose)
+    implementation(libs.compose.material3.navigation.suite)
+    debugImplementation(libs.bundles.compose.debug)
 
-    // Compose
-    implementation("androidx.compose.ui:ui")
-    implementation("androidx.compose.ui:ui-graphics")
-    implementation("androidx.compose.ui:ui-tooling-preview")
-    implementation("androidx.compose.material3:material3")
-    debugImplementation("androidx.compose.ui:ui-tooling")
-    debugImplementation("androidx.compose.ui:ui-test-manifest")
+    // Navigation 3 + Lifecycle
+    implementation(libs.bundles.navigation)
+    implementation(libs.bundles.lifecycle)
 
-    // Navigation
-    implementation("androidx.navigation:navigation-compose:2.8.5")
-
-    // Lifecycle
-    implementation("androidx.lifecycle:lifecycle-runtime-compose:2.8.7")
-    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.7")
-
-    // Hilt
-    implementation("com.google.dagger:hilt-android:2.51.1")
-    ksp("com.google.dagger:hilt-android-compiler:2.51.1")
-    implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
+    // Hilt (KSP — never kapt)
+    implementation(libs.hilt.android)
+    ksp(libs.hilt.compiler)
+    implementation(libs.hilt.lifecycle.viewmodel.compose)
 
     // Kotlinx Serialization
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
+    implementation(libs.kotlinx.serialization.json)
 
-    // Testing
-    testImplementation("org.junit.jupiter:junit-jupiter:5.10.3") // # verify latest
-    testImplementation("io.mockk:mockk:1.13.13")
-    testImplementation("app.cash.turbine:turbine:1.2.0")
-    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.9.0")
-    androidTestImplementation("androidx.compose.ui:ui-test-junit4")
+    // Firebase
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.auth)
+    implementation(libs.firebase.firestore)
+
+    // Testing — fakes from :core:testing, no mocking library by default
+    testImplementation(platform(libs.junit.bom))
+    testImplementation(libs.bundles.testing)
+    testRuntimeOnly(libs.junit.platform.launcher)
+    testImplementation(project(":core:testing"))
+    androidTestImplementation(libs.compose.ui.test.junit4)
 }
 ```
 
@@ -316,7 +319,7 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             AppTheme {
-                AppNavHost()
+                AppShell()
             }
         }
     }
@@ -325,48 +328,46 @@ class MainActivity : ComponentActivity() {
 
 ### Navigation Setup
 
+ARC Labs apps use Navigation 3 with one back stack per top-level tab and `NavigationSuiteScaffold` for the bar ↔ rail switch. The full shell (`NavigationState`, `Navigator`, `AppShell`) is in [Navigation 3](../Architecture/navigation-3.md#-top-level-tabs-with-navigationsuitescaffold); `MainActivity` sets `AppShell()` as content.
+
 ```kotlin
 @Composable
-fun AppNavHost(
-    navController: NavHostController = rememberNavController(),
-) {
-    NavHost(
-        navController = navController,
-        startDestination = Routes.Home,
-    ) {
-        composable<Routes.Home> {
+fun AppNavDisplay(navigationState: NavigationState, navigator: Navigator) {
+    val entryProvider = entryProvider<NavKey> {
+        entry<HomeKey> {
             HomeScreen(
-                onRestaurantClick = { id ->
-                    navController.navigate(Routes.RestaurantDetail(id))
-                },
+                onRestaurantClick = { id -> navigator.navigate(RestaurantDetailKey(id)) },
             )
         }
-        composable<Routes.RestaurantDetail> {
+        entry<RestaurantDetailKey> { key ->
             RestaurantDetailScreen(
-                onBackClick = { navController.popBackStack() },
+                restaurantId = key.restaurantId,
+                onBackClick = navigator::goBack,
             )
         }
-        composable<Routes.Settings> {
+        entry<SettingsKey> {
             SettingsScreen()
         }
     }
+
+    NavDisplay(
+        entries = navigationState.toEntries(entryProvider),
+        onBack = { navigator.goBack() },
+    )
 }
 ```
 
-### Route Definitions
+### Key Definitions
 
 ```kotlin
 @Serializable
-sealed interface Routes {
-    @Serializable
-    data object Home : Routes
+data object HomeKey : NavKey
 
-    @Serializable
-    data class RestaurantDetail(val id: String) : Routes
+@Serializable
+data class RestaurantDetailKey(val restaurantId: String) : NavKey
 
-    @Serializable
-    data object Settings : Routes
-}
+@Serializable
+data object SettingsKey : NavKey
 ```
 
 ---
@@ -688,26 +689,19 @@ val DarkColorScheme = darkColorScheme(
 
 ### Theme Composable
 
+One `AppTheme` in `:core:designsystem`, Material 3 Expressive, brand colors only (dynamic color off). See [UI Guidelines → Material 3 Expressive](../Quality/ui-guidelines.md#material-3-expressive).
+
 ```kotlin
-// theme/Theme.kt
+// core/designsystem/.../Theme.kt — verify MaterialExpressiveTheme parameters/opt-in for material3 1.5.0-beta01
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun AppTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    dynamicColor: Boolean = true,
     content: @Composable () -> Unit,
 ) {
-    val colorScheme = when {
-        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-            val context = LocalContext.current
-            if (darkTheme) dynamicDarkColorScheme(context)
-            else dynamicLightColorScheme(context)
-        }
-        darkTheme -> DarkColorScheme
-        else -> LightColorScheme
-    }
-
-    MaterialTheme(
-        colorScheme = colorScheme,
+    MaterialExpressiveTheme(
+        colorScheme = if (darkTheme) DarkColorScheme else LightColorScheme,
+        motionScheme = MotionScheme.expressive(),
         typography = AppTypography,
         shapes = AppShapes,
         content = content,
@@ -721,15 +715,14 @@ fun AppTheme(
 
 ### Coverage Requirements
 
-- **App modules**: 80%+ code coverage
-- **Library modules**: 100% code coverage
+- **All modules**: 80% line coverage gate (unified across ARC Labs; libraries aim for 100%)
 - Focus on ViewModel and Use Case testing
 
 ### What to Test
 
 | Layer | What | How | Priority |
 |-------|------|-----|----------|
-| Domain | Use Cases | Unit test with MockK | High |
+| Domain | Use Cases | Unit test with fakes | High |
 | Domain | Entities | Unit test (if logic exists) | Medium |
 | Presentation | ViewModels | Unit test with Turbine | High |
 | Presentation | UI State mapping | Unit test | Medium |
@@ -939,7 +932,7 @@ object DaoModule {
 
 - [ ] Dark theme tested and working
 - [ ] Light theme tested and working
-- [ ] Dynamic color supported (API 31+)
+- [ ] Brand color scheme in light and dark (dynamic color off)
 - [ ] TalkBack accessible
 - [ ] Content descriptions on all interactive elements
 - [ ] Loading states shown for async operations
@@ -959,9 +952,10 @@ object DaoModule {
 
 ### Testing
 
-- [ ] 80%+ code coverage
+- [ ] ≥ 80% line coverage
 - [ ] ViewModel tests with Turbine
-- [ ] Use Case tests with MockK
+- [ ] Use Case tests with fakes (no mocking library by default)
+- [ ] `@Preview` for every composable fed from centralized sample data; screenshot tests green
 - [ ] Given-When-Then structure in all tests
 - [ ] `makeSUT()` factory method used
 - [ ] Edge cases covered

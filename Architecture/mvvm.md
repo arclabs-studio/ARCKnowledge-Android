@@ -8,7 +8,7 @@
 
 ### Overview
 
-MVVM (Model-View-ViewModel) is the primary architectural pattern for all ARC Labs Android projects. Unlike our iOS counterpart which uses MVVM+C (with Coordinators), the Android implementation omits the Coordinator layer entirely. Android's navigation ecosystem — Jetpack Navigation, NavHost, and NavController — provides a declarative, type-safe navigation mechanism that replaces the need for a dedicated Coordinator object.
+MVVM (Model-View-ViewModel) is the primary architectural pattern for all ARC Labs Android projects. Unlike our iOS counterpart which uses MVVM+C (with Coordinators), the Android implementation omits the Coordinator layer entirely. Jetpack Navigation 3 — a back stack of `@Serializable` keys rendered by `NavDisplay` — provides a declarative, type-safe navigation mechanism that replaces the need for a dedicated Coordinator object.
 
 ### Why MVVM Fits Android
 
@@ -519,18 +519,18 @@ fun UserProfileRoute(
 
 ## 🧭 Navigation Pattern
 
-In Android MVVM, there is **no Coordinator**. Navigation is handled through a combination of Jetpack Navigation's `NavController`, callback lambdas, and ViewModel-emitted events.
+In Android MVVM, there is **no Coordinator**. Navigation is handled through a combination of a Navigation 3 back stack (owned by a small `Navigator` in `:app`), callback lambdas, and ViewModel-emitted events. See [Navigation 3](navigation-3.md).
 
 ### Core Principles
 
-1. **ViewModels NEVER hold a reference to `NavController`** — this is an Android framework class
+1. **ViewModels NEVER hold a reference to the `Navigator` or `NavBackStack`** — navigation state belongs to the UI
 2. **Navigation decisions originate in ViewModels** — but are executed by Composables
-3. **NavController is managed at the NavHost level** — passed down via lambda callbacks
-4. **Type-safe navigation routes** — use Kotlin serialization for route arguments
+3. **The back stack is managed at the `NavDisplay` level** — passed down via lambda callbacks
+4. **Type-safe navigation keys** — `@Serializable` keys implementing `NavKey`
 
 ### Navigation Event Flow
 
-The ViewModel decides _when_ to navigate by emitting events. The Composable decides _how_ to navigate by collecting those events and calling `NavController`:
+The ViewModel decides _when_ to navigate by emitting events. The Composable decides _how_ to navigate by collecting those events and calling a navigation lambda:
 
 ```kotlin
 // Step 1: ViewModel emits a navigation event
@@ -581,38 +581,33 @@ fun OrderListRoute(
 ```
 
 ```kotlin
-// Step 3: NavHost wires navigation callbacks to NavController
+// Step 3: NavDisplay's entryProvider wires navigation callbacks to the back stack
+@Serializable data object OrderListKey : NavKey
+@Serializable data class OrderDetailKey(val orderId: String) : NavKey
+@Serializable data class TrackingKey(val trackingId: String) : NavKey
+
 @Composable
-fun AppNavHost(
-    navController: NavHostController = rememberNavController(),
-    modifier: Modifier = Modifier,
-) {
-    NavHost(
-        navController = navController,
-        startDestination = "orders",
-        modifier = modifier,
-    ) {
-        composable("orders") {
-            OrderListRoute(
-                onNavigateToDetail = { orderId ->
-                    navController.navigate("orders/$orderId")
-                },
-            )
-        }
-        composable(
-            route = "orders/{orderId}",
-            arguments = listOf(
-                navArgument("orderId") { type = NavType.StringType }
-            ),
-        ) {
-            OrderDetailRoute(
-                onNavigateBack = { navController.popBackStack() },
-                onNavigateToTracking = { trackingId ->
-                    navController.navigate("tracking/$trackingId")
-                },
-            )
-        }
-    }
+fun OrdersNavDisplay() {
+    val backStack = rememberNavBackStack(OrderListKey)
+
+    NavDisplay(
+        backStack = backStack,
+        onBack = { backStack.removeLastOrNull() },
+        entryProvider = entryProvider {
+            entry<OrderListKey> {
+                OrderListRoute(
+                    onNavigateToDetail = { orderId -> backStack.add(OrderDetailKey(orderId)) },
+                )
+            }
+            entry<OrderDetailKey> { key ->
+                OrderDetailRoute(
+                    orderId = key.orderId,
+                    onNavigateBack = { backStack.removeLastOrNull() },
+                    onNavigateToTracking = { trackingId -> backStack.add(TrackingKey(trackingId)) },
+                )
+            }
+        },
+    )
 }
 ```
 
@@ -790,7 +785,7 @@ object NetworkModule {
         return Retrofit.Builder()
             .baseUrl(BuildConfig.BASE_URL)
             .client(okHttpClient)
-            .addConverterFactory(GsonConverterFactory.create())
+            .addConverterFactory(Json.asConverterFactory("application/json".toMediaType()))
             .build()
     }
 }
@@ -891,7 +886,7 @@ ViewModel is created by:
 
 ## 🧪 Testing MVVM
 
-Every layer of the MVVM architecture is independently testable. At ARC Labs, we target 100% coverage for packages and 80%+ for apps.
+Every layer of the MVVM architecture is independently testable. At ARC Labs, the coverage gate is a unified 80% line coverage (libraries aim for 100%), and test doubles are fakes rather than mocks.
 
 ### ViewModel Testing
 

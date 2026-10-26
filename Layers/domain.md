@@ -105,21 +105,25 @@ The Domain layer should be a **pure Kotlin** module — not an Android library m
 ```kotlin
 // domain/build.gradle.kts
 plugins {
-    id("org.jetbrains.kotlin.jvm")
-    id("org.jetbrains.kotlin.kapt")
+    alias(libs.plugins.kotlin.jvm)   // no kapt: the domain has no annotation processing at all
 }
 
 dependencies {
-    // Pure Kotlin dependencies only
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
-    implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.5.0")
-    implementation("javax.inject:javax.inject:1")
+    // Pure Kotlin dependencies only (versions: Tools/gradle.md 2026 stack table)
+    implementation(libs.kotlinx.coroutines.core)
+    implementation(libs.javax.inject)
+    // kotlinx-datetime only if needed — not pinned in the 2026 stack, verify before use
 
-    // Testing
-    testImplementation("org.junit.jupiter:junit-jupiter:5.10.1")
-    testImplementation("io.mockk:mockk:1.13.8")
-    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")
-    testImplementation("app.cash.turbine:turbine:1.0.0")
+    // Testing — fakes, not mocks
+    testImplementation(platform(libs.junit.bom))
+    testImplementation(libs.junit.jupiter)
+    testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.turbine)
+    testRuntimeOnly(libs.junit.platform.launcher)
+}
+
+tasks.test {
+    useJUnitPlatform()
 }
 ```
 
@@ -1091,14 +1095,14 @@ and **Entity business rules**.
 | Target | What to Test | Mocking |
 |--------|-------------|---------|
 | Entities | Computed properties, validation, business rules | None needed |
-| Use Cases | Input validation, orchestration, error handling | Mock repositories |
+| Use Cases | Input validation, orchestration, error handling | Fake repositories |
 | Repository Interfaces | N/A (interfaces, not implementations) | N/A |
 | Domain Exceptions | Construction, message formatting | None needed |
 
 ### Testing Tools
 
 - **JUnit 5** — test framework
-- **MockK** — mocking library (Kotlin-first)
+- **Fakes** — hand-written test doubles from `:core:testing` (MockK only with approval)
 - **kotlinx-coroutines-test** — `runTest` for coroutine testing
 - **Turbine** — `Flow` testing
 
@@ -1579,10 +1583,10 @@ Use this checklist to verify your Domain layer follows all conventions:
 - [ ] Covers all known business rule violations
 
 ### Testing
-- [ ] All Use Cases have tests (100% coverage target)
+- [ ] All Use Cases have behavioral tests (80% line-coverage gate; aim higher for the domain)
 - [ ] All Entity business rules have tests
 - [ ] Given-When-Then pattern used consistently
-- [ ] MockK used for repository mocking
+- [ ] Fake repositories from `:core:testing` used (no mocking library by default)
 - [ ] Turbine used for Flow testing
 - [ ] Test fakes provided as companion object extensions
 - [ ] Edge cases and error paths tested

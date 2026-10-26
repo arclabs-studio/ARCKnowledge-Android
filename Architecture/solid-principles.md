@@ -783,7 +783,7 @@ class RestaurantListViewModel : ViewModel() {
     // Direct dependency on Retrofit — cannot test without network
     private val api = Retrofit.Builder()
         .baseUrl("https://api.example.com/")
-        .addConverterFactory(GsonConverterFactory.create())
+        .addConverterFactory(Json.asConverterFactory("application/json".toMediaType()))
         .build()
         .create(RestaurantApi::class.java)
 

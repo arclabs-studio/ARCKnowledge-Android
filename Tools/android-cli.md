@@ -2,7 +2,7 @@
 
 **Google's official command-line interface for agent-first Android development.** Standardizes core development workflows for AI agents and humans: environment setup, project scaffolding, virtual device management, skill distribution, and UI automation.
 
-> **Status:** Preview (April 2026). Not yet required — `./gradlew` remains the build system. Install opt-in.
+> **Status:** First released as a preview (April 2026). ARC's sanctioned tool for SDK, emulator, run and UI inspection alongside `./gradlew`, which remains the build system — see the Tooling Policy in [CLAUDE.md](../CLAUDE.md) and the `arc-cli-android` skill.
 
 ---
 
@@ -31,7 +31,7 @@ android --version
 android update
 ```
 
-> **ARC Labs default today:** Use `android-skills-mcp` (MCP server) to access the 6 official skills without installing the CLI binary. See [Tools/mcp-setup.md](mcp-setup.md).
+> **ARC Labs default:** install the CLI, and install Google's skills through the `android/skills` Claude plugin (33 skills — see the [Skills Index](../Skills/skills-index.md)). `android-skills-mcp` is an optional alternative — see [Tools/mcp-setup.md](mcp-setup.md).
 
 ---
 
@@ -161,9 +161,9 @@ android layout --pretty
 
 ---
 
-## The 6 Official Skills
+## Official Skills
 
-Available at `github.com/android/skills` (Apache-2.0). These are what `android skills add --all` installs:
+Available at `github.com/android/skills` (Apache-2.0); `android skills add --all` installs them. The set has grown from the 6 launch skills below to 33 — the full list is in the [Skills Index](../Skills/skills-index.md). Launch skills:
 
 | Skill | Use When |
 |-------|---------|
@@ -174,7 +174,7 @@ Available at `github.com/android/skills` (Apache-2.0). These are what `android s
 | `play-billing-library-version-upgrade` | Upgrading Play Billing Library version |
 | `edge-to-edge` | Implementing full edge-to-edge display support |
 
-**ARC Labs usage:** Access these via `android-skills-mcp` (Claude Code MCP) rather than installing files locally. See [Tools/mcp-setup.md](mcp-setup.md) → Android Skills MCP section.
+**ARC Labs usage:** install them via the `android/skills` Claude plugin (or `android skills add --all`); `android-skills-mcp` is an optional alternative — see [Tools/mcp-setup.md](mcp-setup.md) → Android Skills MCP section.
 
 ---
 

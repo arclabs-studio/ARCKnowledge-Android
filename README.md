@@ -4,6 +4,8 @@
 
 ARCKnowledge-Android guides AI agents (primarily Claude Code) in building high-quality Android applications using Kotlin, Jetpack Compose, and Clean Architecture. It is the Android counterpart to [ARCKnowledge](https://github.com/arclabs-studio/ARCKnowledge) (iOS/Swift).
 
+**Version:** 0.3.0 — 2026 stack refresh (see [CHANGELOG](CHANGELOG.md)).
+
 ---
 
 ## Philosophy
@@ -18,19 +20,22 @@ ARCKnowledge-Android guides AI agents (primarily Claude Code) in building high-q
 
 | Category | Technology |
 |----------|-----------|
-| Language | Kotlin 2.0+ |
-| UI | Jetpack Compose + Material Design 3 |
+| Language | Kotlin 2.4.21 (K2) |
+| UI | Jetpack Compose (BOM 2026.09.00) + Material 3 Expressive (material3 1.5.0-beta01) |
 | Architecture | Clean Architecture + MVVM |
-| DI | Hilt (Dagger) |
-| Networking | Retrofit + OkHttp + Kotlinx Serialization |
-| Persistence | Room (database), DataStore (key-value) |
-| Testing | JUnit 5 + MockK + Turbine + Compose Testing |
-| Linting | ktlint + detekt |
-| Build | Gradle with Kotlin DSL + Version Catalogs |
+| DI | Hilt 2.60.1 + KSP 2.3.12 (no kapt) |
+| Backend / Networking | Firebase SDKs (BoM 35.0.2) — no HTTP client in v1; Retrofit 3 + OkHttp 5 + kotlinx.serialization when a Vapor backend arrives |
+| Persistence | Room 3 (`androidx.room3` 3.0.3), DataStore 1.2.1 |
+| Testing | JUnit 5 (mannodermaus plugin) + fakes + Turbine + Robolectric + Compose Preview Screenshot Testing |
+| Linting | ktlint 1.8 + detekt 1.23.8 + Android Lint (zero warnings) |
+| Build | Gradle 9.8.2 + AGP 9.4.0, Kotlin DSL, Version Catalogs, `build-logic/` convention plugins |
 | Concurrency | Kotlin Coroutines + Flow |
-| Navigation | Navigation Compose (type-safe) |
-| Images | Coil |
+| SDK | compileSdk 37 / targetSdk 36, minSdk 26 |
+| Navigation | Navigation 3 (`NavDisplay` + `@Serializable` `NavKey`s) |
+| Images | Coil 3 |
 | CI/CD | GitHub Actions |
+
+> Full version table: [Tools/gradle.md → ARC Labs 2026 Stack](Tools/gradle.md#-arc-labs-2026-stack-reference-table).
 
 ## Repository Structure
 
@@ -48,7 +53,7 @@ ARCKnowledge-Android/
 │   ├── mvvm.md                    MVVM pattern (ViewModel + StateFlow)
 │   ├── solid-principles.md        SOLID with Kotlin examples
 │   ├── dependency-injection.md    Hilt DI patterns
-│   ├── navigation-compose.md      Type-safe Navigation Compose
+│   ├── navigation-3.md            Navigation 3 (NavDisplay, NavKey, scenes)
 │   └── singletons.md              When & how to use singletons
 │
 ├── Layers/
@@ -110,8 +115,8 @@ git clone https://github.com/arclabs-studio/ARCKnowledge-Android.git
 
 The entry point is **CLAUDE.md**. It provides:
 - Core philosophy and values
-- Available skills with slash commands
-- Critical rules (never break)
+- Skill routing (ARC Android skills + the official `android/skills` plugin)
+- Critical rules and binding rules (zero warnings, third-party allowlist, modern APIs, secrets, tooling policy, tests)
 - Quick architecture reference with code examples
 - Code style and testing essentials
 
@@ -133,8 +138,8 @@ Browse the documentation by category:
 | UI Framework | SwiftUI | Jetpack Compose |
 | State Management | @Observable | ViewModel + StateFlow |
 | DI | Manual (init params) | Hilt (@Inject) |
-| Navigation | ARCNavigation (Router) | Navigation Compose (type-safe) |
-| Testing | Swift Testing | JUnit 5 + MockK + Turbine |
+| Navigation | `NavigationStack` + `navigationDestination` | Navigation 3 (`NavDisplay` + `NavKey`) |
+| Testing | Swift Testing | JUnit 5 + fakes + Turbine |
 | Linting | SwiftLint + SwiftFormat | ktlint + detekt |
 | Build System | SPM (Package.swift) | Gradle (build.gradle.kts) |
 | Documentation | DocC | Dokka |

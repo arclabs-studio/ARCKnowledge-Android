@@ -70,11 +70,11 @@ alternatives. Keep it to 2-3 sentences maximum.
 | Requirement | Version |
 |---|---|
 | Android Min SDK | 26 (Android 8.0) |
-| Android Target SDK | 35 |
-| Kotlin | 2.0+ |
-| Jetpack Compose BOM | 2024.12.01 |
-| Android Gradle Plugin | 8.7+ |
-| Java | 17 |
+| Android Target SDK | 36 |
+| Kotlin | 2.4.21 |
+| Jetpack Compose BOM | 2026.09.00 |
+| Android Gradle Plugin | 9.4.0 |
+| Java (bytecode target) | 17 |
 
 ## Installation
 
@@ -280,21 +280,21 @@ The project follows **Clean Architecture + MVVM** with unidirectional data flow:
 
 - **Presentation:** Jetpack Compose views, ViewModels with `@HiltViewModel`
 - **Domain:** Pure Kotlin use cases and entity models, repository interfaces
-- **Data:** Repository implementations, Retrofit services, Room DAOs, DataStore
+- **Data:** Repository implementations, Firebase data sources, Room 3 DAOs, DataStore
 
 ## Tech Stack
 
 | Category | Technology |
 |---|---|
-| Language | Kotlin 2.0 |
-| UI Framework | Jetpack Compose + Material Design 3 |
-| Dependency Injection | Hilt |
-| Networking | Retrofit + OkHttp + Kotlinx Serialization |
-| Local Storage | Room + DataStore |
-| Navigation | Compose Navigation (type-safe) |
+| Language | Kotlin 2.4 |
+| UI Framework | Jetpack Compose + Material 3 Expressive |
+| Dependency Injection | Hilt (KSP) |
+| Backend | Firebase SDKs (no HTTP client in v1) |
+| Local Storage | Room 3 + DataStore |
+| Navigation | Navigation 3 |
 | Async | Kotlin Coroutines + Flow |
-| Image Loading | Coil |
-| Testing | JUnit 5, Turbine, Mockk |
+| Image Loading | Coil 3 |
+| Testing | JUnit 5, Turbine, fakes, Robolectric, Compose Preview Screenshot Testing |
 | CI/CD | GitHub Actions |
 | Code Quality | Detekt, ktlint |
 
@@ -302,9 +302,9 @@ The project follows **Clean Architecture + MVVM** with unidirectional data flow:
 
 ### Prerequisites
 
-- [Android Studio](https://developer.android.com/studio) Ladybug (2024.2.1) or later
-- JDK 17
-- Android SDK 35
+- `android` CLI and the Android SDK (Android Studio optional)
+- JBR bundled with Android Studio as `JAVA_HOME` (bytecode target 17)
+- Android SDK 36
 - Android Emulator or physical device (API 26+)
 
 ### Steps
@@ -455,7 +455,7 @@ Use [shields.io](https://shields.io) for custom badges:
 
 ```markdown
 [![Min SDK](https://img.shields.io/badge/minSdk-26-green.svg)](link)
-[![Compose BOM](https://img.shields.io/badge/Compose%20BOM-2024.12.01-blue.svg)](link)
+[![Compose BOM](https://img.shields.io/badge/Compose%20BOM-2026.09.00-blue.svg)](link)
 [![Coverage](https://img.shields.io/badge/coverage-95%25-brightgreen.svg)](link)
 ```
 
@@ -681,8 +681,8 @@ A great library.
 | Requirement | Version |
 |---|---|
 | Android Min SDK | 26 |
-| Kotlin | 2.0+ |
-| Compose BOM | 2024.12.01 |
+| Kotlin | 2.4.21 |
+| Compose BOM | 2026.09.00 |
 
 ## Installation
 ...
@@ -787,7 +787,7 @@ Template sections that were never filled in ship to production.
 
 - **Type-safe routes** — Define navigation routes as Kotlin data classes
 - **Deep link support** — Automatic deep link registration and handling
-- **Compose integration** — Seamless integration with NavHost and NavController
+- **Compose integration** — Seamless integration with Navigation 3 `NavDisplay` and `NavBackStack`
 ```
 
 **Fix:** Search for "TODO", "TBD", "Feature 1", and other placeholder text before merging.

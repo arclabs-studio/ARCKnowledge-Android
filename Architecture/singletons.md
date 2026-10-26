@@ -676,20 +676,21 @@ class MainActivity : AppCompatActivity() {
 
 ```kotlin
 interface ImageLoader {
-    suspend fun load(url: String): Bitmap
+    suspend fun load(uri: String): Bitmap?
 }
 
+// Coil 3 (io.coil-kt.coil3). Verify SingletonImageLoader / ImageResult.image / toBitmap() against Coil 3.6.3 when implementing.
 class CoilImageLoader @Inject constructor(
     @ApplicationContext private val context: Context,
 ) : ImageLoader {
 
-    private val imageLoader = context.imageLoader
+    private val imageLoader = SingletonImageLoader.get(context)
 
-    override suspend fun load(url: String): Bitmap {
+    override suspend fun load(uri: String): Bitmap? {
         val request = ImageRequest.Builder(context)
-            .data(url)
+            .data(uri)
             .build()
-        return (imageLoader.execute(request).drawable as BitmapDrawable).bitmap
+        return imageLoader.execute(request).image?.toBitmap()   // no force cast
     }
 }
 

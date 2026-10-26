@@ -1,12 +1,12 @@
 # 🎨 UI Guidelines
 
-**ARC Labs apps follow Material Design 3 with consistent theming, accessibility, and localization across all screens.**
+**ARC Labs apps follow Material 3 Expressive (material3 1.5.0-beta01) with a brand color scheme (dynamic color off), consistent theming, accessibility, and localization across all screens.**
 
 ---
 
 ## 🎯 UI Philosophy
 
-- **Material Design 3** as the foundation for all visual and interaction patterns
+- **Material 3 Expressive** as the foundation for all visual, motion and interaction patterns
 - **Native first**: use Jetpack Compose components before reaching for custom solutions
 - **Consistent** across light and dark themes, all screen sizes, and device types
 - **Accessible** to all users, including those using assistive technologies
@@ -19,29 +19,27 @@ Material Design 3 provides a comprehensive design system that handles color, typ
 
 ## 🎨 Material Design 3
 
+### Material 3 Expressive
+
+ARC Labs apps use **Material 3 Expressive** — the evolution of Material 3 with research-backed updates to components, motion, shape and typography — via `androidx.compose.material3:material3` **1.5.0-beta01**, pinned explicitly in the version catalog on top of Compose BOM 2026.09.00 (the BOM alone resolves the stable line).
+
+Expressive changes what "native" means: prefer the Expressive variants and defaults the library ships (expressive motion scheme, shape morphing, updated components such as button groups, toolbars and loading indicators) instead of re-creating them by hand. API surface in a beta moves: **verify every Expressive API** (name, parameters, `@ExperimentalMaterial3ExpressiveApi` opt-in status) with Context7 or `android docs` before using it.
+
 ### Theme Setup
 
-Every ARC Labs app uses a centralized theme composable that supports dynamic color (Android 12+) with graceful fallback to custom color schemes on older devices.
+Every ARC Labs app has one theme composable, `AppTheme`, in `:core:designsystem`. **Dynamic color is off**: ARC Labs apps carry their brand identity, so the color scheme always comes from the brand light/dark schemes.
 
 ```kotlin
+// Verify MaterialExpressiveTheme's parameters and opt-in requirement against material3 1.5.0-beta01.
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun AppTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    dynamicColor: Boolean = true,
     content: @Composable () -> Unit,
 ) {
-    val colorScheme = when {
-        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-            val context = LocalContext.current
-            if (darkTheme) dynamicDarkColorScheme(context)
-            else dynamicLightColorScheme(context)
-        }
-        darkTheme -> DarkColorScheme
-        else -> LightColorScheme
-    }
-
-    MaterialTheme(
-        colorScheme = colorScheme,
+    MaterialExpressiveTheme(
+        colorScheme = if (darkTheme) DarkColorScheme else LightColorScheme,
+        motionScheme = MotionScheme.expressive(),
         typography = AppTypography,
         shapes = AppShapes,
         content = content,
@@ -49,7 +47,10 @@ fun AppTheme(
 }
 ```
 
-Dynamic color extracts a color scheme from the user's wallpaper, creating a personalized experience. When dynamic color is unavailable (Android < 12, or opt-out), the app falls back to carefully defined custom color schemes.
+- ✅ Brand `lightColorScheme` / `darkColorScheme` generated from the brand colors (Material Theme Builder) and kept in `:core:designsystem` — the only place color literals may appear.
+- ✅ Light and dark themes are both first-class; every screen is previewed and screenshot-tested in both.
+- ❌ No `dynamicLightColorScheme` / `dynamicDarkColorScheme` in ARC Labs apps (wallpaper colors would replace the brand).
+- ❌ No custom re-implementations of M3 components; customise through component parameters, `*Defaults`, theme tokens or the Compose Styles API (official `styles` skill).
 
 ### Custom Color Scheme Definition
 
@@ -885,66 +886,19 @@ Things to verify:
 
 ## 📱 Responsive Layout
 
-### WindowSizeClass
+### Adaptive Layouts (Window Size)
 
-Use `WindowSizeClass` to create adaptive layouts that respond to screen size changes (phones, tablets, foldables).
+ARC Labs follows the official `adaptive` skill (android/skills plugin):
 
-```kotlin
-@OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
-@Composable
-fun AppRoot(activity: ComponentActivity) {
-    val windowSizeClass = calculateWindowSizeClass(activity)
-
-    AppTheme {
-        when (windowSizeClass.widthSizeClass) {
-            WindowWidthSizeClass.Compact -> PhoneLayout()
-            WindowWidthSizeClass.Medium -> TabletLayout()
-            WindowWidthSizeClass.Expanded -> DesktopLayout()
-        }
-    }
-}
-```
-
-### Adaptive List-Detail Layout
-
-```kotlin
-@Composable
-fun RestaurantListDetail(
-    widthSizeClass: WindowWidthSizeClass,
-    restaurants: List<Restaurant>,
-    selectedRestaurant: Restaurant?,
-    onSelect: (Restaurant) -> Unit,
-) {
-    when (widthSizeClass) {
-        WindowWidthSizeClass.Compact -> {
-            // Phone: single pane, navigate between list and detail
-            if (selectedRestaurant != null) {
-                RestaurantDetail(selectedRestaurant)
-            } else {
-                RestaurantList(restaurants, onSelect)
-            }
-        }
-        else -> {
-            // Tablet/Desktop: two-pane layout
-            Row(modifier = Modifier.fillMaxSize()) {
-                RestaurantList(
-                    restaurants = restaurants,
-                    onSelect = onSelect,
-                    modifier = Modifier.weight(1f),
-                )
-                selectedRestaurant?.let {
-                    RestaurantDetail(
-                        restaurant = it,
-                        modifier = Modifier.weight(2f),
-                    )
-                }
-            }
-        }
-    }
-}
-```
+- **Navigation area**: `NavigationSuiteScaffold` switches between bottom bar and navigation rail by window size — never branch on size classes by hand for this. See [Navigation 3](../Architecture/navigation-3.md#-top-level-tabs-with-navigationsuitescaffold).
+- **Multi-pane**: list-detail and supporting-pane layouts are Navigation 3 **scene strategies** (`ListDetailSceneStrategy`, `SupportingPaneSceneStrategy` from `adaptive-navigation3`), not hand-written `Row`s and not `ListDetailPaneScaffold` directly. See [Navigation 3 → Adaptive Layouts](../Architecture/navigation-3.md#-adaptive-layouts-list-detail).
+- **Lists**: grids use adaptive columns (`GridCells.Adaptive(minSize)` / `StaggeredGridCells.Adaptive(minSize)`).
+- **Window info**: when a screen genuinely needs the window size, read it from Material 3 adaptive (the official recipes use `currentWindowAdaptiveInfoV2()`; verify the current entry point for material3-adaptive 1.3.0). The legacy `calculateWindowSizeClass(activity)` from `material3-window-size-class` is not used in new code.
+- **Verify** with screenshot tests at phone, foldable, tablet and desktop sizes (`@PreviewTest` + multi-device `@Preview`s).
 
 ### Foldable Device Support
+
+> **Verify before use:** `LocalFoldingFeatures` below is illustrative, not a Jetpack API. Read posture/hinge information from Material 3 adaptive window info (`windowPosture`) or Jetpack WindowManager, confirming the API with the official `adaptive` skill.
 
 ```kotlin
 @Composable
@@ -1325,12 +1279,12 @@ Button(onClick = onRetry) { Text(stringResource(R.string.common_retry)) }
 
 - [ ] `MaterialTheme` used consistently (no hardcoded colors)
 - [ ] Both light and dark themes tested
-- [ ] Dynamic color tested on Android 12+ devices
+- [ ] Brand color scheme used (dynamic color off); Expressive components preferred over custom ones
 - [ ] All user-facing strings from `R.string` resources
 - [ ] Content descriptions on all interactive and meaningful elements
 - [ ] Touch targets >= 48dp on all interactive elements
-- [ ] Preview functions for all components (light and dark)
-- [ ] Responsive to different screen sizes (phone, tablet)
+- [ ] `@Preview` for every composable (light and dark), fed from centralized sample data, covered by screenshot tests
+- [ ] Responsive to different window sizes (`NavigationSuiteScaffold`, Navigation 3 list-detail scenes)
 - [ ] RTL layout tested (start/end instead of left/right)
 - [ ] Typography uses `sp` units (respects user font size)
 - [ ] Heading semantics applied to section titles

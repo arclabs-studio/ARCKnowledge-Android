@@ -285,7 +285,7 @@ In your `build.gradle.kts`:
 
 ```kotlin
 dependencies {
-    implementation("org.jetbrains.kotlinx:kotlinx-collections-immutable:0.3.7")
+    implementation(libs.kotlinx.collections.immutable)   // first-party Kotlin lib; version: verify before use
 }
 ```
 
@@ -952,7 +952,7 @@ In your project-level `build.gradle.kts`:
 
 ```kotlin
 plugins {
-    id("androidx.baselineprofile") version "1.3.3" apply false
+    alias(libs.plugins.baselineprofile) apply false   // version: verify before use
 }
 ```
 
