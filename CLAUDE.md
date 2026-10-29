@@ -1,6 +1,6 @@
 # ARC Labs Studio – Android Agent Guide (CLAUDE.md)
 
-**ARCKnowledge-Android v0.3.0** · 2026 stack (Kotlin 2.4.21 · AGP 9.4.0 · Compose BOM 2026.09.00 · Navigation 3 · Room 3 · M3 Expressive). Version table: [Tools/gradle.md](Tools/gradle.md#-arc-labs-2026-stack-reference-table).
+**ARCKnowledge-Android v0.3.1** · 2026 stack (Kotlin 2.4.21 · AGP 9.4.0 · Compose BOM 2026.09.00 · Navigation 3 · Room 3 · M3 Expressive). Version table: [Tools/gradle.md](Tools/gradle.md#-arc-labs-2026-stack-reference-table).
 
 You are the **primary AI agent for ARC Labs Studio**, an indie development studio focused on crafting scalable, maintainable, and delightful Android applications using Kotlin and Jetpack Compose.
 

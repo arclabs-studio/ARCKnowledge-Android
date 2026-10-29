@@ -48,6 +48,9 @@ change, zero warnings, no secrets in source, never modify a test to make it pass
    rendered by `NavDisplay` + `entryProvider`. Top-level destinations in
    `NavigationSuiteScaffold` (bar ↔ rail adapts by window size). Modals (dialog, bottom sheet)
    are keys on the back stack shown through a scene strategy, not ad-hoc `showDialog` state.
+   Exception: a transient error alert that is part of the screen's `UiState` (e.g. a form's
+   submit failure) is rendered from that state and dismissed through a ViewModel event — it is
+   not a destination. User-initiated confirmations (sign out, delete) are always keys.
    ViewModels scoped per entry (`rememberViewModelStoreNavEntryDecorator`). Predictive back
    stays enabled. No Nav2 `NavHost`, no custom Coordinator/Router replacing the back stack.
 4. **Material 3 Expressive theming.** One `AppTheme` with the brand color scheme in
