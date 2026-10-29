@@ -349,6 +349,19 @@ fun AppNavDisplay(navigationState: NavigationState, navigator: Navigator) {
 - `BottomSheetSceneStrategy` is **not** part of the library: copy the implementation from the official `bottomsheet` recipe (in the `navigation-3` skill) into `:core:ui` once and reuse it. It wraps `ModalBottomSheet` in an `OverlayScene`.
 - ❌ Do not show modals with local `var showDialog by remember { … }` state when the modal is a navigation destination (it is lost on process death and is invisible to back handling).
 - ✅ Purely transient, in-screen confirmations (e.g. a snackbar, a menu) stay as local UI state — they are not destinations.
+- ✅ A transient **error alert** that belongs to the screen's `UiState` (e.g. `SignInUiState.Editing(error = …)` after a failed submit) is rendered as an `AlertDialog` from that state and dismissed through a ViewModel event (`onErrorDismiss()`). It is not a destination: the state is already the source of truth, survives configuration changes in the ViewModel, and a key would duplicate it. Anything the user opens on purpose — a confirmation (sign out, delete account), a picker, a form — is a key.
+
+```kotlin
+// ✅ State-driven error alert: the ViewModel owns it, no local showDialog flag, no key
+val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+(uiState as? SignInUiState.Editing)?.error?.let { messageRes -> // @StringRes
+    AlertDialog(
+        onDismissRequest = viewModel::onErrorDismiss,
+        confirmButton = { TextButton(onClick = viewModel::onErrorDismiss) { Text(stringResource(R.string.ok)) } },
+        text = { Text(stringResource(messageRes)) },
+    )
+}
+```
 
 ---
 
