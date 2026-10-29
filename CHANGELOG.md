@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.1] - 2026-10-29
+
+Upstreams a FavRes-Android (Fase 3) finding.
+
+### Changed
+- Navigation 3 modals (`Architecture/navigation-3.md`, `android-doctrine` rule 3): a transient error alert that is part of the screen's `UiState` (e.g. a form's submit failure) stays a ViewModel-state `AlertDialog` dismissed through a ViewModel event; user-initiated confirmations remain back-stack keys
+
 ## [0.3.0] - 2026-10-21
 
 2026 stack refresh.
